@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		14F52C29F9998B69E5DE34D5 /* Pods_Zoomnotes_ZoomnotesUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5E3B737D7EA7890DED81178 /* Pods_Zoomnotes_ZoomnotesUITests.framework */; };
 		3101752E24E5211D007D3589 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101752D24E5211D007D3589 /* AppDelegate.swift */; };
 		3101753024E5211D007D3589 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101752F24E5211D007D3589 /* SceneDelegate.swift */; };
 		3101753224E5211D007D3589 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101753124E5211D007D3589 /* ViewController.swift */; };
@@ -16,6 +17,14 @@
 		3101753D24E5211E007D3589 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3101753B24E5211E007D3589 /* LaunchScreen.storyboard */; };
 		3101754824E5211F007D3589 /* ZoomnotesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101754724E5211F007D3589 /* ZoomnotesTests.swift */; };
 		3101755324E5211F007D3589 /* ZoomnotesUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101755224E5211F007D3589 /* ZoomnotesUITests.swift */; };
+		3101756224E52F77007D3589 /* DrawingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101756124E52F77007D3589 /* DrawingModel.swift */; };
+		3101756524E52FED007D3589 /* ZoomNotesNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101756424E52FED007D3589 /* ZoomNotesNavigationController.swift */; };
+		3101756824E530EB007D3589 /* UIGraphics+Closure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101756724E530EB007D3589 /* UIGraphics+Closure.swift */; };
+		3101756A24E531D1007D3589 /* NoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101756924E531D1007D3589 /* NoteViewController.swift */; };
+		3101756C24E5366A007D3589 /* NoteCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101756B24E5366A007D3589 /* NoteCollectionViewController.swift */; };
+		3101756F24E53778007D3589 /* NoteCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101756E24E53778007D3589 /* NoteCollectionViewCell.swift */; };
+		F7F6F47D55BB5C37777B55B9 /* Pods_Zoomnotes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41CA6B1C7B18B29005E678AC /* Pods_Zoomnotes.framework */; };
+		F885CBA636E12959C8D6828F /* Pods_ZoomnotesTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE82804B11FC6B424862CD52 /* Pods_ZoomnotesTests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +60,21 @@
 		3101754E24E5211F007D3589 /* ZoomnotesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZoomnotesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3101755224E5211F007D3589 /* ZoomnotesUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomnotesUITests.swift; sourceTree = "<group>"; };
 		3101755424E5211F007D3589 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3101756124E52F77007D3589 /* DrawingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingModel.swift; sourceTree = "<group>"; };
+		3101756424E52FED007D3589 /* ZoomNotesNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomNotesNavigationController.swift; sourceTree = "<group>"; };
+		3101756724E530EB007D3589 /* UIGraphics+Closure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIGraphics+Closure.swift"; sourceTree = "<group>"; };
+		3101756924E531D1007D3589 /* NoteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteViewController.swift; sourceTree = "<group>"; };
+		3101756B24E5366A007D3589 /* NoteCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteCollectionViewController.swift; sourceTree = "<group>"; };
+		3101756E24E53778007D3589 /* NoteCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteCollectionViewCell.swift; sourceTree = "<group>"; };
+		41CA6B1C7B18B29005E678AC /* Pods_Zoomnotes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Zoomnotes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		485C114CAEE2DCFC02846656 /* Pods-ZoomnotesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZoomnotesTests.release.xcconfig"; path = "Target Support Files/Pods-ZoomnotesTests/Pods-ZoomnotesTests.release.xcconfig"; sourceTree = "<group>"; };
+		4E0ECA886B165C66AEA4C374 /* Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig"; path = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		57DB1DBA447531A7C1E4CCD4 /* Pods-ZoomnotesTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZoomnotesTests.debug.xcconfig"; path = "Target Support Files/Pods-ZoomnotesTests/Pods-ZoomnotesTests.debug.xcconfig"; sourceTree = "<group>"; };
+		5F49899A865EFBBE65BAF712 /* Pods-Zoomnotes.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Zoomnotes.release.xcconfig"; path = "Target Support Files/Pods-Zoomnotes/Pods-Zoomnotes.release.xcconfig"; sourceTree = "<group>"; };
+		A5E3B737D7EA7890DED81178 /* Pods_Zoomnotes_ZoomnotesUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Zoomnotes_ZoomnotesUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BC2B55DB6B95923E7DD8CCD4 /* Pods-Zoomnotes-ZoomnotesUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Zoomnotes-ZoomnotesUITests.release.xcconfig"; path = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests.release.xcconfig"; sourceTree = "<group>"; };
+		CA92CA7F8E2021BBDBFB0BA2 /* Pods-Zoomnotes.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Zoomnotes.debug.xcconfig"; path = "Target Support Files/Pods-Zoomnotes/Pods-Zoomnotes.debug.xcconfig"; sourceTree = "<group>"; };
+		FE82804B11FC6B424862CD52 /* Pods_ZoomnotesTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ZoomnotesTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +82,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F7F6F47D55BB5C37777B55B9 /* Pods_Zoomnotes.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +90,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F885CBA636E12959C8D6828F /* Pods_ZoomnotesTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,6 +98,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14F52C29F9998B69E5DE34D5 /* Pods_Zoomnotes_ZoomnotesUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +112,8 @@
 				3101754624E5211F007D3589 /* ZoomnotesTests */,
 				3101755124E5211F007D3589 /* ZoomnotesUITests */,
 				3101752B24E5211D007D3589 /* Products */,
+				413867CE548B7A1622A584B0 /* Pods */,
+				F0FC171296CB43771DDBE564 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -101,6 +130,10 @@
 		3101752C24E5211D007D3589 /* Zoomnotes */ = {
 			isa = PBXGroup;
 			children = (
+				3101756924E531D1007D3589 /* NoteViewController.swift */,
+				3101756624E530D1007D3589 /* Components */,
+				3101756324E52FDE007D3589 /* Utils */,
+				3101756024E52F6B007D3589 /* Model */,
 				3101752D24E5211D007D3589 /* AppDelegate.swift */,
 				3101752F24E5211D007D3589 /* SceneDelegate.swift */,
 				3101753124E5211D007D3589 /* ViewController.swift */,
@@ -131,6 +164,63 @@
 			path = ZoomnotesUITests;
 			sourceTree = "<group>";
 		};
+		3101756024E52F6B007D3589 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				3101756124E52F77007D3589 /* DrawingModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		3101756324E52FDE007D3589 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				3101756724E530EB007D3589 /* UIGraphics+Closure.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		3101756624E530D1007D3589 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				3101756D24E53766007D3589 /* NoteCollectionView */,
+				3101756424E52FED007D3589 /* ZoomNotesNavigationController.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		3101756D24E53766007D3589 /* NoteCollectionView */ = {
+			isa = PBXGroup;
+			children = (
+				3101756B24E5366A007D3589 /* NoteCollectionViewController.swift */,
+				3101756E24E53778007D3589 /* NoteCollectionViewCell.swift */,
+			);
+			path = NoteCollectionView;
+			sourceTree = "<group>";
+		};
+		413867CE548B7A1622A584B0 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				CA92CA7F8E2021BBDBFB0BA2 /* Pods-Zoomnotes.debug.xcconfig */,
+				5F49899A865EFBBE65BAF712 /* Pods-Zoomnotes.release.xcconfig */,
+				4E0ECA886B165C66AEA4C374 /* Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig */,
+				BC2B55DB6B95923E7DD8CCD4 /* Pods-Zoomnotes-ZoomnotesUITests.release.xcconfig */,
+				57DB1DBA447531A7C1E4CCD4 /* Pods-ZoomnotesTests.debug.xcconfig */,
+				485C114CAEE2DCFC02846656 /* Pods-ZoomnotesTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		F0FC171296CB43771DDBE564 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				41CA6B1C7B18B29005E678AC /* Pods_Zoomnotes.framework */,
+				A5E3B737D7EA7890DED81178 /* Pods_Zoomnotes_ZoomnotesUITests.framework */,
+				FE82804B11FC6B424862CD52 /* Pods_ZoomnotesTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -138,6 +228,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3101755724E5211F007D3589 /* Build configuration list for PBXNativeTarget "Zoomnotes" */;
 			buildPhases = (
+				FA55D72B0D0050F893EA56B8 /* [CP] Check Pods Manifest.lock */,
 				3101752624E5211D007D3589 /* Sources */,
 				3101752724E5211D007D3589 /* Frameworks */,
 				3101752824E5211D007D3589 /* Resources */,
@@ -155,6 +246,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3101755A24E5211F007D3589 /* Build configuration list for PBXNativeTarget "ZoomnotesTests" */;
 			buildPhases = (
+				9D401D5CD8BC239DF3A656BD /* [CP] Check Pods Manifest.lock */,
 				3101753F24E5211F007D3589 /* Sources */,
 				3101754024E5211F007D3589 /* Frameworks */,
 				3101754124E5211F007D3589 /* Resources */,
@@ -173,6 +265,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3101755D24E5211F007D3589 /* Build configuration list for PBXNativeTarget "ZoomnotesUITests" */;
 			buildPhases = (
+				71A2A4F3BAA625C4AEFCFB25 /* [CP] Check Pods Manifest.lock */,
 				3101754A24E5211F007D3589 /* Sources */,
 				3101754B24E5211F007D3589 /* Frameworks */,
 				3101754C24E5211F007D3589 /* Resources */,
@@ -257,15 +350,90 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		71A2A4F3BAA625C4AEFCFB25 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Zoomnotes-ZoomnotesUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9D401D5CD8BC239DF3A656BD /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ZoomnotesTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FA55D72B0D0050F893EA56B8 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Zoomnotes-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		3101752624E5211D007D3589 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3101756A24E531D1007D3589 /* NoteViewController.swift in Sources */,
+				3101756824E530EB007D3589 /* UIGraphics+Closure.swift in Sources */,
+				3101756F24E53778007D3589 /* NoteCollectionViewCell.swift in Sources */,
 				3101753824E5211D007D3589 /* Zoomnotes.xcdatamodeld in Sources */,
 				3101753224E5211D007D3589 /* ViewController.swift in Sources */,
+				3101756524E52FED007D3589 /* ZoomNotesNavigationController.swift in Sources */,
+				3101756224E52F77007D3589 /* DrawingModel.swift in Sources */,
 				3101752E24E5211D007D3589 /* AppDelegate.swift in Sources */,
 				3101753024E5211D007D3589 /* SceneDelegate.swift in Sources */,
+				3101756C24E5366A007D3589 /* NoteCollectionViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -436,6 +604,7 @@
 		};
 		3101755824E5211F007D3589 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CA92CA7F8E2021BBDBFB0BA2 /* Pods-Zoomnotes.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -448,12 +617,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = bercis.ideas.Zoomnotes;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
 		};
 		3101755924E5211F007D3589 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5F49899A865EFBBE65BAF712 /* Pods-Zoomnotes.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -466,12 +636,13 @@
 				PRODUCT_BUNDLE_IDENTIFIER = bercis.ideas.Zoomnotes;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Release;
 		};
 		3101755B24E5211F007D3589 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 57DB1DBA447531A7C1E4CCD4 /* Pods-ZoomnotesTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -494,6 +665,7 @@
 		};
 		3101755C24E5211F007D3589 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 485C114CAEE2DCFC02846656 /* Pods-ZoomnotesTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -516,6 +688,7 @@
 		};
 		3101755E24E5211F007D3589 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4E0ECA886B165C66AEA4C374 /* Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -536,6 +709,7 @@
 		};
 		3101755F24E5211F007D3589 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BC2B55DB6B95923E7DD8CCD4 /* Pods-Zoomnotes-ZoomnotesUITests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;

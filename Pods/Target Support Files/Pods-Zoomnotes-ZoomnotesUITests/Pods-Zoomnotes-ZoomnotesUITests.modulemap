@@ -1,0 +1,6 @@
+framework module Pods_Zoomnotes_ZoomnotesUITests {
+  umbrella header "Pods-Zoomnotes-ZoomnotesUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}
