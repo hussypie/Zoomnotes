@@ -14,7 +14,7 @@ struct DrawingModel : Codable {
     static let canvasWidth: CGFloat = 768
     static let defaultDrawingNames: [String] = ["Notes"]
     
-    var drawings: [PKDrawing] = []
+    var notes: [NoteModel] = []
 }
 
 protocol DataModelControllerObserver {
@@ -40,29 +40,29 @@ class DataModelController {
     
     var observers: [DataModelControllerObserver] = []
     
-    var drawings: [PKDrawing] {
-        get { dataModel.drawings }
-        set { dataModel.drawings = newValue }
+    var notes: [NoteModel] {
+        get { dataModel.notes }
+        set { dataModel.notes = newValue }
     }
     
     init() {
         loadDataModel()
     }
     
-    func updateDrawing(_ drawing: PKDrawing, at index: Int) {
-        dataModel.drawings[index] = drawing
+    func updateDrawing(_ drawing: NoteModel, at index: Int) {
+        dataModel.notes[index] = drawing
         generateThumbnail(index)
         saveDataModel()
     }
     
     private func generateAllThumbnails() {
-        for index in drawings.indices {
+        for index in notes.indices {
             generateThumbnail(index)
         }
     }
     
     private func generateThumbnail(_ index: Int) {
-        let drawing = drawings[index]
+        let note = notes[index]
         let aspectRatio = DataModelController.thumbnailSize.width / DataModelController.thumbnailSize.height
         let thumbnailRect = CGRect(x: 0, y: 0, width: DrawingModel.canvasWidth, height: DrawingModel.canvasWidth / aspectRatio)
         let thumbnailScale = UIScreen.main.scale * DataModelController.thumbnailSize.width / DrawingModel.canvasWidth
@@ -70,7 +70,7 @@ class DataModelController {
         
         thumbnailQueue.async {
             traitCollection.performAsCurrent {
-                let image = drawing.image(from: thumbnailRect, scale: thumbnailScale)
+                let image = note.root.data.drawing.image(from: thumbnailRect, scale: thumbnailScale)
                 DispatchQueue.main.async {
                     self.updateThumbnail(image, at: index)
                 }
@@ -132,15 +132,15 @@ class DataModelController {
     
     private func setLoadedDataModel(_ dataModel: DrawingModel) {
         self.dataModel = dataModel
-        thumbnails = Array(repeating: UIImage(), count: dataModel.drawings.count)
+        thumbnails = Array(repeating: UIImage(), count: dataModel.notes.count)
         generateAllThumbnails()
     }
     
     func newDrawing() {
-        let newDrawing = PKDrawing()
-        dataModel.drawings.append(newDrawing)
+        let newlyAddedDrawing = NoteModel.default(controller: self)
+        dataModel.notes.append(newlyAddedDrawing)
         thumbnails.append(UIImage())
-        updateDrawing(newDrawing, at: dataModel.drawings.count - 1)
+        updateDrawing(newlyAddedDrawing, at: dataModel.notes.count - 1)
     }
 }
 

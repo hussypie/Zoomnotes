@@ -23,6 +23,10 @@
 		3101756A24E531D1007D3589 /* NoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101756924E531D1007D3589 /* NoteViewController.swift */; };
 		3101756C24E5366A007D3589 /* NoteCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101756B24E5366A007D3589 /* NoteCollectionViewController.swift */; };
 		3101756F24E53778007D3589 /* NoteCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101756E24E53778007D3589 /* NoteCollectionViewCell.swift */; };
+		31BF9E2C24E5906100142EBF /* NoteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BF9E2B24E5906100142EBF /* NoteModel.swift */; };
+		31BF9E2E24E5944A00142EBF /* CodableImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BF9E2D24E5944A00142EBF /* CodableImage.swift */; };
+		31D6648B24EC53450062AF8D /* NoteChild.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D6648A24EC53450062AF8D /* NoteChild.swift */; };
+		31D6648D24EC53890062AF8D /* NoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D6648C24EC53890062AF8D /* NoteImage.swift */; };
 		F7F6F47D55BB5C37777B55B9 /* Pods_Zoomnotes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41CA6B1C7B18B29005E678AC /* Pods_Zoomnotes.framework */; };
 		F885CBA636E12959C8D6828F /* Pods_ZoomnotesTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE82804B11FC6B424862CD52 /* Pods_ZoomnotesTests.framework */; };
 /* End PBXBuildFile section */
@@ -66,6 +70,10 @@
 		3101756924E531D1007D3589 /* NoteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteViewController.swift; sourceTree = "<group>"; };
 		3101756B24E5366A007D3589 /* NoteCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteCollectionViewController.swift; sourceTree = "<group>"; };
 		3101756E24E53778007D3589 /* NoteCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteCollectionViewCell.swift; sourceTree = "<group>"; };
+		31BF9E2B24E5906100142EBF /* NoteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteModel.swift; sourceTree = "<group>"; };
+		31BF9E2D24E5944A00142EBF /* CodableImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableImage.swift; sourceTree = "<group>"; };
+		31D6648A24EC53450062AF8D /* NoteChild.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteChild.swift; sourceTree = "<group>"; };
+		31D6648C24EC53890062AF8D /* NoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteImage.swift; sourceTree = "<group>"; };
 		41CA6B1C7B18B29005E678AC /* Pods_Zoomnotes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Zoomnotes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		485C114CAEE2DCFC02846656 /* Pods-ZoomnotesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZoomnotesTests.release.xcconfig"; path = "Target Support Files/Pods-ZoomnotesTests/Pods-ZoomnotesTests.release.xcconfig"; sourceTree = "<group>"; };
 		4E0ECA886B165C66AEA4C374 /* Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig"; path = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -168,6 +176,9 @@
 			isa = PBXGroup;
 			children = (
 				3101756124E52F77007D3589 /* DrawingModel.swift */,
+				31BF9E2B24E5906100142EBF /* NoteModel.swift */,
+				31D6648A24EC53450062AF8D /* NoteChild.swift */,
+				31D6648C24EC53890062AF8D /* NoteImage.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -176,6 +187,7 @@
 			isa = PBXGroup;
 			children = (
 				3101756724E530EB007D3589 /* UIGraphics+Closure.swift */,
+				31BF9E2D24E5944A00142EBF /* CodableImage.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -426,11 +438,15 @@
 			files = (
 				3101756A24E531D1007D3589 /* NoteViewController.swift in Sources */,
 				3101756824E530EB007D3589 /* UIGraphics+Closure.swift in Sources */,
+				31D6648B24EC53450062AF8D /* NoteChild.swift in Sources */,
 				3101756F24E53778007D3589 /* NoteCollectionViewCell.swift in Sources */,
 				3101753824E5211D007D3589 /* Zoomnotes.xcdatamodeld in Sources */,
+				31D6648D24EC53890062AF8D /* NoteImage.swift in Sources */,
 				3101753224E5211D007D3589 /* ViewController.swift in Sources */,
 				3101756524E52FED007D3589 /* ZoomNotesNavigationController.swift in Sources */,
+				31BF9E2E24E5944A00142EBF /* CodableImage.swift in Sources */,
 				3101756224E52F77007D3589 /* DrawingModel.swift in Sources */,
+				31BF9E2C24E5906100142EBF /* NoteModel.swift in Sources */,
 				3101752E24E5211D007D3589 /* AppDelegate.swift in Sources */,
 				3101753024E5211D007D3589 /* SceneDelegate.swift in Sources */,
 				3101756C24E5366A007D3589 /* NoteCollectionViewController.swift in Sources */,

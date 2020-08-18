@@ -17,14 +17,14 @@ class NoteViewController : UIViewController {
     var toolPicker: PKToolPicker!
     
     var dataModelController: DataModelController!
-    var drawingIndex: Int = 0
+    var note: NoteModel!
     var hasModifiedDrawing = false
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         canvasView.delegate = self
-        canvasView.drawing = dataModelController.drawings[drawingIndex]
+        canvasView.drawing = note.root.data.drawing
         canvasView.alwaysBounceVertical = true
         
         canvasView.isScrollEnabled = false
@@ -55,7 +55,7 @@ class NoteViewController : UIViewController {
         super.viewWillDisappear(animated)
         
         if hasModifiedDrawing {
-            dataModelController.updateDrawing(canvasView.drawing, at: drawingIndex)
+            note.updateDrawing(with: canvasView.drawing)
         }
     }
     

@@ -35,7 +35,7 @@ class NoteCollectionViewController : UICollectionViewController, DataModelContro
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        dataModelController.drawings.count
+        dataModelController.notes.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -59,7 +59,7 @@ class NoteCollectionViewController : UICollectionViewController, DataModelContro
         
         // Transition to the drawing view controller.
         noteViewController.dataModelController = dataModelController
-        noteViewController.drawingIndex = indexPath.last!
+        noteViewController.note = dataModelController.notes[indexPath.last!]
         navigationController.pushViewController(noteViewController, animated: true)
     }
     
