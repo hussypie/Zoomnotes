@@ -9,7 +9,7 @@
 import UIKit
 import PencilKit
 
-class NoteViewController : UIViewController {
+class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var canvasView: PKCanvasView!
     @IBOutlet weak var undoButton: UIBarButtonItem!
     @IBOutlet weak var redoButton: UIBarButtonItem!
@@ -19,6 +19,8 @@ class NoteViewController : UIViewController {
     var dataModelController: DataModelController!
     var note: NoteModel!
     var hasModifiedDrawing = false
+    
+    var circle: UIView? = nil
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -38,6 +40,38 @@ class NoteViewController : UIViewController {
         toolPicker.addObserver(self)
         updateLayout(for: toolPicker)
         canvasView.becomeFirstResponder()
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        
+        let edgeGestureRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(screenEdgeSwiped(_:)))
+        edgeGestureRecognizer.edges = .right
+        edgeGestureRecognizer.delegate = self
+        
+        self.view.addGestureRecognizer(edgeGestureRecognizer)
+    }
+    
+    @objc func screenEdgeSwiped(_ rec: UIScreenEdgePanGestureRecognizer) {
+        if rec.state == .changed {
+            let loc = rec.location(in: canvasView)
+            
+            if circle == nil {
+                let circleView = UIView(frame: CGRect(x: loc.x - 100, y: loc.y - 100, width: 200, height: 200))
+                circleView.layer.cornerRadius = 100
+                circleView.backgroundColor = UIColor.red
+                
+                view.addSubview(circleView)
+                
+                circle = circleView
+            }
+            
+            circle!.frame = CGRect(x: loc.x - 100, y: loc.y - 100, width: 200, height: 200)
+        } else if rec.state == .ended {
+            circle = nil
+        }
     }
     
     override func viewDidLayoutSubviews() {
