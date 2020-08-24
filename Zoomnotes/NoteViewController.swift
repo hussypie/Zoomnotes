@@ -20,7 +20,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     var note: NoteModel!
     var hasModifiedDrawing = false
     
-    var circle: UIView? = nil
+    // TODO: tool here
+    var circle: NoteLevelPreview? = nil
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -30,7 +31,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         canvasView.alwaysBounceVertical = true
         
         canvasView.isScrollEnabled = false
-        canvasView.allowsFingerDrawing = false
+        canvasView.allowsFingerDrawing = true
         
         let window = parent?.view.window
         toolPicker = PKToolPicker.shared(for: window!)
@@ -52,25 +53,37 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         edgeGestureRecognizer.delegate = self
         
         self.view.addGestureRecognizer(edgeGestureRecognizer)
+        
+        let zoomGestureRecognizer = UIPinchGestureRecognizer(target: self,
+                                                       action: #selector(onPinch(_:)))
+        self.view.addGestureRecognizer(zoomGestureRecognizer)
     }
     
     @objc func screenEdgeSwiped(_ rec: UIScreenEdgePanGestureRecognizer) {
+        if rec.state == .began {
+            self.note.addSublevel(level: NoteModel.NoteLevel.default)
+        }
+        
         if rec.state == .changed {
             let loc = rec.location(in: canvasView)
-            
+            let frame = CGRect(x: loc.x - 100, y: loc.y - 100, width: 200, height: 200)
             if circle == nil {
-                let circleView = UIView(frame: CGRect(x: loc.x - 100, y: loc.y - 100, width: 200, height: 200))
-                circleView.layer.cornerRadius = 100
-                circleView.backgroundColor = UIColor.red
-                
+                let circleView = NoteLevelPreview(frame: frame)
                 view.addSubview(circleView)
-                
                 circle = circleView
             }
             
-            circle!.frame = CGRect(x: loc.x - 100, y: loc.y - 100, width: 200, height: 200)
-        } else if rec.state == .ended {
+            circle!.frame = frame
+        }
+        
+        if rec.state == .ended {
             circle = nil
+        }
+    }
+    
+    @objc func onPinch(_ rec: UIPinchGestureRecognizer) {
+        if rec.state == .changed {
+            
         }
     }
     

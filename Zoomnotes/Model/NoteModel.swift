@@ -11,8 +11,8 @@ import PencilKit
 
 class NoteModel : Codable {
     class NoteLevel : Codable {
-        let data: NoteData
-        let children: [NoteLevel]
+        var data: NoteData
+        var children: [NoteLevel]
         
         init(data: NoteData, children: [NoteLevel]) {
             self.data = data
@@ -42,10 +42,10 @@ class NoteModel : Codable {
         }
     }
     
-    var title: String
-    var root: NoteLevel
+    private(set) var title: String
+    private(set) var root: NoteLevel
     
-    var currentLevel: NoteLevel
+    private(set) var currentLevel: NoteLevel
 
     init(title: String, root: NoteLevel) {
         self.title = title
@@ -55,6 +55,10 @@ class NoteModel : Codable {
     
     func updateDrawing(with drawing: PKDrawing) {
         self.currentLevel.data.updateDrawing(with: drawing)
+    }
+    
+    func addSublevel(level: NoteLevel) {
+        self.currentLevel.children.append(level)
     }
     
     static func `default`(controller: DataModelController) -> NoteModel {
