@@ -26,3 +26,12 @@ extension UIImage {
     return UIGraphicsGetImageFromCurrentImageContext() ?? self
   }
 }
+
+extension UIImage {
+    static func from(frame: CGRect) -> UIImage {
+        UIGraphicsBeginImageContext(frame.size)
+        let image = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        return image
+    }
+}

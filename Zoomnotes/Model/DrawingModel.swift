@@ -48,9 +48,8 @@ class DataModelController {
         loadDataModel()
     }
     
-    func updateDrawing(for note: NoteModel, with image: UIImage) {
-        let noteIndex: Int = dataModel.notes.firstIndex { $0.id == note.id }!
-        self.updateThumbnail(image, at: noteIndex)
+    func updateDrawing(for note: NoteModel) {
+        self.updateThumbnail(note.preview, at: dataModel.notes.firstIndex { $0.id == note.id }!)
         saveDataModel()
     }
     
@@ -138,10 +137,10 @@ class DataModelController {
     }
     
     func newDrawing(with image: UIImage) {
-        let newlyAddedDrawing = NoteModel.default(controller: self)
+        let newlyAddedDrawing = NoteModel.default(image: image)
         dataModel.notes.append(newlyAddedDrawing)
         thumbnails.append(image)
-        updateDrawing(for: newlyAddedDrawing, with: image)
+        updateDrawing(for: newlyAddedDrawing)
     }
 }
 

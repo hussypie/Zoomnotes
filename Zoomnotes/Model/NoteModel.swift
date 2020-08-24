@@ -14,15 +14,17 @@ class NoteModel : Codable {
         let id: UUID
         var data: NoteData
         var children: [UUID : NoteLevel]
+        var previewImage: NoteImage
         
-        init(data: NoteData, children: [UUID : NoteLevel]) {
+        init(data: NoteData, children: [UUID : NoteLevel], preview: UIImage) {
             self.id = UUID()
             self.data = data
             self.children = children
+            self.previewImage = NoteImage(wrapping: preview)
         }
         
-        static var `default`: NoteLevel {
-            NoteLevel(data: NoteData.default, children: [:])
+        static func `default`(preview: UIImage) -> NoteLevel {
+            NoteLevel(data: NoteData.default, children: [:], preview: preview)
         }
     }
     
@@ -47,8 +49,13 @@ class NoteModel : Codable {
     let id: UUID
     private(set) var title: String
     private(set) var root: NoteLevel
-    
     private(set) var currentLevel: NoteLevel
+    
+    var preview: UIImage {
+        get {
+            self.root.previewImage.image
+        }
+    }
     
     var updateDrawingCallback: ((PKDrawing) -> Void)? = nil
     
@@ -70,6 +77,10 @@ class NoteModel : Codable {
         }
     }
     
+    func updatePreview(with image: UIImage) {
+        self.currentLevel.previewImage = NoteImage(wrapping: image)
+    }
+    
     func add(subLevel: NoteLevel) {
         self.currentLevel.children[subLevel.id] = subLevel
     }
@@ -78,7 +89,7 @@ class NoteModel : Codable {
         self.currentLevel.children.removeValue(forKey: id)
     }
     
-    static func `default`(controller: DataModelController) -> NoteModel {
-        NoteModel(title: "Untitled", root: NoteLevel.default)
+    static func `default`(image: UIImage) -> NoteModel {
+        NoteModel(title: "Untitled", root: NoteLevel.default(preview: image))
     }
 }

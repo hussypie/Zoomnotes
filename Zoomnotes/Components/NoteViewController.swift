@@ -39,8 +39,24 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         toolPicker.setVisible(true, forFirstResponder: canvasView)
         toolPicker.addObserver(canvasView)
         toolPicker.addObserver(self)
+        
         updateLayout(for: toolPicker)
+        
         canvasView.becomeFirstResponder()
+        
+        for sublevel in note.currentLevel.children.values {
+            let width = self.view.frame.width / 4
+            let height = self.view.frame.height / 4
+            let frame = CGRect(x: loc.x - width / 2,
+                               y: loc.y - height / 2,
+                               width: width,
+                               height: height)
+            
+            let preview = NoteLevelPreview(frame: frame) {
+                self.note.remove(subLevel: newLevel.id)
+            }
+            self.view.addSubview()
+        }
     }
     
     override func viewDidLoad() {
@@ -70,7 +86,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
                                height: height)
             
             if circle == nil {
-                let newLevel = NoteModel.NoteLevel.default
+                let defaultPreviewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
+                let newLevel = NoteModel.NoteLevel.default(preview: defaultPreviewImage)
                 let noteLevelPreview = NoteLevelPreview(frame: frame) {
                     self.note.remove(subLevel: newLevel.id)
                 }
@@ -115,7 +132,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         if hasModifiedDrawing {
             note.updateDrawing(with: canvasView.drawing)
             guard let screen = captureCurrentScreen() else { return }
-            dataModelController.updateDrawing(for: note, with: screen)
+            note.updatePreview(with: screen)
+            dataModelController.updateDrawing(for: note)
         }
     }
     

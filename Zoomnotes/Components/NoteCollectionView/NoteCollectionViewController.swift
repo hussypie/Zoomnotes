@@ -12,12 +12,7 @@ class NoteCollectionViewController : UICollectionViewController, DataModelContro
     var dataModelController: DataModelController = DataModelController()
     
     @IBAction func newDrawing(_ sender: Any) {
-        UIGraphicsBeginImageContext(view.frame.size)
-
-        let image = UIGraphicsGetImageFromCurrentImageContext()!.withBackground(color: UIColor.white)
-        UIGraphicsEndImageContext()
-        
-        dataModelController.newDrawing(with: image)
+        dataModelController.newDrawing(with: UIImage.from(frame: view.frame).withBackground(color: UIColor.white))
     }
     
     override func viewDidLoad() {
