@@ -15,16 +15,18 @@ class NoteModel : Codable {
         var data: NoteData
         var children: [UUID : NoteLevel]
         var previewImage: NoteImage
+        var frame: CGRect
         
-        init(data: NoteData, children: [UUID : NoteLevel], preview: UIImage) {
+        init(data: NoteData, children: [UUID : NoteLevel], preview: UIImage, frame: CGRect) {
             self.id = UUID()
             self.data = data
             self.children = children
             self.previewImage = NoteImage(wrapping: preview)
+            self.frame = frame
         }
         
-        static func `default`(preview: UIImage) -> NoteLevel {
-            NoteLevel(data: NoteData.default, children: [:], preview: preview)
+        static func `default`(preview: UIImage, frame: CGRect) -> NoteLevel {
+            NoteLevel(data: NoteData.default, children: [:], preview: preview, frame: frame)
         }
     }
     
@@ -89,7 +91,7 @@ class NoteModel : Codable {
         self.currentLevel.children.removeValue(forKey: id)
     }
     
-    static func `default`(image: UIImage) -> NoteModel {
-        NoteModel(title: "Untitled", root: NoteLevel.default(preview: image))
+    static func `default`(image: UIImage, frame: CGRect) -> NoteModel {
+        NoteModel(title: "Untitled", root: NoteLevel.default(preview: image, frame: frame))
     }
 }

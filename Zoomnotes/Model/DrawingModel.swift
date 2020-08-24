@@ -137,7 +137,7 @@ class DataModelController {
     }
     
     func newDrawing(with image: UIImage) {
-        let newlyAddedDrawing = NoteModel.default(image: image)
+        let newlyAddedDrawing = NoteModel.default(image: image, frame: CGRect())
         dataModel.notes.append(newlyAddedDrawing)
         thumbnails.append(image)
         updateDrawing(for: newlyAddedDrawing)

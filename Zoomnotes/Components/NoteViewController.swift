@@ -45,17 +45,17 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         canvasView.becomeFirstResponder()
         
         for sublevel in note.currentLevel.children.values {
-            let width = self.view.frame.width / 4
-            let height = self.view.frame.height / 4
-            let frame = CGRect(x: loc.x - width / 2,
-                               y: loc.y - height / 2,
-                               width: width,
-                               height: height)
-            
-            let preview = NoteLevelPreview(frame: frame) {
-                self.note.remove(subLevel: newLevel.id)
+            let preview = NoteLevelPreview(frame: sublevel.frame, onMoved: { rec in
+                let loc = rec.location(in: self.view)
+                sublevel.frame = CGRect(x: loc.x - sublevel.frame.width / 2,
+                                       y: loc.y - sublevel.frame.height / 2,
+                                       width: sublevel.frame.width,
+                                       height: sublevel.frame.height)
+                self.hasModifiedDrawing = true
+            }) {
+                self.note.remove(subLevel: sublevel.id)
             }
-            self.view.addSubview()
+            self.view.addSubview(preview)
         }
     }
     
@@ -71,8 +71,10 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         self.view.addGestureRecognizer(edgeGestureRecognizer)
         
         let zoomGestureRecognizer = UIPinchGestureRecognizer(target: self,
-                                                       action: #selector(onPinch(_:)))
+                                                             action: #selector(onPinch(_:)))
         self.view.addGestureRecognizer(zoomGestureRecognizer)
+        
+        
     }
     
     @objc func screenEdgeSwiped(_ rec: UIScreenEdgePanGestureRecognizer) {
@@ -87,8 +89,15 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
             
             if circle == nil {
                 let defaultPreviewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
-                let newLevel = NoteModel.NoteLevel.default(preview: defaultPreviewImage)
-                let noteLevelPreview = NoteLevelPreview(frame: frame) {
+                let newLevel = NoteModel.NoteLevel.default(preview: defaultPreviewImage, frame: frame)
+                let noteLevelPreview = NoteLevelPreview(frame: frame, onMoved: { rec in
+                    let loc = rec.location(in: self.view)
+                    newLevel.frame = CGRect(x: loc.x - newLevel.frame.width / 2,
+                                            y: loc.y - newLevel.frame.height / 2,
+                                            width: newLevel.frame.width,
+                                            height: newLevel.frame.height)
+                    self.hasModifiedDrawing = true
+                }) {
                     self.note.remove(subLevel: newLevel.id)
                 }
                 self.note.add(subLevel: newLevel)

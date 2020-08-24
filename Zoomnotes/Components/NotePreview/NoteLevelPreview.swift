@@ -11,7 +11,10 @@ import UIKit
 import PencilKit
 
 class NoteLevelPreview: UIView {
-    init(frame: CGRect, onFlingOut: @escaping () -> Void) {
+    init(frame: CGRect,
+         onMoved: @escaping (UIPanGestureRecognizer) -> Void,
+         onFlingOut: @escaping () -> Void
+    ) {
         super.init(frame: frame)
         
         self.backgroundColor = UIColor.white
@@ -25,7 +28,7 @@ class NoteLevelPreview: UIView {
         self.layer.shadowOffset = CGSize(width: 0, height: 3)
         
         let panGestureRecognizer = ZNPanGestureRecognizer { rec in
-            self.panGesture(rec, onEnded: onFlingOut)
+            self.panGesture(rec, onChanged: onMoved, onEnded: onFlingOut)
         }
 
         panGestureRecognizer.maximumNumberOfTouches = 1
@@ -42,17 +45,20 @@ class NoteLevelPreview: UIView {
         super.init(coder: coder)
     }
     
-    @objc func panGesture(_ rec: UIPanGestureRecognizer, onEnded: @escaping () -> Void) {
+    @objc func panGesture(_ rec: UIPanGestureRecognizer,
+                          onChanged: @escaping (UIPanGestureRecognizer) -> Void,
+                          onEnded: @escaping () -> Void
+    ) {
         guard let superview = self.superview else { return }
-        let loc = rec.location(in: superview)
         let velocity = rec.velocity(in: superview)
         
         if rec.state == .changed {
+            onChanged(rec)
+            let loc = rec.location(in: self.superview!)
             self.frame = CGRect(x: loc.x - self.frame.width / 2,
-                                y: loc.y - self.frame.height / 2,
-                                width: self.frame.width,
-                                height: self.frame.height)
-            
+                                   y: loc.y - self.frame.height / 2,
+                                   width: self.frame.width,
+                                   height: self.frame.height)
         } else if rec.state == .ended {
             // MARK: begin snippet
             /// https://www.raywenderlich.com/1860-uikit-dynamics-and-swift-tutorial-tossing-views
