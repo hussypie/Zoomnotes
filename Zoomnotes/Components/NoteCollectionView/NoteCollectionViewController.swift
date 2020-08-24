@@ -5,7 +5,6 @@
 //  Created by Berci on 2020. 08. 13..
 //  Copyright © 2020. Berci. All rights reserved.
 //
-
 import UIKit
 import PencilKit
 
@@ -13,7 +12,12 @@ class NoteCollectionViewController : UICollectionViewController, DataModelContro
     var dataModelController: DataModelController = DataModelController()
     
     @IBAction func newDrawing(_ sender: Any) {
-        dataModelController.newDrawing()
+        UIGraphicsBeginImageContext(view.frame.size)
+
+        let image = UIGraphicsGetImageFromCurrentImageContext()!.withBackground(color: UIColor.white)
+        UIGraphicsEndImageContext()
+        
+        dataModelController.newDrawing(with: image)
     }
     
     override func viewDidLoad() {

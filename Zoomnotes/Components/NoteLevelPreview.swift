@@ -11,7 +11,7 @@ import UIKit
 import PencilKit
 
 class NoteLevelPreview: UIView {
-    override init(frame: CGRect) {
+    init(frame: CGRect, onFlingOut: @escaping () -> Void) {
         super.init(frame: frame)
         
         self.backgroundColor = UIColor.white
@@ -24,10 +24,13 @@ class NoteLevelPreview: UIView {
         self.layer.shadowOpacity = 0.1
         self.layer.shadowOffset = CGSize(width: 0, height: 3)
         
-        let panGestureRecognizer = UIPanGestureRecognizer(target: self,
-                                                          action: #selector(panGesture(_:)))
+        let panGestureRecognizer = ZNPanGestureRecognizer { rec in
+            self.panGesture(rec, onEnded: onFlingOut)
+        }
+
         panGestureRecognizer.maximumNumberOfTouches = 1
         panGestureRecognizer.minimumNumberOfTouches = 1
+        
         self.addGestureRecognizer(panGestureRecognizer)
         
         let zoomGestureRecognizer = UIPinchGestureRecognizer(target: self,
@@ -39,9 +42,10 @@ class NoteLevelPreview: UIView {
         super.init(coder: coder)
     }
     
-    @objc func panGesture(_ rec: UIPanGestureRecognizer) {
-        let loc = rec.location(in: self.superview!)
-        let velocity = rec.velocity(in: self.superview)
+    @objc func panGesture(_ rec: UIPanGestureRecognizer, onEnded: @escaping () -> Void) {
+        guard let superview = self.superview else { return }
+        let loc = rec.location(in: superview)
+        let velocity = rec.velocity(in: superview)
         
         if rec.state == .changed {
             self.frame = CGRect(x: loc.x - self.frame.width / 2,
@@ -59,7 +63,7 @@ class NoteLevelPreview: UIView {
             let velocityPadding: CGFloat  = 35
             
             if magnitude > threshold {
-                let animator = UIDynamicAnimator(referenceView: self.superview!)
+                let animator = UIDynamicAnimator(referenceView: superview)
                 let pushBehavior = UIPushBehavior(items: [self], mode: .instantaneous)
                 pushBehavior.pushDirection = CGVector(dx: velocity.x / 10, dy: velocity.y / 10)
                 pushBehavior.magnitude = magnitude / velocityPadding
@@ -69,6 +73,7 @@ class NoteLevelPreview: UIView {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                     animator.removeAllBehaviors()
                     self.removeFromSuperview()
+                    onEnded()
                 }
             }
             
@@ -76,9 +81,5 @@ class NoteLevelPreview: UIView {
         }
     }
     
-    @objc func pinchGesture(_ rec: UIPinchGestureRecognizer) {
-        if rec.state == .changed {
-            
-        }
-    }
+    @objc func pinchGesture(_ rec: UIPinchGestureRecognizer) { }
 }

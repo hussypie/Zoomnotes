@@ -11,8 +11,7 @@ import PencilKit
 import os
 
 struct DrawingModel : Codable {
-    static let canvasWidth: CGFloat = 768
-    static let defaultDrawingNames: [String] = ["Notes"]
+    static let canvasWidth: CGFloat = 1280
     
     var notes: [NoteModel] = []
 }
@@ -22,7 +21,7 @@ protocol DataModelControllerObserver {
 }
 
 class DataModelController {
-    static let thumbnailSize = CGSize(width: 192, height: 256)
+    static let thumbnailSize = CGSize(width: 256, height: 192)
     
     var dataModel = DrawingModel()
     
@@ -49,9 +48,9 @@ class DataModelController {
         loadDataModel()
     }
     
-    func updateDrawing(_ drawing: NoteModel, at index: Int) {
-        dataModel.notes[index] = drawing
-        generateThumbnail(index)
+    func updateDrawing(for note: NoteModel, with image: UIImage) {
+        let noteIndex: Int = dataModel.notes.firstIndex { $0.id == note.id }!
+        self.updateThumbnail(image, at: noteIndex)
         saveDataModel()
     }
     
@@ -112,14 +111,16 @@ class DataModelController {
     private func loadDataModel() {
         let url = saveURL
         serializationQueue.async {
-            // Load the data model, or the initial test data.
-            let dataModel: DrawingModel
-            
             if FileManager.default.fileExists(atPath: url.path) {
                 do {
                     let decoder = PropertyListDecoder()
                     let data = try Data(contentsOf: url)
-                    dataModel = try decoder.decode(DrawingModel.self, from: data)
+                    let dataModel = try decoder.decode(DrawingModel.self, from: data)
+                    
+                    for note in dataModel.notes {
+                        note.updateDrawingCallback = { _ in self.saveDataModel() }
+                    }
+                    
                     DispatchQueue.main.async {
                         self.setLoadedDataModel(dataModel)
                     }
@@ -136,11 +137,11 @@ class DataModelController {
         generateAllThumbnails()
     }
     
-    func newDrawing() {
+    func newDrawing(with image: UIImage) {
         let newlyAddedDrawing = NoteModel.default(controller: self)
         dataModel.notes.append(newlyAddedDrawing)
-        thumbnails.append(UIImage())
-        updateDrawing(newlyAddedDrawing, at: dataModel.notes.count - 1)
+        thumbnails.append(image)
+        updateDrawing(for: newlyAddedDrawing, with: image)
     }
 }
 

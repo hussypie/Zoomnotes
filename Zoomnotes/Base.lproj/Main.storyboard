@@ -24,14 +24,14 @@
                         </collectionViewFlowLayout>
                         <cells>
                             <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="NoteCollectionViewCell" id="aui-tw-5tn" customClass="NoteCollectionViewCell" customModule="Zoomnotes" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="232" height="291"/>
+                                <rect key="frame" x="0.0" y="0.0" width="291" height="232"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="CUk-Xy-ceX">
-                                    <rect key="frame" x="0.0" y="0.0" width="232" height="291"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="291" height="232"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="cfl-9h-mFD">
-                                            <rect key="frame" x="20" y="20" width="192" height="251"/>
+                                            <rect key="frame" x="20" y="20" width="251" height="192"/>
                                             <color key="backgroundColor" systemColor="secondarySystemBackgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </imageView>
                                     </subviews>
@@ -42,7 +42,7 @@
                                         <constraint firstAttribute="bottom" secondItem="cfl-9h-mFD" secondAttribute="bottom" constant="20" id="t5f-g9-4eb"/>
                                     </constraints>
                                 </collectionViewCellContentView>
-                                <size key="customSize" width="232" height="291"/>
+                                <size key="customSize" width="291" height="232"/>
                                 <connections>
                                     <outlet property="imageView" destination="cfl-9h-mFD" id="Z8y-Mz-cEi"/>
                                 </connections>

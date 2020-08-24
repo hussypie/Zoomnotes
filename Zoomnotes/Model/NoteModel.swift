@@ -11,24 +11,26 @@ import PencilKit
 
 class NoteModel : Codable {
     class NoteLevel : Codable {
+        let id: UUID
         var data: NoteData
-        var children: [NoteLevel]
+        var children: [UUID : NoteLevel]
         
-        init(data: NoteData, children: [NoteLevel]) {
+        init(data: NoteData, children: [UUID : NoteLevel]) {
+            self.id = UUID()
             self.data = data
             self.children = children
         }
         
         static var `default`: NoteLevel {
-            NoteLevel(data: NoteData.default, children: [])
+            NoteLevel(data: NoteData.default, children: [:])
         }
     }
     
     class NoteData : Codable {
         var drawing: PKDrawing
-        var images: [NoteImage]
+        var images: [UUID : NoteImage]
         
-        init(drawing: PKDrawing, images: [NoteImage]) {
+        init(drawing: PKDrawing, images: [UUID : NoteImage]) {
             self.drawing = drawing
             self.images = images
         }
@@ -38,16 +40,24 @@ class NoteModel : Codable {
         }
         
         static var `default`: NoteData {
-            NoteData(drawing: PKDrawing(), images: [])
+            NoteData(drawing: PKDrawing(), images: [:])
         }
     }
     
+    let id: UUID
     private(set) var title: String
     private(set) var root: NoteLevel
     
     private(set) var currentLevel: NoteLevel
+    
+    var updateDrawingCallback: ((PKDrawing) -> Void)? = nil
+    
+    private enum CodingKeys: String, CodingKey {
+        case title, root, currentLevel, id
+    }
 
     init(title: String, root: NoteLevel) {
+        self.id = UUID()
         self.title = title
         self.root = root
         self.currentLevel = root
@@ -55,10 +65,17 @@ class NoteModel : Codable {
     
     func updateDrawing(with drawing: PKDrawing) {
         self.currentLevel.data.updateDrawing(with: drawing)
+        if self.currentLevel.id == self.root.id {
+            self.updateDrawingCallback?(self.root.data.drawing)
+        }
     }
     
-    func addSublevel(level: NoteLevel) {
-        self.currentLevel.children.append(level)
+    func add(subLevel: NoteLevel) {
+        self.currentLevel.children[subLevel.id] = subLevel
+    }
+    
+    func remove(subLevel id: UUID) {
+        self.currentLevel.children.removeValue(forKey: id)
     }
     
     static func `default`(controller: DataModelController) -> NoteModel {

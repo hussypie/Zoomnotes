@@ -60,17 +60,23 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     }
     
     @objc func screenEdgeSwiped(_ rec: UIScreenEdgePanGestureRecognizer) {
-        if rec.state == .began {
-            self.note.addSublevel(level: NoteModel.NoteLevel.default)
-        }
-        
         if rec.state == .changed {
             let loc = rec.location(in: canvasView)
-            let frame = CGRect(x: loc.x - 100, y: loc.y - 100, width: 200, height: 200)
+            let width = self.view.frame.width / 4
+            let height = self.view.frame.height / 4
+            let frame = CGRect(x: loc.x - width / 2,
+                               y: loc.y - height / 2,
+                               width: width,
+                               height: height)
+            
             if circle == nil {
-                let circleView = NoteLevelPreview(frame: frame)
-                view.addSubview(circleView)
-                circle = circleView
+                let newLevel = NoteModel.NoteLevel.default
+                let noteLevelPreview = NoteLevelPreview(frame: frame) {
+                    self.note.remove(subLevel: newLevel.id)
+                }
+                self.note.add(subLevel: newLevel)
+                view.addSubview(noteLevelPreview)
+                circle = noteLevelPreview
             }
             
             circle!.frame = frame
@@ -81,11 +87,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         }
     }
     
-    @objc func onPinch(_ rec: UIPinchGestureRecognizer) {
-        if rec.state == .changed {
-            
-        }
-    }
+    @objc func onPinch(_ rec: UIPinchGestureRecognizer) { }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -98,11 +100,22 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         canvasView.contentOffset = CGPoint(x: 0, y: -canvasView.adjustedContentInset.top)
     }
     
+    private func captureCurrentScreen() -> UIImage? {
+        UIGraphicsBeginImageContext(view.frame.size)
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        view.layer.render(in: context)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
         if hasModifiedDrawing {
             note.updateDrawing(with: canvasView.drawing)
+            guard let screen = captureCurrentScreen() else { return }
+            dataModelController.updateDrawing(for: note, with: screen)
         }
     }
     
