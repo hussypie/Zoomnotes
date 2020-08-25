@@ -23,6 +23,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     // TODO: tool here
     var circle: NoteLevelPreview? = nil
     
+    var subLevelViews: [UUID : NoteLevelPreview] = [:]
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -44,8 +46,15 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         
         canvasView.becomeFirstResponder()
         
-        for sublevel in note.children.values {
-            self.view.addSubview(newSublevel(for: sublevel))
+        if isMovingToParent || isBeingDismissed {
+            for note in note.children.values {
+                subLevelViews[note.id] = sublevelPreview(for: note)
+                self.view.addSubview(subLevelViews[note.id]!)
+            }
+        }
+        
+        for note in note.children.values {
+            subLevelViews[note.id]?.image = note.previewImage.image
         }
     }
     
@@ -87,11 +96,13 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
                            width: width,
                            height: height)
         
+        hasModifiedDrawing = true
+        
         if rec.state == .changed {
             if circle == nil {
                 let defaultPreviewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
                 let newLevel = NoteModel.NoteLevel.default(preview: defaultPreviewImage, frame: frame)
-                let noteLevelPreview = newSublevel(for: newLevel)
+                let noteLevelPreview = sublevelPreview(for: newLevel)
                 self.note.children[newLevel.id] = newLevel
                 view.addSubview(noteLevelPreview)
                 circle = noteLevelPreview
@@ -115,13 +126,18 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     ) {
         let velocity = rec.velocity(in: self.view)
         
+        hasModifiedDrawing = true
+        
+        let loc = rec.location(in: self.view)
+        let frame = CGRect(x: loc.x - preview.frame.width / 2,
+                            y: loc.y - preview.frame.height / 2,
+                            width: preview.frame.width,
+                            height: preview.frame.height)
+        
         if rec.state == .changed {
             onChanged(rec)
-            let loc = rec.location(in: self.view)
-            preview.frame = CGRect(x: loc.x - preview.frame.width / 2,
-                                   y: loc.y - preview.frame.height / 2,
-                                   width: preview.frame.width,
-                                   height: preview.frame.height)
+            
+            preview.frame = frame
         } else if rec.state == .ended {
             // MARK: begin snippet
             /// https://www.raywenderlich.com/1860-uikit-dynamics-and-swift-tutorial-tossing-views
@@ -143,6 +159,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
                     animator.removeAllBehaviors()
                     onEnded()
                 }
+            } else {
+                preview.frame = frame
             }
             
             // MARK: end snippet
@@ -163,8 +181,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         }
     }
     
-    private func newSublevel(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
-        let preview = NoteLevelPreview(frame: sublevel.frame)
+    private func sublevelPreview(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
+        let preview = NoteLevelPreview(for: sublevel)
         
         let panGestureRecognizer = ZNPanGestureRecognizer { rec in
             self.previewPanGesture(rec, preview, onChanged: { rec in
