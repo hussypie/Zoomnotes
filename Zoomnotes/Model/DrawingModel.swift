@@ -11,9 +11,7 @@ import PencilKit
 import os
 
 struct DrawingModel : Codable {
-    static let canvasWidth: CGFloat = 1280
-    
-    var notes: [NoteModel] = []
+    var notes: [UUID : NoteModel] = [:]
 }
 
 protocol DataModelControllerObserver {
@@ -21,63 +19,25 @@ protocol DataModelControllerObserver {
 }
 
 class DataModelController {
-    static let thumbnailSize = CGSize(width: 256, height: 192)
-    
     var dataModel = DrawingModel()
-    
-    var thumbnails: [UIImage] = []
-    var thumbnailTraitCollection = UITraitCollection() {
-        didSet {
-            if oldValue.userInterfaceStyle != thumbnailTraitCollection.userInterfaceStyle {
-                generateAllThumbnails()
-            }
-        }
-    }
     
     private let thumbnailQueue = DispatchQueue(label: "ThumbnailQueue", qos: .background)
     private let serializationQueue = DispatchQueue(label: "SerializationQueue", qos: .background)
     
     var observers: [DataModelControllerObserver] = []
     
-    var notes: [NoteModel] {
-        get { dataModel.notes }
-        set { dataModel.notes = newValue }
+    var notePreviews: [CollectionViewVM] {
+        get {
+            dataModel.notes.values.map { CollectionViewVM(idx: $0.id, image: $0.preview) }
+        }
     }
     
     init() {
         loadDataModel()
     }
     
-    func updateDrawing(for note: NoteModel) {
-        self.updateThumbnail(note.preview, at: dataModel.notes.firstIndex { $0.id == note.id }!)
+    func updatePreview() {
         saveDataModel()
-    }
-    
-    private func generateAllThumbnails() {
-        for index in notes.indices {
-            generateThumbnail(index)
-        }
-    }
-    
-    private func generateThumbnail(_ index: Int) {
-        let note = notes[index]
-        let aspectRatio = DataModelController.thumbnailSize.width / DataModelController.thumbnailSize.height
-        let thumbnailRect = CGRect(x: 0, y: 0, width: DrawingModel.canvasWidth, height: DrawingModel.canvasWidth / aspectRatio)
-        let thumbnailScale = UIScreen.main.scale * DataModelController.thumbnailSize.width / DrawingModel.canvasWidth
-        let traitCollection = thumbnailTraitCollection
-        
-        thumbnailQueue.async {
-            traitCollection.performAsCurrent {
-                let image = note.root.data.drawing.image(from: thumbnailRect, scale: thumbnailScale)
-                DispatchQueue.main.async {
-                    self.updateThumbnail(image, at: index)
-                }
-            }
-        }
-    }
-    
-    private func updateThumbnail(_ image: UIImage, at index: Int) {
-        thumbnails[index] = image
         didChange()
     }
     
@@ -116,10 +76,6 @@ class DataModelController {
                     let data = try Data(contentsOf: url)
                     let dataModel = try decoder.decode(DrawingModel.self, from: data)
                     
-                    for note in dataModel.notes {
-                        note.updateDrawingCallback = { _ in self.saveDataModel() }
-                    }
-                    
                     DispatchQueue.main.async {
                         self.setLoadedDataModel(dataModel)
                     }
@@ -132,15 +88,13 @@ class DataModelController {
     
     private func setLoadedDataModel(_ dataModel: DrawingModel) {
         self.dataModel = dataModel
-        thumbnails = Array(repeating: UIImage(), count: dataModel.notes.count)
-        generateAllThumbnails()
+        didChange()
     }
     
     func newDrawing(with image: UIImage) {
         let newlyAddedDrawing = NoteModel.default(image: image, frame: CGRect())
-        dataModel.notes.append(newlyAddedDrawing)
-        thumbnails.append(image)
-        updateDrawing(for: newlyAddedDrawing)
+        dataModel.notes[newlyAddedDrawing.id] = newlyAddedDrawing
+        updatePreview()
     }
 }
 

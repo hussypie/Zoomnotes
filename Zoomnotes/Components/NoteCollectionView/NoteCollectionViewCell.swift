@@ -17,7 +17,7 @@ class NoteCollectionViewCell : UICollectionViewCell {
         super.awakeFromNib()
         
         imageView.layer.shadowPath = UIBezierPath(rect: imageView.bounds).cgPath
-        imageView.layer.shadowOpacity = 0.2
+        imageView.layer.shadowOpacity = 0.1
         imageView.layer.shadowOffset = CGSize(width: 0, height: 3)
         imageView.clipsToBounds = false
     }

@@ -17,7 +17,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     var toolPicker: PKToolPicker!
     
     var dataModelController: DataModelController!
-    var note: NoteModel!
+    var note: NoteModel.NoteLevel!
     var hasModifiedDrawing = false
     
     // TODO: tool here
@@ -27,7 +27,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         super.viewWillAppear(animated)
         
         canvasView.delegate = self
-        canvasView.drawing = note.root.data.drawing
+        canvasView.drawing = note.data.drawing
         canvasView.alwaysBounceVertical = true
         
         canvasView.isScrollEnabled = false
@@ -44,18 +44,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         
         canvasView.becomeFirstResponder()
         
-        for sublevel in note.currentLevel.children.values {
-            let preview = NoteLevelPreview(frame: sublevel.frame, onMoved: { rec in
-                let loc = rec.location(in: self.view)
-                sublevel.frame = CGRect(x: loc.x - sublevel.frame.width / 2,
-                                       y: loc.y - sublevel.frame.height / 2,
-                                       width: sublevel.frame.width,
-                                       height: sublevel.frame.height)
-                self.hasModifiedDrawing = true
-            }) {
-                self.note.remove(subLevel: sublevel.id)
-            }
-            self.view.addSubview(preview)
+        for sublevel in note.children.values {
+            self.view.addSubview(newSublevel(for: sublevel))
         }
     }
     
@@ -77,6 +67,19 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if hasModifiedDrawing {
+            note.data.drawing = canvasView.drawing
+            let screen = captureCurrentScreen()
+            note.previewImage = NoteImage(wrapping: screen)
+            dataModelController.updatePreview()
+        }
+    }
+    
+    override var prefersHomeIndicatorAutoHidden: Bool { true }
+    
     @objc func screenEdgeSwiped(_ rec: UIScreenEdgePanGestureRecognizer) {
         if rec.state == .changed {
             let loc = rec.location(in: canvasView)
@@ -90,17 +93,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
             if circle == nil {
                 let defaultPreviewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
                 let newLevel = NoteModel.NoteLevel.default(preview: defaultPreviewImage, frame: frame)
-                let noteLevelPreview = NoteLevelPreview(frame: frame, onMoved: { rec in
-                    let loc = rec.location(in: self.view)
-                    newLevel.frame = CGRect(x: loc.x - newLevel.frame.width / 2,
-                                            y: loc.y - newLevel.frame.height / 2,
-                                            width: newLevel.frame.width,
-                                            height: newLevel.frame.height)
-                    self.hasModifiedDrawing = true
-                }) {
-                    self.note.remove(subLevel: newLevel.id)
-                }
-                self.note.add(subLevel: newLevel)
+                let noteLevelPreview = newSublevel(for: newLevel)
+                self.note.children[newLevel.id] = newLevel
                 view.addSubview(noteLevelPreview)
                 circle = noteLevelPreview
             }
@@ -115,40 +109,29 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     
     @objc func onPinch(_ rec: UIPinchGestureRecognizer) { }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        
-        let canvasScale = canvasView.bounds.width / DrawingModel.canvasWidth
-        canvasView.minimumZoomScale = canvasScale
-        canvasView.maximumZoomScale = canvasScale
-        canvasView.zoomScale = canvasScale
-        
-        canvasView.contentOffset = CGPoint(x: 0, y: -canvasView.adjustedContentInset.top)
+    private func newSublevel(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
+        NoteLevelPreview(frame: sublevel.frame, onMoved: { rec in
+            let loc = rec.location(in: self.view)
+            sublevel.frame = CGRect(x: loc.x - sublevel.frame.width / 2,
+                                   y: loc.y - sublevel.frame.height / 2,
+                                   width: sublevel.frame.width,
+                                   height: sublevel.frame.height)
+            self.hasModifiedDrawing = true
+        }) {
+            self.note.children.removeValue(forKey: sublevel.id)
+        }
     }
     
-    private func captureCurrentScreen() -> UIImage? {
+    private func captureCurrentScreen() -> UIImage {
         UIGraphicsBeginImageContext(view.frame.size)
-        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        let context = UIGraphicsGetCurrentContext()!
         view.layer.render(in: context)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
+        let image = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
         return image
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        if hasModifiedDrawing {
-            note.updateDrawing(with: canvasView.drawing)
-            guard let screen = captureCurrentScreen() else { return }
-            note.updatePreview(with: screen)
-            dataModelController.updateDrawing(for: note)
-        }
-    }
-    
-    override var prefersHomeIndicatorAutoHidden: Bool { true }
-    
-    func setNewDrawingUndoable(_ newDrawing: PKDrawing) {
+    private func setNewDrawingUndoable(_ newDrawing: PKDrawing) {
         let oldDrawing = canvasView.drawing
         undoManager?.registerUndo(withTarget: self) {
             $0.setNewDrawingUndoable(oldDrawing)

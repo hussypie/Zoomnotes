@@ -51,7 +51,6 @@ class NoteModel : Codable {
     let id: UUID
     private(set) var title: String
     private(set) var root: NoteLevel
-    private(set) var currentLevel: NoteLevel
     
     var preview: UIImage {
         get {
@@ -59,36 +58,26 @@ class NoteModel : Codable {
         }
     }
     
-    var updateDrawingCallback: ((PKDrawing) -> Void)? = nil
-    
-    private enum CodingKeys: String, CodingKey {
-        case title, root, currentLevel, id
-    }
-
     init(title: String, root: NoteLevel) {
         self.id = UUID()
         self.title = title
         self.root = root
-        self.currentLevel = root
     }
     
     func updateDrawing(with drawing: PKDrawing) {
-        self.currentLevel.data.updateDrawing(with: drawing)
-        if self.currentLevel.id == self.root.id {
-            self.updateDrawingCallback?(self.root.data.drawing)
-        }
+        self.root.data.updateDrawing(with: drawing)
     }
     
     func updatePreview(with image: UIImage) {
-        self.currentLevel.previewImage = NoteImage(wrapping: image)
+        self.root.previewImage = NoteImage(wrapping: image)
     }
     
     func add(subLevel: NoteLevel) {
-        self.currentLevel.children[subLevel.id] = subLevel
+        self.root.children[subLevel.id] = subLevel
     }
     
     func remove(subLevel id: UUID) {
-        self.currentLevel.children.removeValue(forKey: id)
+        self.root.children.removeValue(forKey: id)
     }
     
     static func `default`(image: UIImage, frame: CGRect) -> NoteModel {

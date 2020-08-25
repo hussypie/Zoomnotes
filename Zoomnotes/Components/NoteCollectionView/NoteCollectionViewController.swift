@@ -8,21 +8,21 @@
 import UIKit
 import PencilKit
 
+struct CollectionViewVM {
+    let idx: UUID
+    let image: UIImage
+}
+
 class NoteCollectionViewController : UICollectionViewController, DataModelControllerObserver {
     var dataModelController: DataModelController = DataModelController()
     
     @IBAction func newDrawing(_ sender: Any) {
-        dataModelController.newDrawing(with: UIImage.from(frame: view.frame).withBackground(color: UIColor.white))
+        let previewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
+        dataModelController.newDrawing(with: previewImage)
     }
     
     override func viewDidLoad() {
-        dataModelController.thumbnailTraitCollection = traitCollection
         dataModelController.observers.append(self)
-    }
-    
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        dataModelController.thumbnailTraitCollection = traitCollection
     }
     
     func dataModelChanged() {
@@ -34,7 +34,7 @@ class NoteCollectionViewController : UICollectionViewController, DataModelContro
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        dataModelController.notes.count
+        dataModelController.notePreviews.count
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -43,8 +43,8 @@ class NoteCollectionViewController : UICollectionViewController, DataModelContro
                                                                 fatalError("unexpected cell type")
         }
         
-        if let index = indexPath.last, index < dataModelController.thumbnails.count {
-            cell.imageView.image = dataModelController.thumbnails[index]
+        if let index = indexPath.last, index < dataModelController.notePreviews.count {
+            cell.imageView.image = dataModelController.notePreviews[index].image
         }
         
         return cell
@@ -58,7 +58,8 @@ class NoteCollectionViewController : UICollectionViewController, DataModelContro
         
         // Transition to the drawing view controller.
         noteViewController.dataModelController = dataModelController
-        noteViewController.note = dataModelController.notes[indexPath.last!]
+        let id = dataModelController.notePreviews[indexPath.last!].idx
+        noteViewController.note = dataModelController.dataModel.notes[id]?.root
         navigationController.pushViewController(noteViewController, animated: true)
     }
     
