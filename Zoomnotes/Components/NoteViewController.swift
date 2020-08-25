@@ -108,17 +108,80 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     
     @objc func onPinch(_ rec: UIPinchGestureRecognizer) { }
     
-    private func newSublevel(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
-        NoteLevelPreview(frame: sublevel.frame, onMoved: { rec in
+    @objc func previewPanGesture(_ rec: UIPanGestureRecognizer,
+                                 _ preview: NoteLevelPreview,
+                                 onChanged: @escaping (UIPanGestureRecognizer) -> Void,
+                                 onEnded: @escaping () -> Void
+    ) {
+        let velocity = rec.velocity(in: self.view)
+        
+        if rec.state == .changed {
+            onChanged(rec)
             let loc = rec.location(in: self.view)
-            sublevel.frame = CGRect(x: loc.x - sublevel.frame.width / 2,
-                                   y: loc.y - sublevel.frame.height / 2,
-                                   width: sublevel.frame.width,
-                                   height: sublevel.frame.height)
-            self.hasModifiedDrawing = true
-        }) {
-            self.note.children.removeValue(forKey: sublevel.id)
+            preview.frame = CGRect(x: loc.x - preview.frame.width / 2,
+                                   y: loc.y - preview.frame.height / 2,
+                                   width: preview.frame.width,
+                                   height: preview.frame.height)
+        } else if rec.state == .ended {
+            // MARK: begin snippet
+            /// https://www.raywenderlich.com/1860-uikit-dynamics-and-swift-tutorial-tossing-views
+            
+            let magnitude: CGFloat = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
+            
+            let threshold: CGFloat = 5000
+            let velocityPadding: CGFloat  = 35
+            
+            if magnitude > threshold {
+                let animator = UIDynamicAnimator(referenceView: self.view)
+                let pushBehavior = UIPushBehavior(items: [preview], mode: .instantaneous)
+                pushBehavior.pushDirection = CGVector(dx: velocity.x / 10, dy: velocity.y / 10)
+                pushBehavior.magnitude = magnitude / velocityPadding
+                
+                animator.addBehavior(pushBehavior)
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    animator.removeAllBehaviors()
+                    onEnded()
+                }
+            }
+            
+            // MARK: end snippet
         }
+    }
+    
+    @objc func onPreviewTap(_ rec: UITapGestureRecognizer) {
+        if rec.state == .ended {
+            
+        }
+    }
+    
+    private func newSublevel(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
+        let preview = NoteLevelPreview(frame: sublevel.frame)
+        
+        let panGestureRecognizer = ZNPanGestureRecognizer { rec in
+            self.previewPanGesture(rec, preview, onChanged: { rec in
+                let loc = rec.location(in: self.view)
+                sublevel.frame = CGRect(x: loc.x - sublevel.frame.width / 2,
+                                       y: loc.y - sublevel.frame.height / 2,
+                                       width: sublevel.frame.width,
+                                       height: sublevel.frame.height)
+                self.hasModifiedDrawing = true
+            }, onEnded: {
+                preview.removeFromSuperview()
+                self.note.children.removeValue(forKey: sublevel.id)
+            })
+        }
+        
+        panGestureRecognizer.maximumNumberOfTouches = 1
+        panGestureRecognizer.minimumNumberOfTouches = 1
+        
+        preview.addGestureRecognizer(panGestureRecognizer)
+        
+        preview.addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(onPinch(_:))))
+        
+        preview.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onPreviewTap(_:))))
+        
+        return preview
     }
     
     private func captureCurrentScreen() -> UIImage {
