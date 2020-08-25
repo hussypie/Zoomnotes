@@ -149,9 +149,17 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         }
     }
     
-    @objc func onPreviewTap(_ rec: UITapGestureRecognizer) {
+    func onPreviewTap(_ rec: UITapGestureRecognizer, _ note: NoteModel.NoteLevel) {
         if rec.state == .ended {
+            guard let noteViewController = storyboard?.instantiateViewController(withIdentifier: String(describing: NoteViewController.self)) as? NoteViewController,
+                let navigationController = navigationController else {
+                    return
+            }
             
+            // Transition to the drawing view controller.
+            noteViewController.dataModelController = dataModelController
+            noteViewController.note = note
+            navigationController.pushViewController(noteViewController, animated: true)
         }
     }
     
@@ -179,7 +187,9 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         
         preview.addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(onPinch(_:))))
         
-        preview.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onPreviewTap(_:))))
+        preview.addGestureRecognizer(ZNTapGestureRecognizer { rec in
+            self.onPreviewTap(rec, sublevel)
+        })
         
         return preview
     }
