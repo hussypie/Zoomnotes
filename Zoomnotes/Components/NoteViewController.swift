@@ -63,8 +63,6 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         let zoomGestureRecognizer = UIPinchGestureRecognizer(target: self,
                                                              action: #selector(onPinch(_:)))
         self.view.addGestureRecognizer(zoomGestureRecognizer)
-        
-        
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -81,15 +79,15 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     override var prefersHomeIndicatorAutoHidden: Bool { true }
     
     @objc func screenEdgeSwiped(_ rec: UIScreenEdgePanGestureRecognizer) {
+        let loc = rec.location(in: canvasView)
+        let width = self.view.frame.width / 4
+        let height = self.view.frame.height / 4
+        let frame = CGRect(x: loc.x - width / 2,
+                           y: loc.y - height / 2,
+                           width: width,
+                           height: height)
+        
         if rec.state == .changed {
-            let loc = rec.location(in: canvasView)
-            let width = self.view.frame.width / 4
-            let height = self.view.frame.height / 4
-            let frame = CGRect(x: loc.x - width / 2,
-                               y: loc.y - height / 2,
-                               width: width,
-                               height: height)
-            
             if circle == nil {
                 let defaultPreviewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
                 let newLevel = NoteModel.NoteLevel.default(preview: defaultPreviewImage, frame: frame)
@@ -103,6 +101,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         }
         
         if rec.state == .ended {
+            circle!.frame = frame
             circle = nil
         }
     }
