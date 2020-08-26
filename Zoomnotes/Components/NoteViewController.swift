@@ -20,20 +20,30 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     var note: NoteModel.NoteLevel!
     var hasModifiedDrawing = false
     
+    var subLevelViews: [UUID : NoteLevelPreview] = [:]
+    
     // TODO: tool here
     var circle: NoteLevelPreview? = nil
+    var zoomOffset: CGPoint? = nil
     
-    var subLevelViews: [UUID : NoteLevelPreview] = [:]
+    var interactionController: UIPercentDrivenInteractiveTransition? = nil
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        navigationController?.setNavigationBarHidden(true, animated: true)
         
         canvasView.delegate = self
         canvasView.drawing = note.data.drawing
         canvasView.alwaysBounceVertical = true
         
         canvasView.isScrollEnabled = false
-        canvasView.allowsFingerDrawing = true
+        
+        #if DEBUG
+            canvasView.allowsFingerDrawing = true
+        #else
+            canvasView.allowsFingerDrawing = false
+        #endif
         
         let window = parent?.view.window
         toolPicker = PKToolPicker.shared(for: window!)
@@ -46,11 +56,16 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         
         canvasView.becomeFirstResponder()
         
+        self.view.transform = CGAffineTransform(scaleX: 1, y: 1)
+        
         if isMovingToParent || isBeingDismissed {
             for note in note.children.values {
-                subLevelViews[note.id] = sublevelPreview(for: note)
-                self.view.addSubview(subLevelViews[note.id]!)
+                let sublevel = sublevelPreview(for: note)
+                subLevelViews[note.id] = sublevel
+                self.view.addSubview(sublevel)
             }
+            
+            self.view.addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(onPreviewZoomUp(_:))))
         }
         
         for note in note.children.values {
@@ -76,12 +91,10 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: true)
         
         if hasModifiedDrawing {
-            note.data.drawing = canvasView.drawing
-            let screen = captureCurrentScreen()
-            note.previewImage = NoteImage(wrapping: screen)
-            dataModelController.updatePreview()
+            updateLevel()
         }
     }
     
@@ -167,18 +180,67 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         }
     }
     
-    func onPreviewTap(_ rec: UITapGestureRecognizer, _ note: NoteModel.NoteLevel) {
+    private func onPreviewZoomDown(_ rec: ZNPinchGestureRecognizer, _ note: NoteModel.NoteLevel) {
+        if rec.state == .began {
+            let dist = distance(from: view.bounds, to: note.frame)
+            print(dist)
+            self.zoomOffset = dist
+        }
+        
+        if rec.state == .changed {
+            // TODO: Update 4 to calculated value (view width / preview width)
+            // needs state
+            let scale = clamp(rec.scale, lower: 1, upper: 4)
+            view.transform = zoomDownTransform(at: scale, for: self.zoomOffset!)
+        }
+        
         if rec.state == .ended {
+            self.zoomOffset = nil
+            guard rec.scale > 1.5 else {
+                UIView.animate(withDuration: 0.1) {
+                    self.view.transform = .identity
+                }
+                return
+            }
+        
             guard let noteViewController = storyboard?.instantiateViewController(withIdentifier: String(describing: NoteViewController.self)) as? NoteViewController,
                 let navigationController = navigationController else {
                     return
             }
             
-            // Transition to the drawing view controller.
-            noteViewController.dataModelController = dataModelController
+            noteViewController.dataModelController = self.dataModelController
             noteViewController.note = note
-            navigationController.pushViewController(noteViewController, animated: true)
+            navigationController.pushViewController(noteViewController, animated: false)
         }
+    }
+    
+    @objc func onPreviewZoomUp(_ rec: ZNPinchGestureRecognizer) {
+        navigationController?.popViewController(animated: true)
+//        if rec.state == .began {
+//            self.interactionController = UIPercentDrivenInteractiveTransition()
+//
+//        }
+//
+//        if rec.state == .changed {
+//            let percent = clamp(1 - rec.scale, lower: 0, upper: 1)
+//            interactionController?.update(percent)
+//        }
+//
+//        if rec.state == .ended {
+//            if rec.scale > 0.5 && rec.state != .cancelled {
+//                interactionController?.finish()
+//            } else {
+//                interactionController?.cancel()
+//            }
+//            interactionController = nil
+//        }
+    }
+    
+    private func updateLevel() {
+        note.data.drawing = canvasView.drawing
+        let screen = captureCurrentScreen()
+        note.previewImage = NoteImage(wrapping: screen)
+        dataModelController.updatePreview()
     }
     
     private func sublevelPreview(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
@@ -205,8 +267,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         
         preview.addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(onPinch(_:))))
         
-        preview.addGestureRecognizer(ZNTapGestureRecognizer { rec in
-            self.onPreviewTap(rec, sublevel)
+        preview.addGestureRecognizer(ZNPinchGestureRecognizer { rec in
+            self.onPreviewZoomDown(rec, sublevel)
         })
         
         return preview
@@ -260,4 +322,17 @@ extension NoteViewController : PKCanvasViewDelegate {
 
 extension NoteViewController : PKToolPickerObserver {
     
+}
+
+extension NoteViewController : UINavigationControllerDelegate {
+    func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        if operation == .pop {
+            return ZoomTransitionAnimator(with: note)
+        }
+        return nil
+    }
+    
+    func navigationController(_ navigationController: UINavigationController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+        return interactionController
+    }
 }
