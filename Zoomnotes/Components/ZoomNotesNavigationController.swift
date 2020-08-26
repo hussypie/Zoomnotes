@@ -11,6 +11,7 @@ import UIKit
 class ZoomNotesNavigationController : UINavigationController {
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.setNavigationBarHidden(false, animated: true)
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {

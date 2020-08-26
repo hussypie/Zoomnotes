@@ -12,7 +12,7 @@ import UIKit
 class ZoomTransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     
     let note: NoteModel.NoteLevel
-    private let duration: TimeInterval = 5
+    private let duration: TimeInterval = 0.2
     
     init(with note: NoteModel.NoteLevel) {
         self.note = note
@@ -24,15 +24,17 @@ class ZoomTransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     }
     
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-        guard let toView = transitionContext.view(forKey: .to) else { return }
-        guard let fromView = transitionContext.view(forKey: .from) else { return }
+        guard let toVC = transitionContext.viewController(forKey: .to) else { return }
 
         let container = transitionContext.containerView
+        container.addSubview(toVC.view)
         
-        toView.transform = CGAffineTransform(scaleX: 2, y: 2)
+        toVC.view.frame = transitionContext.finalFrame(for: toVC)
+        toVC.view.layoutIfNeeded()
+        toVC.view.transform = zoomDownTransform(at: 4, for: distance(from: toVC.view.bounds, to: note.frame))
         
         UIView.animate(withDuration: self.duration, animations: {
-            toView.transform = CGAffineTransform(scaleX: 1, y: 1)
+            toVC.view.transform = .identity
         }, completion: { _ in
             let success = !transitionContext.transitionWasCancelled
             transitionContext.completeTransition(success)

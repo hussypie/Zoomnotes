@@ -32,6 +32,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         super.viewWillAppear(animated)
         
         navigationController?.setNavigationBarHidden(true, animated: true)
+        navigationController?.delegate = self
         
         canvasView.delegate = self
         canvasView.drawing = note.data.drawing
@@ -91,7 +92,6 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: true)
         
         if hasModifiedDrawing {
             updateLevel()
@@ -182,9 +182,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     
     private func onPreviewZoomDown(_ rec: ZNPinchGestureRecognizer, _ note: NoteModel.NoteLevel) {
         if rec.state == .began {
-            let dist = distance(from: view.bounds, to: note.frame)
-            print(dist)
-            self.zoomOffset = dist
+            self.zoomOffset = distance(from: view.bounds, to: note.frame)
         }
         
         if rec.state == .changed {
@@ -215,25 +213,24 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     }
     
     @objc func onPreviewZoomUp(_ rec: ZNPinchGestureRecognizer) {
-        navigationController?.popViewController(animated: true)
-//        if rec.state == .began {
-//            self.interactionController = UIPercentDrivenInteractiveTransition()
-//
-//        }
-//
-//        if rec.state == .changed {
-//            let percent = clamp(1 - rec.scale, lower: 0, upper: 1)
-//            interactionController?.update(percent)
-//        }
-//
-//        if rec.state == .ended {
-//            if rec.scale > 0.5 && rec.state != .cancelled {
-//                interactionController?.finish()
-//            } else {
-//                interactionController?.cancel()
-//            }
-//            interactionController = nil
-//        }
+        if rec.state == .began {
+            self.interactionController = UIPercentDrivenInteractiveTransition()
+            navigationController?.popViewController(animated: true)
+        }
+
+        if rec.state == .changed {
+            let percent = clamp(1 - rec.scale, lower: 0, upper: 1)
+            interactionController?.update(percent)
+        }
+
+        if rec.state == .ended {
+            if rec.scale < 0.5 && rec.state != .cancelled {
+                interactionController?.finish()
+            } else {
+                interactionController?.cancel()
+            }
+            interactionController = nil
+        }
     }
     
     private func updateLevel() {
