@@ -11,7 +11,9 @@ import UIKit
 import PencilKit
 
 class NoteLevelPreview: UIImageView {
+    let note: NoteModel.NoteLevel
     init(for note: NoteModel.NoteLevel) {
+        self.note = note
         super.init(frame: note.frame)
         
         self.backgroundColor = UIColor.white
@@ -31,6 +33,6 @@ class NoteLevelPreview: UIImageView {
     }
     
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
+        fatalError("shit sux")
     }
 }

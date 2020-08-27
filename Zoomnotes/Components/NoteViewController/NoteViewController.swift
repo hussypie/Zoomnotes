@@ -28,6 +28,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     
     var interactionController: UIPercentDrivenInteractiveTransition? = nil
     
+    var drawerView: UIView? = nil
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -72,6 +74,11 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         for note in note.children.values {
             subLevelViews[note.id]?.image = note.previewImage.image
         }
+        
+        if self.drawerView == nil {
+            self.drawerView = DrawerView(in: self.view)
+            self.view.addSubview(drawerView!)
+        }
     }
     
     override func viewDidLoad() {
@@ -79,11 +86,17 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         
-        let edgeGestureRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(screenEdgeSwiped(_:)))
-        edgeGestureRecognizer.edges = .right
-        edgeGestureRecognizer.delegate = self
+        let rightEdgeGestureRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(screenEdgeSwiped(_:)))
+        rightEdgeGestureRecognizer.edges = .right
+        rightEdgeGestureRecognizer.delegate = self
         
-        self.view.addGestureRecognizer(edgeGestureRecognizer)
+        self.view.addGestureRecognizer(rightEdgeGestureRecognizer)
+        
+        let leftEdgeGestureRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(screenEdgeSwiped(_:)))
+        leftEdgeGestureRecognizer.edges = .left
+        leftEdgeGestureRecognizer.delegate = self
+        
+        self.view.addGestureRecognizer(leftEdgeGestureRecognizer)
         
         let zoomGestureRecognizer = UIPinchGestureRecognizer(target: self,
                                                              action: #selector(onPinch(_:)))
@@ -92,7 +105,6 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        
         if hasModifiedDrawing {
             updateLevel()
         }
@@ -140,25 +152,26 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     
     @objc func previewPanGesture(_ rec: UIPanGestureRecognizer,
                                  _ preview: NoteLevelPreview,
-                                 onChanged: @escaping (UIPanGestureRecognizer) -> Void,
+                                 onChanged: @escaping (CGRect) -> Void,
                                  onEnded: @escaping () -> Void
     ) {
         let velocity = rec.velocity(in: self.view)
         
         hasModifiedDrawing = true
         
-        let loc = rec.location(in: self.view)
-        let frame = CGRect(x: loc.x - preview.frame.width / 2,
-                            y: loc.y - preview.frame.height / 2,
+        let loc = rec.translation(in: self.view)
+        let frame = CGRect(x: preview.frame.minX + loc.x,
+                           y: preview.frame.minY + loc.y,
                             width: preview.frame.width,
                             height: preview.frame.height)
         
+        preview.frame = frame
+        
+        rec.setTranslation(CGPoint.zero, in: view)
+        
         if rec.state == .changed {
-            onChanged(rec)
-            
-            preview.frame = frame
+            onChanged(frame)
         } else if rec.state == .ended {
-            preview.frame = frame
             
             // MARK: begin snippet
             /// https://www.raywenderlich.com/1860-uikit-dynamics-and-swift-tutorial-tossing-views
@@ -250,12 +263,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         let preview = NoteLevelPreview(for: sublevel)
         
         let panGestureRecognizer = ZNPanGestureRecognizer { rec in
-            self.previewPanGesture(rec, preview, onChanged: { rec in
-                let loc = rec.location(in: self.view)
-                sublevel.frame = CGRect(x: loc.x - sublevel.frame.width / 2,
-                                       y: loc.y - sublevel.frame.height / 2,
-                                       width: sublevel.frame.width,
-                                       height: sublevel.frame.height)
+            self.previewPanGesture(rec, preview, onChanged: { frame in
+                sublevel.frame = frame
                 self.hasModifiedDrawing = true
             }, onEnded: {
                 preview.removeFromSuperview()
@@ -278,11 +287,13 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     }
     
     private func captureCurrentScreen() -> UIImage {
+        drawerView?.alpha = 0.0
         UIGraphicsBeginImageContext(view.frame.size)
         let context = UIGraphicsGetCurrentContext()!
         view.layer.render(in: context)
         let image = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
+        drawerView?.alpha = 1.0
         return image
     }
     
@@ -325,17 +336,4 @@ extension NoteViewController : PKCanvasViewDelegate {
 
 extension NoteViewController : PKToolPickerObserver {
     
-}
-
-extension NoteViewController : UINavigationControllerDelegate {
-    func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        if operation == .pop {
-            return ZoomTransitionAnimator(with: note)
-        }
-        return nil
-    }
-    
-    func navigationController(_ navigationController: UINavigationController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
-        return interactionController
-    }
 }
