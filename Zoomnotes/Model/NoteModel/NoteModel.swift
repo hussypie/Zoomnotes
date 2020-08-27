@@ -8,6 +8,7 @@
 
 import UIKit
 import PencilKit
+import Combine
 
 class NoteModel : Codable {
     class NoteLevel : Codable {
@@ -62,22 +63,6 @@ class NoteModel : Codable {
         self.id = UUID()
         self.title = title
         self.root = root
-    }
-    
-    func updateDrawing(with drawing: PKDrawing) {
-        self.root.data.updateDrawing(with: drawing)
-    }
-    
-    func updatePreview(with image: UIImage) {
-        self.root.previewImage = NoteImage(wrapping: image)
-    }
-    
-    func add(subLevel: NoteLevel) {
-        self.root.children[subLevel.id] = subLevel
-    }
-    
-    func remove(subLevel id: UUID) {
-        self.root.children.removeValue(forKey: id)
     }
     
     static func `default`(image: UIImage, frame: CGRect) -> NoteModel {

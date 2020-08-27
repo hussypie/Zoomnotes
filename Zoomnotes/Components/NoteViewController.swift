@@ -23,7 +23,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     var subLevelViews: [UUID : NoteLevelPreview] = [:]
     
     // TODO: tool here
-    var circle: NoteLevelPreview? = nil
+    var currentlyDraggedLevel: NoteModel.NoteLevel? = nil
     var zoomOffset: CGPoint? = nil
     
     var interactionController: UIPercentDrivenInteractiveTransition? = nil
@@ -112,21 +112,27 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         hasModifiedDrawing = true
         
         if rec.state == .changed {
-            if circle == nil {
+            if currentlyDraggedLevel == nil {
                 let defaultPreviewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
+                
                 let newLevel = NoteModel.NoteLevel.default(preview: defaultPreviewImage, frame: frame)
-                let noteLevelPreview = sublevelPreview(for: newLevel)
                 self.note.children[newLevel.id] = newLevel
+                
+                let noteLevelPreview = sublevelPreview(for: newLevel)
+                self.subLevelViews[newLevel.id] = noteLevelPreview
+                
                 view.addSubview(noteLevelPreview)
-                circle = noteLevelPreview
+                currentlyDraggedLevel = newLevel
             }
             
-            circle!.frame = frame
+            currentlyDraggedLevel!.frame = frame
+            subLevelViews[currentlyDraggedLevel!.id]!.frame = frame
         }
         
         if rec.state == .ended {
-            circle!.frame = frame
-            circle = nil
+            subLevelViews[currentlyDraggedLevel!.id]!.frame = frame
+            currentlyDraggedLevel!.frame = frame
+            currentlyDraggedLevel = nil
         }
     }
     
@@ -152,6 +158,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
             
             preview.frame = frame
         } else if rec.state == .ended {
+            preview.frame = frame
+            
             // MARK: begin snippet
             /// https://www.raywenderlich.com/1860-uikit-dynamics-and-swift-tutorial-tossing-views
             
@@ -172,8 +180,6 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
                     animator.removeAllBehaviors()
                     onEnded()
                 }
-            } else {
-                preview.frame = frame
             }
             
             // MARK: end snippet
