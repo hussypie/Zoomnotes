@@ -22,12 +22,17 @@
 		3101756A24E531D1007D3589 /* NoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101756924E531D1007D3589 /* NoteViewController.swift */; };
 		3101756C24E5366A007D3589 /* NoteCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101756B24E5366A007D3589 /* NoteCollectionViewController.swift */; };
 		3101756F24E53778007D3589 /* NoteCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101756E24E53778007D3589 /* NoteCollectionViewCell.swift */; };
-		310A5C6D24F40A44006394A0 /* GestureRecognizer+Closure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310A5C6C24F40A44006394A0 /* GestureRecognizer+Closure.swift */; };
+		310A5C6D24F40A44006394A0 /* ZNPanGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310A5C6C24F40A44006394A0 /* ZNPanGestureRecognizer.swift */; };
 		310A5C6F24F411F1006394A0 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310A5C6E24F411F1006394A0 /* UIImage.swift */; };
 		312820CB24F6926B00338E28 /* ZNPinchGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820CA24F6926B00338E28 /* ZNPinchGestureRecognizer.swift */; };
 		312820CD24F6963B00338E28 /* CGRect+center.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820CC24F6963B00338E28 /* CGRect+center.swift */; };
 		312820CF24F69A2700338E28 /* Graphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820CE24F69A2700338E28 /* Graphics.swift */; };
 		312820D224F6B76200338E28 /* ZoomTransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820D124F6B76200338E28 /* ZoomTransitionAnimator.swift */; };
+		312820D624F826EF00338E28 /* DrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820D524F826EF00338E28 /* DrawerView.swift */; };
+		312D7FE824F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312D7FE724F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift */; };
+		312D7FEC24F93D8A008B13F8 /* ZNGestureRecognizerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312D7FEB24F93D8A008B13F8 /* ZNGestureRecognizerState.swift */; };
+		31362A5724F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */; };
+		31362A5B24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */; };
 		3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */; };
 		31BF9E2C24E5906100142EBF /* NoteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BF9E2B24E5906100142EBF /* NoteModel.swift */; };
 		31D6648B24EC53450062AF8D /* NoteChild.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D6648A24EC53450062AF8D /* NoteChild.swift */; };
@@ -75,12 +80,17 @@
 		3101756924E531D1007D3589 /* NoteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteViewController.swift; sourceTree = "<group>"; };
 		3101756B24E5366A007D3589 /* NoteCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteCollectionViewController.swift; sourceTree = "<group>"; };
 		3101756E24E53778007D3589 /* NoteCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteCollectionViewCell.swift; sourceTree = "<group>"; };
-		310A5C6C24F40A44006394A0 /* GestureRecognizer+Closure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GestureRecognizer+Closure.swift"; sourceTree = "<group>"; };
+		310A5C6C24F40A44006394A0 /* ZNPanGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNPanGestureRecognizer.swift; sourceTree = "<group>"; };
 		310A5C6E24F411F1006394A0 /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		312820CA24F6926B00338E28 /* ZNPinchGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNPinchGestureRecognizer.swift; sourceTree = "<group>"; };
 		312820CC24F6963B00338E28 /* CGRect+center.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+center.swift"; sourceTree = "<group>"; };
 		312820CE24F69A2700338E28 /* Graphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graphics.swift; sourceTree = "<group>"; };
 		312820D124F6B76200338E28 /* ZoomTransitionAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomTransitionAnimator.swift; sourceTree = "<group>"; };
+		312820D524F826EF00338E28 /* DrawerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawerView.swift; sourceTree = "<group>"; };
+		312D7FE724F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteLevel+NSItemProviderWriting.swift"; sourceTree = "<group>"; };
+		312D7FEB24F93D8A008B13F8 /* ZNGestureRecognizerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNGestureRecognizerState.swift; sourceTree = "<group>"; };
+		31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+UINavigationControllerDelegate.swift"; sourceTree = "<group>"; };
+		31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNSwipeGesturerecognizer.swift; sourceTree = "<group>"; };
 		3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNTapGestureRecognizer.swift; sourceTree = "<group>"; };
 		31BF9E2B24E5906100142EBF /* NoteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteModel.swift; sourceTree = "<group>"; };
 		31D6648A24EC53450062AF8D /* NoteChild.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteChild.swift; sourceTree = "<group>"; };
@@ -196,10 +206,8 @@
 		3101756324E52FDE007D3589 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				310A5C6C24F40A44006394A0 /* GestureRecognizer+Closure.swift */,
+				312D7FED24F93DB0008B13F8 /* Gestures */,
 				310A5C6E24F411F1006394A0 /* UIImage.swift */,
-				3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */,
-				312820CA24F6926B00338E28 /* ZNPinchGestureRecognizer.swift */,
 				312820CC24F6963B00338E28 /* CGRect+center.swift */,
 				312820CE24F69A2700338E28 /* Graphics.swift */,
 			);
@@ -209,10 +217,11 @@
 		3101756624E530D1007D3589 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				31362A5524F831D70002FD98 /* NoteViewController */,
+				31E58E0324F95EA20052997D /* Drawer */,
 				310A5C7024F42338006394A0 /* NotePreview */,
 				3101756D24E53766007D3589 /* NoteCollectionView */,
 				3101756424E52FED007D3589 /* ZoomNotesNavigationController.swift */,
-				3101756924E531D1007D3589 /* NoteViewController.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -240,6 +249,7 @@
 				31BF9E2B24E5906100142EBF /* NoteModel.swift */,
 				31D6648A24EC53450062AF8D /* NoteChild.swift */,
 				31D6648C24EC53890062AF8D /* NoteImage.swift */,
+				312D7FE724F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift */,
 			);
 			path = NoteModel;
 			sourceTree = "<group>";
@@ -250,6 +260,35 @@
 				312820D124F6B76200338E28 /* ZoomTransitionAnimator.swift */,
 			);
 			path = Animator;
+			sourceTree = "<group>";
+		};
+		312D7FED24F93DB0008B13F8 /* Gestures */ = {
+			isa = PBXGroup;
+			children = (
+				3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */,
+				312D7FEB24F93D8A008B13F8 /* ZNGestureRecognizerState.swift */,
+				31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */,
+				312820CA24F6926B00338E28 /* ZNPinchGestureRecognizer.swift */,
+				310A5C6C24F40A44006394A0 /* ZNPanGestureRecognizer.swift */,
+			);
+			path = Gestures;
+			sourceTree = "<group>";
+		};
+		31362A5524F831D70002FD98 /* NoteViewController */ = {
+			isa = PBXGroup;
+			children = (
+				3101756924E531D1007D3589 /* NoteViewController.swift */,
+				31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */,
+			);
+			path = NoteViewController;
+			sourceTree = "<group>";
+		};
+		31E58E0324F95EA20052997D /* Drawer */ = {
+			isa = PBXGroup;
+			children = (
+				312820D524F826EF00338E28 /* DrawerView.swift */,
+			);
+			path = Drawer;
 			sourceTree = "<group>";
 		};
 		413867CE548B7A1622A584B0 /* Pods */ = {
@@ -478,19 +517,24 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				312820D624F826EF00338E28 /* DrawerView.swift in Sources */,
+				312D7FEC24F93D8A008B13F8 /* ZNGestureRecognizerState.swift in Sources */,
 				3101756A24E531D1007D3589 /* NoteViewController.swift in Sources */,
 				310A5C6F24F411F1006394A0 /* UIImage.swift in Sources */,
 				312820CD24F6963B00338E28 /* CGRect+center.swift in Sources */,
 				31D6648B24EC53450062AF8D /* NoteChild.swift in Sources */,
 				3101756F24E53778007D3589 /* NoteCollectionViewCell.swift in Sources */,
 				3101753824E5211D007D3589 /* Zoomnotes.xcdatamodeld in Sources */,
+				31362A5724F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift in Sources */,
 				31D6648D24EC53890062AF8D /* NoteImage.swift in Sources */,
 				3101753224E5211D007D3589 /* ViewController.swift in Sources */,
+				312D7FE824F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift in Sources */,
 				312820CF24F69A2700338E28 /* Graphics.swift in Sources */,
 				3101756524E52FED007D3589 /* ZoomNotesNavigationController.swift in Sources */,
 				312820CB24F6926B00338E28 /* ZNPinchGestureRecognizer.swift in Sources */,
-				310A5C6D24F40A44006394A0 /* GestureRecognizer+Closure.swift in Sources */,
+				310A5C6D24F40A44006394A0 /* ZNPanGestureRecognizer.swift in Sources */,
 				31D6648F24ED1D470062AF8D /* NoteLevelPreview.swift in Sources */,
+				31362A5B24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift in Sources */,
 				3101756224E52F77007D3589 /* DrawingModel.swift in Sources */,
 				3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */,
 				31BF9E2C24E5906100142EBF /* NoteModel.swift in Sources */,
@@ -674,6 +718,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = P582S266YB;
 				INFOPLIST_FILE = Zoomnotes/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -693,6 +738,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = P582S266YB;
 				INFOPLIST_FILE = Zoomnotes/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
