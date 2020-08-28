@@ -28,7 +28,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     
     var interactionController: UIPercentDrivenInteractiveTransition? = nil
     
-    var drawerView: UIView!
+    var drawerView: UIView? = nil
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -70,8 +70,12 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
             
             self.view.addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(onPreviewZoomUp(_:))))
             
-            self.drawerView = DrawerView(in: self.view, title: .constant("Title"))
-            self.view.addSubview(drawerView)
+            if self.drawerView == nil {
+                self.drawerView = DrawerView(in: self.view, title: .constant("Title"))
+            }
+
+            self.view.addSubview(drawerView!)
+            self.view.bringSubviewToFront(drawerView!)
         }
         
         for note in note.children.values {
@@ -177,6 +181,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
             
             noteViewController.dataModelController = self.dataModelController
             noteViewController.note = note
+            noteViewController.drawerView = self.drawerView!
             navigationController.pushViewController(noteViewController, animated: false)
         }
     }
@@ -260,7 +265,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
                         preview.removeFromSuperview()
                         self.note.children.removeValue(forKey: sublevel.id)
                     }
-                } else if self.drawerView.frame.contains(preview.frame) {
+                } else if self.drawerView!.frame.contains(preview.frame) {
                     let locInDrawer = rec.location(in: self.drawerView)
                     let locInPreview = rec.location(in: preview)
                     preview.removeFromSuperview()
@@ -268,7 +273,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
                                            y: locInDrawer.y - locInPreview.y,
                                            width: preview.frame.width,
                                            height: preview.frame.height)
-                    self.drawerView.addSubview(preview)
+                    self.drawerView!.addSubview(preview)
                     
                 }
                 
@@ -291,9 +296,9 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     }
     
     private func captureCurrentScreen() -> UIImage {
-        drawerView.alpha = 0.0
+        drawerView!.alpha = 0.0
         defer {
-            drawerView.alpha = 1.0
+            drawerView!.alpha = 1.0
         }
         UIGraphicsBeginImageContext(view.frame.size)
         let context = UIGraphicsGetCurrentContext()!
