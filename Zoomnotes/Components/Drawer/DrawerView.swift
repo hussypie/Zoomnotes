@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import SwiftUI
 
 protocol DrawerViewDelegate {
     func noteNameChanged(to: String)
@@ -21,9 +22,9 @@ class DrawerView : UIView {
         case fullyOpen
     }
     
-    var delegate: DrawerViewDelegate?
-    
     private let offset: CGFloat = 50
+    
+    private let title: Binding<String>
     
     private func panGesture(with view: UIView) -> ZNPanGestureRecognizer {
         let baseFrame = CGRect(x: 0,
@@ -85,11 +86,15 @@ class DrawerView : UIView {
         }
     }
     
-    private func titleTextField(title: String) -> UITextField {
+    private func titleTextField() -> UITextField {
         let textField = UITextField(frame: CGRect(x: 10, y: 10, width: 200, height: 30))
+        
+        textField.delegate = self
+
         textField.addTarget(self, action: #selector(onTextField(_:)), for: .valueChanged)
+
         textField.placeholder = "Note Title"
-        textField.text = title
+        textField.text = title.wrappedValue
         textField.returnKeyType = .done
         textField.clearButtonMode = .whileEditing
         textField.backgroundColor = UIColor.systemGray6
@@ -99,12 +104,14 @@ class DrawerView : UIView {
         return textField
     }
     
-    init(in view: UIView, with title: String) {
+    init(in view: UIView, title: Binding<String>) {
         let baseFrame = CGRect(x: 0,
                                y: view.frame.height - offset,
                                width: view.frame.width,
                                height: view.frame.height / 2)
-        
+
+        self.title = title
+
         super.init(frame: baseFrame)
         
         self.frame = baseFrame
@@ -116,7 +123,7 @@ class DrawerView : UIView {
         blurView.frame = self.bounds
         self.addSubview(blurView)
         
-        self.addSubview(titleTextField(title: title))
+        self.addSubview(titleTextField())
         
         self.addGestureRecognizer(panGesture(with: view))
         self.addGestureRecognizer(swipeUpGesture(with: view))
@@ -127,25 +134,47 @@ class DrawerView : UIView {
                        selector: #selector(keyboardWillChangeFrame(notification:)),
                        name: UIResponder.keyboardWillChangeFrameNotification,
                        object: nil)
+        nc.addObserver(self,
+                       selector: #selector(keyboardWillChangeFrame(notification:)),
+                       name: UIResponder.keyboardWillHideNotification,
+                       object: nil)
         
     }
     
     @objc func onTextField(_ sender: UITextField) {
-        self.delegate?.noteNameChanged(to: sender.text ?? "")
+        self.title.wrappedValue = sender.text ?? "Untitled"
     }
     
     @objc func keyboardWillChangeFrame(notification: Notification) {
-//        UIView.animate(withDuration: 0.1) {
-//            guard let keyboardValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
-//
-//            self.frame = CGRect(x: 0,
-//                                y: <#T##CGFloat#>,
-//                                width: self.frame.width,
-//                                height: self.frame.height)
-//        }
+        guard let keyboardValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
+        guard let view = self.superview else { return }
+
+        UIView.animate(withDuration: 0.1) {
+            if notification.name == UIResponder.keyboardWillHideNotification {
+                self.frame = CGRect(x: 0,
+                                    y: view.frame.height - self.offset,
+                                    width: view.frame.width,
+                                    height: view.frame.height / 2)
+            } else {
+                let keyboardScreenEndFrame = keyboardValue.cgRectValue
+                let kbHeight = view.frame.height - keyboardScreenEndFrame.height
+                self.frame = CGRect(x: 0,
+                                    y: kbHeight - self.offset,
+                                    width: view.frame.width,
+                                    height: view.frame.height / 2)
+            }
+        }
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+extension DrawerView : UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        
+        return true
     }
 }

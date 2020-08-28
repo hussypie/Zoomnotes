@@ -70,7 +70,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
             
             self.view.addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(onPreviewZoomUp(_:))))
             
-            self.drawerView = DrawerView(in: self.view, with: "Title")
+            self.drawerView = DrawerView(in: self.view, title: .constant("Title"))
             self.view.addSubview(drawerView)
         }
         

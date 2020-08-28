@@ -50,7 +50,7 @@ class NoteModel : Codable {
     }
     
     let id: UUID
-    private(set) var title: String
+    var title: String
     private(set) var root: NoteLevel
     
     var preview: UIImage {
