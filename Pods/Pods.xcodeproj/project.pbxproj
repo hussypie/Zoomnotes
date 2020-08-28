@@ -6,25 +6,51 @@
 	objectVersion = 50;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		52B60EC2A583F24ACBB69C113F5488B9 /* SwiftLint */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = AE7B4FB01588B9E6DF09CB79FC7CE7BD /* Build configuration list for PBXAggregateTarget "SwiftLint" */;
+			buildPhases = (
+			);
+			dependencies = (
+			);
+			name = SwiftLint;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		1CA1037BCECA96D2786506F01ABE4D52 /* Pods-ZoomnotesTests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D3E7C2519B9F9AA2F77C8E17BA62D0D /* Pods-ZoomnotesTests-dummy.m */; };
-		255C90C35B3244E7051C7B19701710A0 /* Pods-Zoomnotes-ZoomnotesUITests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = C7069C0F2DF890C104E42EFB875EECBD /* Pods-Zoomnotes-ZoomnotesUITests-dummy.m */; };
+		36EBDD4CC16B3794603425B233CB7B3D /* Pods-Zoomnotes-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 502B3E8C457484F5C6DC0B98592D6059 /* Pods-Zoomnotes-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5742B164FF0624CE5568D535FA9718CD /* Pods-ZoomnotesTests-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 4AADDC3A175CFCC4EC3770C85A29D4D9 /* Pods-ZoomnotesTests-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		883E06A498C72B0D70E63525040D44EF /* Pods-Zoomnotes-ZoomnotesUITests-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = B9221F4E7B6D210743FB090E4C2D5D98 /* Pods-Zoomnotes-ZoomnotesUITests-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		92BDAD7B8D37D181994A9B6E5112ECCA /* Pods-Zoomnotes-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 776D868EE5719FE680BB43B2B1960305 /* Pods-Zoomnotes-dummy.m */; };
-		A92E3DCD369C3380CDDA90A263EE9237 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3212113385A8FBBDB272BD23C409FF61 /* Foundation.framework */; };
+		6D1AEF7D400F29E67CE7A5634AE45BCA /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3212113385A8FBBDB272BD23C409FF61 /* Foundation.framework */; };
+		701B36F09FA39E074F32372C57C244EA /* Pods-Zoomnotes-ZoomnotesUITests-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = B9221F4E7B6D210743FB090E4C2D5D98 /* Pods-Zoomnotes-ZoomnotesUITests-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		745B5DF37A9D06FC682BFFFE9E1F4AE7 /* Pods-Zoomnotes-ZoomnotesUITests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = C7069C0F2DF890C104E42EFB875EECBD /* Pods-Zoomnotes-ZoomnotesUITests-dummy.m */; };
 		C248D4F967C5F51D04EDDA6E7411149D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3212113385A8FBBDB272BD23C409FF61 /* Foundation.framework */; };
-		EBDCF03D04718F3095DAABBB26924892 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3212113385A8FBBDB272BD23C409FF61 /* Foundation.framework */; };
-		EC1382275FD67CA1F92309EE2597A64D /* Pods-Zoomnotes-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 502B3E8C457484F5C6DC0B98592D6059 /* Pods-Zoomnotes-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C7BD7E0DF4724DE19B3B27880923F430 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3212113385A8FBBDB272BD23C409FF61 /* Foundation.framework */; };
+		F55333F2531918476C4F42A912AEB8C9 /* Pods-Zoomnotes-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 776D868EE5719FE680BB43B2B1960305 /* Pods-Zoomnotes-dummy.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		C2CF4FEBAC2AD77B752CBFD87AAC83A4 /* PBXContainerItemProxy */ = {
+		45C43009B2478897C4F17F2A1AAB6F5E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 4BD83183B7C45D3D0826D6738697FC45;
 			remoteInfo = "Pods-Zoomnotes";
+		};
+		60B267EDE2A0D73865C46523E749B43C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 52B60EC2A583F24ACBB69C113F5488B9;
+			remoteInfo = SwiftLint;
+		};
+		6D3A60483D0FA68F598410E9E5DBA2BB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 52B60EC2A583F24ACBB69C113F5488B9;
+			remoteInfo = SwiftLint;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -45,6 +71,7 @@
 		776D868EE5719FE680BB43B2B1960305 /* Pods-Zoomnotes-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Zoomnotes-dummy.m"; sourceTree = "<group>"; };
 		799AE924AC13931841C130774F3340C6 /* Pods-ZoomnotesTests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ZoomnotesTests-acknowledgements.plist"; sourceTree = "<group>"; };
 		893F17554E67DF50BED2DD55E10D674C /* Pods_Zoomnotes_ZoomnotesUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_Zoomnotes_ZoomnotesUITests.framework; path = "Pods-Zoomnotes-ZoomnotesUITests.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		89F85ACF3D78B39506B75103B4694B36 /* SwiftLint.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SwiftLint.xcconfig; sourceTree = "<group>"; };
 		8D3E7C2519B9F9AA2F77C8E17BA62D0D /* Pods-ZoomnotesTests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-ZoomnotesTests-dummy.m"; sourceTree = "<group>"; };
 		8E45409307439486A8DF3180ECCA9ED9 /* Pods-Zoomnotes-ZoomnotesUITests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Zoomnotes-ZoomnotesUITests-acknowledgements.plist"; sourceTree = "<group>"; };
 		90B9791DE2E7831DE05E7714FB2B6122 /* Pods-ZoomnotesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ZoomnotesTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -61,19 +88,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		12E2C52DAE6371C08D0D2B8C98FCCF36 /* Frameworks */ = {
+		7A593637AA92948185C91360E325E487 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EBDCF03D04718F3095DAABBB26924892 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6AFAAE654608872420D0650B96947F21 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				A92E3DCD369C3380CDDA90A263EE9237 /* Foundation.framework in Frameworks */,
+				C7BD7E0DF4724DE19B3B27880923F430 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,6 +101,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				C248D4F967C5F51D04EDDA6E7411149D /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DAB9A9EC546444DA989E9B84280A21EF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6D1AEF7D400F29E67CE7A5634AE45BCA /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -156,6 +183,23 @@
 			path = "Target Support Files/Pods-Zoomnotes";
 			sourceTree = "<group>";
 		};
+		965877409E01FB3D85D85E90E6B30185 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				9AED61B9A1CFA211C061344F741DBA07 /* SwiftLint */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		9AED61B9A1CFA211C061344F741DBA07 /* SwiftLint */ = {
+			isa = PBXGroup;
+			children = (
+				EEA599FE5C15138FF0981CCFB01E55AA /* Support Files */,
+			);
+			name = SwiftLint;
+			path = SwiftLint;
+			sourceTree = "<group>";
+		};
 		C0834CEBB1379A84116EF29F93051C60 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -169,6 +213,7 @@
 			children = (
 				9D940727FF8FB9C785EB98E56350EF41 /* Podfile */,
 				D210D550F4EA176C3123ED886F8F87F5 /* Frameworks */,
+				965877409E01FB3D85D85E90E6B30185 /* Pods */,
 				4A4059ABFE31CF97DBE7D3A253475E2C /* Products */,
 				610A872A2DB85A644C219F853CD257E2 /* Targets Support Files */,
 			);
@@ -182,22 +227,31 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		EEA599FE5C15138FF0981CCFB01E55AA /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				89F85ACF3D78B39506B75103B4694B36 /* SwiftLint.xcconfig */,
+			);
+			name = "Support Files";
+			path = "../Target Support Files/SwiftLint";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		59F4B4C71A83E22E117ED0937A9D033C /* Headers */ = {
+		BC815BDDD78B37B5EB00CE0A5252DA5E /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				883E06A498C72B0D70E63525040D44EF /* Pods-Zoomnotes-ZoomnotesUITests-umbrella.h in Headers */,
+				701B36F09FA39E074F32372C57C244EA /* Pods-Zoomnotes-ZoomnotesUITests-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EB40414F1193EDC7C812A7D2D12C5EEE /* Headers */ = {
+		BF5E7F8C1BE362B750CF0BBA10EBA82A /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EC1382275FD67CA1F92309EE2597A64D /* Pods-Zoomnotes-umbrella.h in Headers */,
+				36EBDD4CC16B3794603425B233CB7B3D /* Pods-Zoomnotes-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -214,16 +268,17 @@
 /* Begin PBXNativeTarget section */
 		4BD83183B7C45D3D0826D6738697FC45 /* Pods-Zoomnotes */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 19E035251BAE42FF1E1143CA9B58BC31 /* Build configuration list for PBXNativeTarget "Pods-Zoomnotes" */;
+			buildConfigurationList = FC698865C81BEE433AF769B3861DAFA0 /* Build configuration list for PBXNativeTarget "Pods-Zoomnotes" */;
 			buildPhases = (
-				EB40414F1193EDC7C812A7D2D12C5EEE /* Headers */,
-				CEA7582C73C5AA6777ED8B5C614D64D1 /* Sources */,
-				6AFAAE654608872420D0650B96947F21 /* Frameworks */,
-				4992C7020D5DE1B65D74B33123D572D8 /* Resources */,
+				BF5E7F8C1BE362B750CF0BBA10EBA82A /* Headers */,
+				768A44BC465C651D9F422E7A3E49A74E /* Sources */,
+				7A593637AA92948185C91360E325E487 /* Frameworks */,
+				BC4AA2A1CA1AE685C2E45364AAB9C1E6 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1D648596074F91C59EE21A4814B5E7C1 /* PBXTargetDependency */,
 			);
 			name = "Pods-Zoomnotes";
 			productName = "Pods-Zoomnotes";
@@ -232,16 +287,17 @@
 		};
 		A52E89E13BA5952B1C59362B02DB843D /* Pods-Zoomnotes-ZoomnotesUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 552EEC3A192E9CF33CC7DA7BDE71A2FD /* Build configuration list for PBXNativeTarget "Pods-Zoomnotes-ZoomnotesUITests" */;
+			buildConfigurationList = 3C202133CCCD7429FF7CD870CD38CA5A /* Build configuration list for PBXNativeTarget "Pods-Zoomnotes-ZoomnotesUITests" */;
 			buildPhases = (
-				59F4B4C71A83E22E117ED0937A9D033C /* Headers */,
-				DD8AC8586A4B9352AC0C3AA83211FB6B /* Sources */,
-				12E2C52DAE6371C08D0D2B8C98FCCF36 /* Frameworks */,
-				0DF577FC558CF8E431D3E8BB6B7F2ABF /* Resources */,
+				BC815BDDD78B37B5EB00CE0A5252DA5E /* Headers */,
+				6EF6BD90EB6B5239DE420BD1C0504F22 /* Sources */,
+				DAB9A9EC546444DA989E9B84280A21EF /* Frameworks */,
+				E270CB9F06C4837BBB373F73B7F8AB52 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				24FFC8C428E0DD7E883E8F4880A92886 /* PBXTargetDependency */,
 			);
 			name = "Pods-Zoomnotes-ZoomnotesUITests";
 			productName = "Pods-Zoomnotes-ZoomnotesUITests";
@@ -260,7 +316,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				CE8D3A37A9E5280A9F8A5CF587BF760B /* PBXTargetDependency */,
+				F96E33AA43521E223486897F82C219CB /* PBXTargetDependency */,
 			);
 			name = "Pods-ZoomnotesTests";
 			productName = "Pods-ZoomnotesTests";
@@ -292,26 +348,27 @@
 				4BD83183B7C45D3D0826D6738697FC45 /* Pods-Zoomnotes */,
 				A52E89E13BA5952B1C59362B02DB843D /* Pods-Zoomnotes-ZoomnotesUITests */,
 				DADCB86DD1628918A03E197772DB7650 /* Pods-ZoomnotesTests */,
+				52B60EC2A583F24ACBB69C113F5488B9 /* SwiftLint */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		0DF577FC558CF8E431D3E8BB6B7F2ABF /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		4992C7020D5DE1B65D74B33123D572D8 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		9C02B21D259D813D55880E502A5DFFD1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BC4AA2A1CA1AE685C2E45364AAB9C1E6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E270CB9F06C4837BBB373F73B7F8AB52 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -329,34 +386,84 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		CEA7582C73C5AA6777ED8B5C614D64D1 /* Sources */ = {
+		6EF6BD90EB6B5239DE420BD1C0504F22 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				92BDAD7B8D37D181994A9B6E5112ECCA /* Pods-Zoomnotes-dummy.m in Sources */,
+				745B5DF37A9D06FC682BFFFE9E1F4AE7 /* Pods-Zoomnotes-ZoomnotesUITests-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		DD8AC8586A4B9352AC0C3AA83211FB6B /* Sources */ = {
+		768A44BC465C651D9F422E7A3E49A74E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				255C90C35B3244E7051C7B19701710A0 /* Pods-Zoomnotes-ZoomnotesUITests-dummy.m in Sources */,
+				F55333F2531918476C4F42A912AEB8C9 /* Pods-Zoomnotes-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		CE8D3A37A9E5280A9F8A5CF587BF760B /* PBXTargetDependency */ = {
+		1D648596074F91C59EE21A4814B5E7C1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SwiftLint;
+			target = 52B60EC2A583F24ACBB69C113F5488B9 /* SwiftLint */;
+			targetProxy = 6D3A60483D0FA68F598410E9E5DBA2BB /* PBXContainerItemProxy */;
+		};
+		24FFC8C428E0DD7E883E8F4880A92886 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SwiftLint;
+			target = 52B60EC2A583F24ACBB69C113F5488B9 /* SwiftLint */;
+			targetProxy = 60B267EDE2A0D73865C46523E749B43C /* PBXContainerItemProxy */;
+		};
+		F96E33AA43521E223486897F82C219CB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "Pods-Zoomnotes";
 			target = 4BD83183B7C45D3D0826D6738697FC45 /* Pods-Zoomnotes */;
-			targetProxy = C2CF4FEBAC2AD77B752CBFD87AAC83A4 /* PBXContainerItemProxy */;
+			targetProxy = 45C43009B2478897C4F17F2A1AAB6F5E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		0DED74D72411F77795EDC28F8A833072 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B0AB03BA9B867B3C6176901ABA7B5B10 /* Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
 		1422B121EAEAEA11307496903FA623C6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -417,122 +524,24 @@
 			};
 			name = Release;
 		};
-		451407AB5CF3B45F41380CC182F0C712 /* Debug */ = {
+		84D7C4574E8F0F3095623F0E06F5B402 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B0AB03BA9B867B3C6176901ABA7B5B10 /* Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig */;
+			baseConfigurationReference = 89F85ACF3D78B39506B75103B4694B36 /* SwiftLint.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
 				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests.modulemap";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		6486E4261AE72ABB3A52D7EB58E3F342 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 55F2170289B2301E2BEAC21660E9C25A /* Pods-Zoomnotes.debug.xcconfig */;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Target Support Files/Pods-Zoomnotes/Pods-Zoomnotes-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-Zoomnotes/Pods-Zoomnotes.modulemap";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		89D4B9DD8517E9CFC789E028B098C85A /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2A3FEED4706BA8ABA5A368784C0D224D /* Pods-Zoomnotes-ZoomnotesUITests.release.xcconfig */;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests.modulemap";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};
-		A1BD2639644E26B4D2C8499F703F723B /* Release */ = {
+		897B42CC83D38208706A086209639BDB /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F0D3A6D95E8E9B5E5128AAF42100B996 /* Pods-Zoomnotes.release.xcconfig */;
 			buildSettings = {
@@ -557,6 +566,45 @@
 				);
 				MACH_O_TYPE = staticlib;
 				MODULEMAP_FILE = "Target Support Files/Pods-Zoomnotes/Pods-Zoomnotes.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		998EF98A937A215C3E798F06E3158D2B /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2A3FEED4706BA8ABA5A368784C0D224D /* Pods-Zoomnotes-ZoomnotesUITests.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests.modulemap";
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PODS_ROOT = "$(SRCROOT)";
@@ -610,6 +658,22 @@
 			};
 			name = Release;
 		};
+		DEED47E09AF743F48544C1C4FEADEF47 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 89F85ACF3D78B39506B75103B4694B36 /* SwiftLint.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		DF14C9237DE19AA95AAD587EB4C52B87 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 61D0293A9E20012854A07B20CF286F39 /* Pods-ZoomnotesTests.debug.xcconfig */;
@@ -635,6 +699,44 @@
 				);
 				MACH_O_TYPE = staticlib;
 				MODULEMAP_FILE = "Target Support Files/Pods-ZoomnotesTests/Pods-ZoomnotesTests.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		DF40F9342C1DFFC2743C8C74C6493939 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 55F2170289B2301E2BEAC21660E9C25A /* Pods-Zoomnotes.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-Zoomnotes/Pods-Zoomnotes-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-Zoomnotes/Pods-Zoomnotes.modulemap";
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PODS_ROOT = "$(SRCROOT)";
@@ -715,20 +817,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		19E035251BAE42FF1E1143CA9B58BC31 /* Build configuration list for PBXNativeTarget "Pods-Zoomnotes" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				6486E4261AE72ABB3A52D7EB58E3F342 /* Debug */,
-				A1BD2639644E26B4D2C8499F703F723B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		38831997D3BEED24181CA1251757050D /* Build configuration list for PBXNativeTarget "Pods-ZoomnotesTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DF14C9237DE19AA95AAD587EB4C52B87 /* Debug */,
 				D921A2104CEC61ECE4D3AB6586C32EC3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3C202133CCCD7429FF7CD870CD38CA5A /* Build configuration list for PBXNativeTarget "Pods-Zoomnotes-ZoomnotesUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DED74D72411F77795EDC28F8A833072 /* Debug */,
+				998EF98A937A215C3E798F06E3158D2B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -742,11 +844,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		552EEC3A192E9CF33CC7DA7BDE71A2FD /* Build configuration list for PBXNativeTarget "Pods-Zoomnotes-ZoomnotesUITests" */ = {
+		AE7B4FB01588B9E6DF09CB79FC7CE7BD /* Build configuration list for PBXAggregateTarget "SwiftLint" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				451407AB5CF3B45F41380CC182F0C712 /* Debug */,
-				89D4B9DD8517E9CFC789E028B098C85A /* Release */,
+				DEED47E09AF743F48544C1C4FEADEF47 /* Debug */,
+				84D7C4574E8F0F3095623F0E06F5B402 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FC698865C81BEE433AF769B3861DAFA0 /* Build configuration list for PBXNativeTarget "Pods-Zoomnotes" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DF40F9342C1DFFC2743C8C74C6493939 /* Debug */,
+				897B42CC83D38208706A086209639BDB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

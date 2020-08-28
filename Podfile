@@ -6,6 +6,8 @@ target 'Zoomnotes' do
   use_frameworks!
 
   # Pods for Zoomnotes
+  
+  pod 'SwiftLint'
 
   target 'ZoomnotesTests' do
     inherit! :search_paths

@@ -28,7 +28,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     
     var interactionController: UIPercentDrivenInteractiveTransition? = nil
     
-    var drawerView: UIView? = nil
+    var drawerView: UIView!
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -69,15 +69,13 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
             }
             
             self.view.addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(onPreviewZoomUp(_:))))
+            
+            self.drawerView = DrawerView(in: self.view, with: "Title")
+            self.view.addSubview(drawerView)
         }
         
         for note in note.children.values {
             subLevelViews[note.id]?.image = note.previewImage.image
-        }
-        
-        if self.drawerView == nil {
-            self.drawerView = DrawerView(in: self.view)
-            self.view.addSubview(drawerView!)
         }
     }
     
@@ -149,55 +147,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     }
     
     @objc func onPinch(_ rec: UIPinchGestureRecognizer) { }
-    
-    @objc func previewPanGesture(_ rec: UIPanGestureRecognizer,
-                                 _ preview: NoteLevelPreview,
-                                 onChanged: @escaping (CGRect) -> Void,
-                                 onEnded: @escaping () -> Void
-    ) {
-        let velocity = rec.velocity(in: self.view)
-        
-        hasModifiedDrawing = true
-        
-        let loc = rec.translation(in: self.view)
-        let frame = CGRect(x: preview.frame.minX + loc.x,
-                           y: preview.frame.minY + loc.y,
-                            width: preview.frame.width,
-                            height: preview.frame.height)
-        
-        preview.frame = frame
-        
-        rec.setTranslation(CGPoint.zero, in: view)
-        
-        if rec.state == .changed {
-            onChanged(frame)
-        } else if rec.state == .ended {
-            
-            // MARK: begin snippet
-            /// https://www.raywenderlich.com/1860-uikit-dynamics-and-swift-tutorial-tossing-views
-            
-            let magnitude: CGFloat = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
-            
-            let threshold: CGFloat = 5000
-            let velocityPadding: CGFloat  = 35
-            
-            if magnitude > threshold {
-                let animator = UIDynamicAnimator(referenceView: self.view)
-                let pushBehavior = UIPushBehavior(items: [preview], mode: .instantaneous)
-                pushBehavior.pushDirection = CGVector(dx: velocity.x / 10, dy: velocity.y / 10)
-                pushBehavior.magnitude = magnitude / velocityPadding
-                
-                animator.addBehavior(pushBehavior)
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                    animator.removeAllBehaviors()
-                    onEnded()
-                }
-            }
-            
-            // MARK: end snippet
-        }
-    }
+
     
     private func onPreviewZoomDown(_ rec: ZNPinchGestureRecognizer, _ note: NoteModel.NoteLevel) {
         if rec.state == .began {
@@ -263,13 +213,67 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         let preview = NoteLevelPreview(for: sublevel)
         
         let panGestureRecognizer = ZNPanGestureRecognizer { rec in
-            self.previewPanGesture(rec, preview, onChanged: { frame in
-                sublevel.frame = frame
-                self.hasModifiedDrawing = true
-            }, onEnded: {
-                preview.removeFromSuperview()
-                self.note.children.removeValue(forKey: sublevel.id)
-            })
+            let loc = rec.location(in: self.view)
+            let rLoc = rec.location(in: preview)
+            if rec.state == .began {
+                self.view.addSubview(preview)
+                preview.frame = CGRect(x: loc.x - rLoc.x,
+                                       y: loc.y - rLoc.y,
+                                       width: preview.frame.width,
+                                       height: preview.frame.height)
+                self.view.bringSubviewToFront(preview)
+            }
+            
+            self.hasModifiedDrawing = true
+            
+            let tran = rec.translation(in: self.view)
+            let frame = CGRect(x: max(0, preview.frame.minX + tran.x),
+                               y: max(0, preview.frame.minY + tran.y),
+                                width: preview.frame.width,
+                                height: preview.frame.height)
+            
+            preview.frame = frame
+            sublevel.frame = frame
+            
+            rec.setTranslation(CGPoint.zero, in: self.view)
+            
+            if rec.state == .ended {
+                // MARK: begin snippet
+                /// https://www.raywenderlich.com/1860-uikit-dynamics-and-swift-tutorial-tossing-views
+                
+                let velocity = rec.velocity(in: self.view)
+                let magnitude: CGFloat = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
+                
+                let threshold: CGFloat = 5000
+                let velocityPadding: CGFloat  = 35
+                
+                if magnitude > threshold {
+                    let animator = UIDynamicAnimator(referenceView: self.view)
+                    let pushBehavior = UIPushBehavior(items: [preview], mode: .instantaneous)
+                    pushBehavior.pushDirection = CGVector(dx: velocity.x / 10, dy: velocity.y / 10)
+                    pushBehavior.magnitude = magnitude / velocityPadding
+                    
+                    animator.addBehavior(pushBehavior)
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        animator.removeAllBehaviors()
+                        preview.removeFromSuperview()
+                        self.note.children.removeValue(forKey: sublevel.id)
+                    }
+                } else if self.drawerView.frame.contains(preview.frame) {
+                    let locInDrawer = rec.location(in: self.drawerView)
+                    let locInPreview = rec.location(in: preview)
+                    preview.removeFromSuperview()
+                    preview.frame = CGRect(x: locInDrawer.x - locInPreview.x,
+                                           y: locInDrawer.y - locInPreview.y,
+                                           width: preview.frame.width,
+                                           height: preview.frame.height)
+                    self.drawerView.addSubview(preview)
+                    
+                }
+                
+                // MARK: end snippet
+            }
         }
         
         panGestureRecognizer.maximumNumberOfTouches = 1
@@ -287,13 +291,15 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     }
     
     private func captureCurrentScreen() -> UIImage {
-        drawerView?.alpha = 0.0
+        drawerView.alpha = 0.0
+        defer {
+            drawerView.alpha = 1.0
+        }
         UIGraphicsBeginImageContext(view.frame.size)
         let context = UIGraphicsGetCurrentContext()!
         view.layer.render(in: context)
         let image = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
-        drawerView?.alpha = 1.0
         return image
     }
     
