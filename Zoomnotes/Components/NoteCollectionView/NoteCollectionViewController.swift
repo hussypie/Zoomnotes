@@ -23,11 +23,11 @@ class NoteCollectionViewController : UICollectionViewController, DataModelContro
     
     override func viewDidLoad() {
         dataModelController.observers.append(self)
-        navigationController?.setNavigationBarHidden(false, animated: true)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: true)
     }
     
     func dataModelChanged() {

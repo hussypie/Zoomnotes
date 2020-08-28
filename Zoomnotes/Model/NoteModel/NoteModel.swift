@@ -11,14 +11,14 @@ import PencilKit
 import Combine
 
 class NoteModel : Codable {
-    class NoteLevel : Codable {
+    class NoteLevel : NSObject, Codable {
         let id: UUID
         var data: NoteData
         var children: [UUID : NoteLevel]
         var previewImage: NoteImage
         var frame: CGRect
         
-        init(data: NoteData, children: [UUID : NoteLevel], preview: UIImage, frame: CGRect) {
+        required init(data: NoteData, children: [UUID : NoteLevel], preview: UIImage, frame: CGRect) {
             self.id = UUID()
             self.data = data
             self.children = children

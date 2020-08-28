@@ -42,7 +42,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         
         canvasView.isScrollEnabled = false
         
-        #if DEBUG
+        #if targetEnvironment(simulator)
             canvasView.allowsFingerDrawing = true
         #else
             canvasView.allowsFingerDrawing = false
