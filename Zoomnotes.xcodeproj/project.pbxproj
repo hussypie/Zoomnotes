@@ -10,7 +10,6 @@
 		14F52C29F9998B69E5DE34D5 /* Pods_Zoomnotes_ZoomnotesUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5E3B737D7EA7890DED81178 /* Pods_Zoomnotes_ZoomnotesUITests.framework */; };
 		3101752E24E5211D007D3589 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101752D24E5211D007D3589 /* AppDelegate.swift */; };
 		3101753024E5211D007D3589 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101752F24E5211D007D3589 /* SceneDelegate.swift */; };
-		3101753224E5211D007D3589 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3101753124E5211D007D3589 /* ViewController.swift */; };
 		3101753524E5211D007D3589 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3101753324E5211D007D3589 /* Main.storyboard */; };
 		3101753824E5211D007D3589 /* Zoomnotes.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3101753624E5211D007D3589 /* Zoomnotes.xcdatamodeld */; };
 		3101753A24E5211E007D3589 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3101753924E5211E007D3589 /* Assets.xcassets */; };
@@ -63,7 +62,6 @@
 		3101752A24E5211D007D3589 /* Zoomnotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Zoomnotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3101752D24E5211D007D3589 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3101752F24E5211D007D3589 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		3101753124E5211D007D3589 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		3101753424E5211D007D3589 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		3101753724E5211D007D3589 /* Zoomnotes.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Zoomnotes.xcdatamodel; sourceTree = "<group>"; };
 		3101753924E5211E007D3589 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -166,7 +164,6 @@
 				3101756024E52F6B007D3589 /* Model */,
 				3101752D24E5211D007D3589 /* AppDelegate.swift */,
 				3101752F24E5211D007D3589 /* SceneDelegate.swift */,
-				3101753124E5211D007D3589 /* ViewController.swift */,
 				3101753324E5211D007D3589 /* Main.storyboard */,
 				3101753924E5211E007D3589 /* Assets.xcassets */,
 				3101753B24E5211E007D3589 /* LaunchScreen.storyboard */,
@@ -527,7 +524,6 @@
 				3101753824E5211D007D3589 /* Zoomnotes.xcdatamodeld in Sources */,
 				31362A5724F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift in Sources */,
 				31D6648D24EC53890062AF8D /* NoteImage.swift in Sources */,
-				3101753224E5211D007D3589 /* ViewController.swift in Sources */,
 				312D7FE824F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift in Sources */,
 				312820CF24F69A2700338E28 /* Graphics.swift in Sources */,
 				3101756524E52FED007D3589 /* ZoomNotesNavigationController.swift in Sources */,

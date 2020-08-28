@@ -123,8 +123,6 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
                            width: width,
                            height: height)
         
-        hasModifiedDrawing = true
-        
         if rec.state == .changed {
             if currentlyDraggedLevel == nil {
                 let defaultPreviewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
@@ -149,6 +147,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     @objc func onPinch(_ rec: UIPinchGestureRecognizer) { }
     
     private func addSublevel(sublevel: NoteModel.NoteLevel) {
+        hasModifiedDrawing = true
         self.note.children[sublevel.id] = sublevel
         
         let noteLevelPreview = sublevelPreview(for: sublevel)
@@ -163,6 +162,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     }
     
     private func removeSublevel(sublevel: NoteModel.NoteLevel) {
+        hasModifiedDrawing = true
         UIView.animate(withDuration: 0.15, animations: {
             let preview = self.subLevelViews[sublevel.id]!
             preview.frame = CGRect(x: self.view.frame.width,
@@ -181,6 +181,7 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     }
     
     private func moveSublevel(sublevel: NoteModel.NoteLevel, from: CGRect, to: CGRect) {
+        hasModifiedDrawing = true
         UIView.animate(withDuration: 0.15, animations: {
             self.subLevelViews[sublevel.id]!.frame = to
         }, completion: { _ in
@@ -274,8 +275,6 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
                 
                 originalFrame = preview.frame
             }
-            
-            self.hasModifiedDrawing = true
             
             let tran = rec.translation(in: self.view)
             let frame = CGRect(x: max(0, preview.frame.minX + tran.x),
