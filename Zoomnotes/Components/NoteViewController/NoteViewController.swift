@@ -130,12 +130,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
                 let defaultPreviewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
                 
                 let newLevel = NoteModel.NoteLevel.default(preview: defaultPreviewImage, frame: frame)
-                self.note.children[newLevel.id] = newLevel
+                self.addSublevel(sublevel: newLevel)
                 
-                let noteLevelPreview = sublevelPreview(for: newLevel)
-                self.subLevelViews[newLevel.id] = noteLevelPreview
-                
-                view.addSubview(noteLevelPreview)
                 currentlyDraggedLevel = newLevel
             }
             
@@ -151,6 +147,51 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     }
     
     @objc func onPinch(_ rec: UIPinchGestureRecognizer) { }
+    
+    private func addSublevel(sublevel: NoteModel.NoteLevel) {
+        self.note.children[sublevel.id] = sublevel
+        
+        let noteLevelPreview = sublevelPreview(for: sublevel)
+        self.subLevelViews[sublevel.id] = noteLevelPreview
+        
+        view.addSubview(noteLevelPreview)
+        
+        undoManager?.registerUndo(withTarget: self) {
+            $0.removeSublevel(sublevel: sublevel)
+        }
+        self.undoManager?.setActionName("AddSublevel")
+    }
+    
+    private func removeSublevel(sublevel: NoteModel.NoteLevel) {
+        UIView.animate(withDuration: 0.15, animations: {
+            let preview = self.subLevelViews[sublevel.id]!
+            preview.frame = CGRect(x: self.view.frame.width,
+                                   y: preview.frame.minY,
+                                   width: 0,
+                                   height: 0)
+        }, completion: { _ in
+            self.subLevelViews[sublevel.id]!.removeFromSuperview()
+            self.note.children.removeValue(forKey: sublevel.id)
+        })
+        
+        self.undoManager?.registerUndo(withTarget: self) {
+            $0.addSublevel(sublevel: sublevel)
+        }
+        self.undoManager?.setActionName("RemoveSublevel")
+    }
+    
+    private func moveSublevel(sublevel: NoteModel.NoteLevel, from: CGRect, to: CGRect) {
+        UIView.animate(withDuration: 0.15, animations: {
+            self.subLevelViews[sublevel.id]!.frame = to
+        }, completion: { _ in
+            sublevel.frame = to
+        })
+        
+        undoManager?.registerUndo(withTarget: self) {
+            $0.moveSublevel(sublevel: sublevel, from: to, to: from)
+        }
+        self.undoManager?.setActionName("MoveSublevel")
+    }
 
     
     private func onPreviewZoomDown(_ rec: ZNPinchGestureRecognizer, _ note: NoteModel.NoteLevel) {
@@ -217,9 +258,12 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     private func sublevelPreview(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
         let preview = NoteLevelPreview(for: sublevel)
         
+        var originalFrame: CGRect? = nil
+        
         let panGestureRecognizer = ZNPanGestureRecognizer { rec in
             let loc = rec.location(in: self.view)
             let rLoc = rec.location(in: preview)
+            
             if rec.state == .began {
                 self.view.addSubview(preview)
                 preview.frame = CGRect(x: loc.x - rLoc.x,
@@ -227,6 +271,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
                                        width: preview.frame.width,
                                        height: preview.frame.height)
                 self.view.bringSubviewToFront(preview)
+                
+                originalFrame = preview.frame
             }
             
             self.hasModifiedDrawing = true
@@ -262,8 +308,8 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
                     
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                         animator.removeAllBehaviors()
-                        preview.removeFromSuperview()
-                        self.note.children.removeValue(forKey: sublevel.id)
+                        
+                        self.removeSublevel(sublevel: sublevel)
                     }
                 } else if self.drawerView!.frame.contains(preview.frame) {
                     let locInDrawer = rec.location(in: self.drawerView)
@@ -274,7 +320,9 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
                                            width: preview.frame.width,
                                            height: preview.frame.height)
                     self.drawerView!.addSubview(preview)
-                    
+                } else {
+                    self.moveSublevel(sublevel: sublevel, from: originalFrame!, to: frame)
+                    originalFrame = nil
                 }
                 
                 // MARK: end snippet
