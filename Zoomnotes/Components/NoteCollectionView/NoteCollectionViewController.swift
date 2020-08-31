@@ -56,15 +56,15 @@ class NoteCollectionViewController : UICollectionViewController, DataModelContro
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let noteViewController = storyboard?.instantiateViewController(withIdentifier: String(describing: NoteViewController.self)) as? NoteViewController,
-            let navigationController = navigationController else {
-                return
-        }
+        guard let navigationController = navigationController else { return }
         
-        // Transition to the drawing view controller.
+        guard let noteViewController =  NoteViewController.from(storyboard) else { return }
+        
         noteViewController.dataModelController = dataModelController
+        
         let id = dataModelController.notePreviews[indexPath.last!].idx
         noteViewController.note = dataModelController.dataModel.notes[id]?.root
+        
         navigationController.pushViewController(noteViewController, animated: true)
     }
     
