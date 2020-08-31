@@ -63,12 +63,12 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         canvasView.drawing = note.data.drawing
         canvasView.alwaysBounceVertical = true
         
-//        #if targetEnvironment(simulator)
-//            canvasView.allowsFingerDrawing = true
-//        #else
-
-//        #endif
-        canvasView.allowsFingerDrawing = false
+        #if targetEnvironment(simulator)
+            canvasView.allowsFingerDrawing = true
+        #else
+             canvasView.allowsFingerDrawing = false
+        #endif
+        
         
         let window = parent?.view.window
         toolPicker = PKToolPicker.shared(for: window!)
@@ -139,7 +139,9 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
     
     override var prefersHomeIndicatorAutoHidden: Bool { true }
     
-    override var prefersStatusBarHidden: Bool { false }
+    override var prefersStatusBarHidden: Bool {
+        return UserDefaults.standard.withDefault(.statusBarVisible, default: true)
+    }
     
     @objc func screenEdgeSwiped(_ rec: UIScreenEdgePanGestureRecognizer) {
         let loc = rec.location(in: canvasView)

@@ -7,6 +7,7 @@
 //
 import UIKit
 import PencilKit
+import SwiftUI
 
 struct CollectionViewVM {
     let idx: UUID
@@ -20,6 +21,12 @@ class NoteCollectionViewController : UICollectionViewController, DataModelContro
         let previewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
         dataModelController.newDrawing(with: previewImage)
     }
+    
+    @IBAction func settingTapped(_ sender: Any) {
+        let settingVC = UIHostingController(rootView: SettingsView())
+        navigationController?.pushViewController(settingVC, animated: true)
+    }
+    
     
     override func viewDidLoad() {
         dataModelController.observers.append(self)

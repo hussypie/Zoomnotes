@@ -54,6 +54,11 @@
                         </connections>
                     </collectionView>
                     <navigationItem key="navigationItem" id="coh-tJ-Mtr">
+                        <barButtonItem key="leftBarButtonItem" image="gear" catalog="system" id="KSK-hk-3FI" userLabel="Settings">
+                            <connections>
+                                <action selector="settingTapped:" destination="EXc-tG-Whn" id="EVo-lk-84a"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="MRf-ov-Pe8">
                             <connections>
                                 <action selector="newDrawing:" destination="EXc-tG-Whn" id="7Ti-MP-M2e"/>
@@ -128,5 +133,6 @@
     <resources>
         <image name="arrow.uturn.left" catalog="system" width="128" height="112"/>
         <image name="arrow.uturn.right" catalog="system" width="128" height="112"/>
+        <image name="gear" catalog="system" width="128" height="119"/>
     </resources>
 </document>
