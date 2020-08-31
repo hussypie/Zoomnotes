@@ -63,12 +63,12 @@ class NoteViewController : UIViewController, UIGestureRecognizerDelegate {
         canvasView.drawing = note.data.drawing
         canvasView.alwaysBounceVertical = true
         
-//        #if targetEnvironment(simulator)
-//            canvasView.allowsFingerDrawing = true
-//        #else
-
-//        #endif
-        canvasView.allowsFingerDrawing = false
+        #if targetEnvironment(simulator)
+            canvasView.allowsFingerDrawing = true
+        #else
+             canvasView.allowsFingerDrawing = false
+        #endif
+        
         
         let window = parent?.view.window
         toolPicker = PKToolPicker.shared(for: window!)
