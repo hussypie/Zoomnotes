@@ -34,6 +34,8 @@
 		31362A5B24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */; };
 		3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */; };
 		31B1AA3424FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3324FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift */; };
+		31B1AA3624FD3AE4007DAF4D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3524FD3AE4007DAF4D /* SettingsView.swift */; };
+		31B1AA3824FD5DC7007DAF4D /* UserDefaults+withDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */; };
 		31BF9E2C24E5906100142EBF /* NoteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BF9E2B24E5906100142EBF /* NoteModel.swift */; };
 		31D6648B24EC53450062AF8D /* NoteChild.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D6648A24EC53450062AF8D /* NoteChild.swift */; };
 		31D6648D24EC53890062AF8D /* NoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D6648C24EC53890062AF8D /* NoteImage.swift */; };
@@ -92,6 +94,8 @@
 		31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNSwipeGesturerecognizer.swift; sourceTree = "<group>"; };
 		3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNTapGestureRecognizer.swift; sourceTree = "<group>"; };
 		31B1AA3324FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+fromStoryBoard.swift"; sourceTree = "<group>"; };
+		31B1AA3524FD3AE4007DAF4D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+withDefault.swift"; sourceTree = "<group>"; };
 		31BF9E2B24E5906100142EBF /* NoteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteModel.swift; sourceTree = "<group>"; };
 		31D6648A24EC53450062AF8D /* NoteChild.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteChild.swift; sourceTree = "<group>"; };
 		31D6648C24EC53890062AF8D /* NoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteImage.swift; sourceTree = "<group>"; };
@@ -209,6 +213,7 @@
 				310A5C6E24F411F1006394A0 /* UIImage.swift */,
 				312820CC24F6963B00338E28 /* CGRect+center.swift */,
 				312820CE24F69A2700338E28 /* Graphics.swift */,
+				31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -221,6 +226,7 @@
 				310A5C7024F42338006394A0 /* NotePreview */,
 				3101756D24E53766007D3589 /* NoteCollectionView */,
 				3101756424E52FED007D3589 /* ZoomNotesNavigationController.swift */,
+				31B1AA3524FD3AE4007DAF4D /* SettingsView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -538,10 +544,12 @@
 				3101756224E52F77007D3589 /* DrawingModel.swift in Sources */,
 				3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */,
 				31BF9E2C24E5906100142EBF /* NoteModel.swift in Sources */,
+				31B1AA3824FD5DC7007DAF4D /* UserDefaults+withDefault.swift in Sources */,
 				3101752E24E5211D007D3589 /* AppDelegate.swift in Sources */,
 				3101753024E5211D007D3589 /* SceneDelegate.swift in Sources */,
 				312820D224F6B76200338E28 /* ZoomTransitionAnimator.swift in Sources */,
 				3101756C24E5366A007D3589 /* NoteCollectionViewController.swift in Sources */,
+				31B1AA3624FD3AE4007DAF4D /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
