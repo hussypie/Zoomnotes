@@ -21,7 +21,7 @@ struct SettingsView: View {
         Form {
             Section {
                 Toggle(isOn: self.statusBarPreference) {
-                    Text("Show status bar")
+                    Text("Hide status bar")
                 }
             }
         }
