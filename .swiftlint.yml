@@ -1,0 +1,14 @@
+disabled_rules:
+  - file_length
+  - identifier_name
+  - line_length
+  - redundant_optional_initialization
+
+enabled_rules:
+  - explicit_self
+  - empty_count
+
+excluded:
+  - Zoomnotes/SceneDelegate.swift
+  - Zoomnotes/AppDelegate.swift
+

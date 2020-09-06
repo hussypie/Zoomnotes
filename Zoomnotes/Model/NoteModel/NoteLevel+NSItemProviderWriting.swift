@@ -16,11 +16,11 @@ extension NoteModel.NoteLevel: NSItemProviderWriting {
     static var writableTypeIdentifiersForItemProvider: [String] {
         return [ noteLevelTypeId ]
     }
-    
-    enum NoteLevelLoadingError : Error {
+
+    enum NoteLevelLoadingError: Error {
         case archivingFailed(Error)
     }
-    
+
     func loadData(withTypeIdentifier typeIdentifier: String, forItemProviderCompletionHandler completionHandler: @escaping (Data?, Error?) -> Void) -> Progress? {
         guard typeIdentifier == noteLevelTypeId else { return nil }
         do {
@@ -28,7 +28,7 @@ extension NoteModel.NoteLevel: NSItemProviderWriting {
             try archiver.encodeEncodable(self, forKey: NSKeyedArchiveRootObjectKey)
             archiver.finishEncoding()
             let data = archiver.encodedData
-            
+
             completionHandler(data, nil)
         } catch {
             completionHandler(nil, NoteLevelLoadingError.archivingFailed(error))
@@ -41,16 +41,14 @@ extension NoteModel.NoteLevel: NSItemProviderReading {
     static var readableTypeIdentifiersForItemProvider: [String] {
         return [ noteLevelTypeId ]
     }
-    
+
     static func object(withItemProviderData data: Data, typeIdentifier: String) throws -> Self {
         let archiver = try NSKeyedUnarchiver(forReadingFrom: data)
-        let noteLevel = try! archiver.decodeTopLevelDecodable(NoteModel.NoteLevel.self, forKey: NSKeyedArchiveRootObjectKey)!
+        let noteLevel = try archiver.decodeTopLevelDecodable(NoteModel.NoteLevel.self, forKey: NSKeyedArchiveRootObjectKey)!
         return self.init(data: noteLevel.data,
                          children: noteLevel.children,
                          preview: noteLevel.previewImage.image,
                          frame: noteLevel.frame)
-        
+
     }
-    
-    
 }

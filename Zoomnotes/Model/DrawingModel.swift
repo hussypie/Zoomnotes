@@ -10,8 +10,8 @@ import UIKit
 import PencilKit
 import os
 
-struct DrawingModel : Codable {
-    var notes: [UUID : NoteModel] = [:]
+struct DrawingModel: Codable {
+    var notes: [UUID: NoteModel] = [:]
 }
 
 protocol DataModelControllerObserver {
@@ -20,39 +20,37 @@ protocol DataModelControllerObserver {
 
 class DataModelController {
     var dataModel = DrawingModel()
-    
+
     private let thumbnailQueue = DispatchQueue(label: "ThumbnailQueue", qos: .background)
     private let serializationQueue = DispatchQueue(label: "SerializationQueue", qos: .background)
-    
+
     var observers: [DataModelControllerObserver] = []
-    
+
     var notePreviews: [CollectionViewVM] {
-        get {
-            dataModel.notes.values.map { CollectionViewVM(idx: $0.id, image: $0.preview) }
-        }
+        dataModel.notes.values.map { CollectionViewVM(idx: $0.id, image: $0.preview) }
     }
-    
+
     init() {
         loadDataModel()
     }
-    
+
     func updatePreview() {
         saveDataModel()
         didChange()
     }
-    
+
     private func didChange() {
         for observer in self.observers {
             observer.dataModelChanged()
         }
     }
-    
+
     private var saveURL: URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         let documentsDirectory = paths.first!
         return documentsDirectory.appendingPathComponent("Zoomnotes.data")
     }
-    
+
     func saveDataModel() {
         let savingDataModel = dataModel
         let url = saveURL
@@ -66,7 +64,7 @@ class DataModelController {
             }
         }
     }
-    
+
     private func loadDataModel() {
         let url = saveURL
         serializationQueue.async {
@@ -75,7 +73,7 @@ class DataModelController {
                     let decoder = PropertyListDecoder()
                     let data = try Data(contentsOf: url)
                     let dataModel = try decoder.decode(DrawingModel.self, from: data)
-                    
+
                     DispatchQueue.main.async {
                         self.setLoadedDataModel(dataModel)
                     }
@@ -85,17 +83,15 @@ class DataModelController {
             }
         }
     }
-    
+
     private func setLoadedDataModel(_ dataModel: DrawingModel) {
         self.dataModel = dataModel
         didChange()
     }
-    
+
     func newDrawing(with image: UIImage) {
         let newlyAddedDrawing = NoteModel.default(image: image, frame: CGRect())
         dataModel.notes[newlyAddedDrawing.id] = newlyAddedDrawing
         updatePreview()
     }
 }
-
-

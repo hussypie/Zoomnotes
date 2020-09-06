@@ -9,10 +9,10 @@
 import Foundation
 import UIKit
 
-final class ZNPanGestureRecognizer : UIPanGestureRecognizer {
+final class ZNPanGestureRecognizer: UIPanGestureRecognizer {
     typealias Callback = (ZNPanGestureRecognizer) -> Void
     private var action: Callback
-    
+
     init(action: @escaping Callback) {
         self.action = action
         super.init(target: nil, action: nil)

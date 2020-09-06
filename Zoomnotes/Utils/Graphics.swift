@@ -20,7 +20,7 @@ func zoomOffset(in view: UIView, for note: NoteModel.NoteLevel) -> CGPoint {
 
 func zoomDownTransform(at scale: CGFloat, for offset: CGPoint) -> CGAffineTransform {
     let t: CGFloat = (scale - 1) / 3
-    
+
     let translateTransform = CGAffineTransform(translationX: offset.x * t,
                                                y: offset.y * t)
 

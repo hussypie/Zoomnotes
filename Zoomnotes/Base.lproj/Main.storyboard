@@ -66,7 +66,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <segue destination="I8X-cy-noA" kind="show" id="8A1-sD-ioN"/>
+                        <segue destination="I8X-cy-noA" kind="show" identifier="NoteViewControllerSegue" id="8A1-sD-ioN"/>
                     </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6tu-S7-btT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

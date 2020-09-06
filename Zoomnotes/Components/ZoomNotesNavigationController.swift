@@ -8,22 +8,22 @@
 
 import UIKit
 
-class ZoomNotesNavigationController : UINavigationController {
+class ZoomNotesNavigationController: UINavigationController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.setNavigationBarHidden(false, animated: true)
     }
-    
+
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
     }
-    
+
     private func updateNavigationBarBackground() {
         UIGraphicsBeginImageContext(CGSize(width: 1, height: 1))
         UIColor.secondarySystemBackground.withAlphaComponent(0.95).set()
         UIBezierPath(rect: CGRect(x: 0, y: 0, width: 1, height: 1)).fill()
         navigationBar.setBackgroundImage(UIGraphicsGetImageFromCurrentImageContext(), for: .default)
         UIGraphicsEndImageContext()
-        
+
     }
 }

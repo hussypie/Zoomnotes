@@ -9,5 +9,5 @@
 import UIKit
 
 func withUIGrapicsImageContext(setup: () -> Void, build: (UIImage) -> Void) {
-    
+
 }

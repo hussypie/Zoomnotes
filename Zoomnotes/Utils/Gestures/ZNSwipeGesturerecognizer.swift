@@ -9,10 +9,10 @@
 import Foundation
 import UIKit
 
-final class ZNSwipeGestureRecognizer : UISwipeGestureRecognizer {
+final class ZNSwipeGestureRecognizer: UISwipeGestureRecognizer {
     typealias Callback = (ZNSwipeGestureRecognizer) -> Void
     private var action: Callback
-    
+
     init(direction: Direction, action: @escaping Callback) {
         self.action = action
         super.init(target: nil, action: nil)

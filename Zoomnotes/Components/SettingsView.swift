@@ -16,7 +16,7 @@ struct SettingsView: View {
             UserDefaults.standard.set($0, forKey: UserDefaultsKey.statusBarVisible.rawValue)
         })
     }
-    
+
     var body: some View {
         Form {
             Section {
