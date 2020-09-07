@@ -15,6 +15,7 @@ enum NoteEditorCommand {
     case move(NoteModel.NoteLevel, from: CGRect, to: CGRect)
     case remove(NoteModel.NoteLevel)
     case create(NoteModel.NoteLevel)
+    case resize(NoteModel.NoteLevel, from: CGRect, to: CGRect)
     case update(PKDrawing)
     case refresh(NoteImage)
     case moveToDrawer(NoteModel.NoteLevel, frame: CGRect)
@@ -91,6 +92,8 @@ class NoteEditorViewModel: ObservableObject {
             self.level.children[sublevel.id] = sublevel
             sublevel.frame = frame
             drawerContents.removeValue(forKey: sublevel.id)
+        case .resize(let sublevel, from: _, to: let frame):
+            sublevel.frame = frame
         }
         eventSubject.send(command)
     }

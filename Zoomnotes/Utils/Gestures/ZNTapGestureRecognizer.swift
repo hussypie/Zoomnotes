@@ -19,6 +19,11 @@ final class ZNTapGestureRecognizer: UITapGestureRecognizer {
         self.addTarget(self, action: #selector(execute))
     }
 
+    func taps(_ count: Int) -> Self {
+        self.numberOfTapsRequired = count
+        return self
+    }
+
     @objc private func execute(_ recognizer: ZNPanGestureRecognizer) {
         action(self)
     }

@@ -19,6 +19,13 @@ final class ZNPanGestureRecognizer: UIPanGestureRecognizer {
         self.addTarget(self, action: #selector(execute))
     }
 
+    func touches(_ count: Int) -> Self {
+        self.minimumNumberOfTouches = count
+        self.maximumNumberOfTouches = count
+
+        return self
+    }
+
     @objc private func execute(_ recognizer: ZNPanGestureRecognizer) {
         action(self)
     }

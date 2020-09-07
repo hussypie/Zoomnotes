@@ -351,7 +351,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
     private func panGesture(for sublevel: NoteModel.NoteLevel, _ preview: NoteLevelPreview) -> UIPanGestureRecognizer {
         var origin: MoveOrigin = .drawer
-        let panGestureRecognizer = ZNPanGestureRecognizer { rec in
+        return ZNPanGestureRecognizer { rec in
             if rec.state == .began {
                 if preview.superview! == self.drawerView! {
                     origin = .drawer
@@ -392,7 +392,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 let velocity = rec.velocity(in: self.canvasView)
                 let magnitude: CGFloat = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
 
-                let threshold: CGFloat = 5000
+                let threshold: CGFloat = 4000
 
                 if magnitude > threshold {
                     self.fling(velocity, magnitude, sublevel)
@@ -431,21 +431,23 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
                 self.dragState = nil
             }
-        }
-
-        panGestureRecognizer.maximumNumberOfTouches = 1
-        panGestureRecognizer.minimumNumberOfTouches = 1
-        return panGestureRecognizer
+        }.touches(1)
     }
 
     private func sublevelPreview(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
-        let preview = NoteLevelPreview(frame: sublevel.frame)
+        let preview = NoteLevelPreview(frame: sublevel.frame, resizeEnded: { frame in
+            self.viewModel.process(.resize(sublevel, from: sublevel.frame, to: frame))
+        }, copyStarted: { })
 
         preview.addGestureRecognizer(panGesture(for: sublevel, preview))
 
         preview.addGestureRecognizer(ZNPinchGestureRecognizer { self.onPreviewZoomUp($0) })
 
         preview.addGestureRecognizer(ZNPinchGestureRecognizer { self.onPreviewZoomDown($0, sublevel) })
+
+        preview.addGestureRecognizer(ZNTapGestureRecognizer { _ in
+            preview.isEdited.toggle()
+        }.taps(2))
 
         return preview
     }
