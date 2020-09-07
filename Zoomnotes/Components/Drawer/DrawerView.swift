@@ -15,6 +15,8 @@ class DrawerView: UIView {
 
     private let title: Binding<String>
 
+    var contents: [UUID: NoteLevelPreview]
+
     private func panGesture(with view: UIView) -> ZNPanGestureRecognizer {
         let baseFrame = CGRect(x: 0,
                                y: view.frame.height - offset,
@@ -75,7 +77,7 @@ class DrawerView: UIView {
         }
     }
 
-    private func titleTextField() -> UITextField {
+    lazy var titleTextField: UITextField = {
         let textField = UITextField(frame: CGRect(x: 10, y: 10, width: 200, height: 30))
 
         textField.delegate = self
@@ -86,12 +88,16 @@ class DrawerView: UIView {
         textField.text = title.wrappedValue
         textField.returnKeyType = .done
         textField.clearButtonMode = .whileEditing
-        textField.backgroundColor = UIColor.systemGray6
-        textField.layer.borderColor = UIColor.systemGray6.cgColor
-        textField.borderStyle = .roundedRect
+        textField.backgroundColor = UIColor.systemGray5
+        textField.layer.borderColor = UIColor.systemGray5.cgColor
+        textField.layer.cornerRadius = 5
+
+        /// https://stackoverflow.com/a/51403213
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField.frame.height))
+        textField.leftViewMode = .always
 
         return textField
-    }
+    }()
 
     init(in view: UIView, title: Binding<String>) {
         let baseFrame = CGRect(x: 0,
@@ -100,6 +106,7 @@ class DrawerView: UIView {
                                height: view.frame.height / 2)
 
         self.title = title
+        self.contents = [:]
 
         super.init(frame: baseFrame)
 
@@ -112,7 +119,7 @@ class DrawerView: UIView {
         blurView.frame = self.bounds
         self.addSubview(blurView)
 
-        self.addSubview(titleTextField())
+        self.addSubview(titleTextField)
 
         self.addGestureRecognizer(panGesture(with: view))
         self.addGestureRecognizer(swipeUpGesture(with: view))
@@ -127,7 +134,6 @@ class DrawerView: UIView {
                        selector: #selector(keyboardWillChangeFrame(notification:)),
                        name: UIResponder.keyboardWillHideNotification,
                        object: nil)
-
     }
 
     @objc func onTextField(_ sender: UITextField) {

@@ -17,14 +17,17 @@ struct CollectionViewVM {
 class NoteCollectionViewController: UICollectionViewController, DataModelControllerObserver {
     var dataModelController: DataModelController = DataModelController()
 
+    lazy var settingsVC: UIViewController = {
+        return UIHostingController(rootView: SettingsView())
+    }()
+
     @IBAction func newDrawing(_ sender: Any) {
         let previewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
         dataModelController.newDrawing(with: previewImage)
     }
 
     @IBAction func settingTapped(_ sender: Any) {
-        let settingVC = UIHostingController(rootView: SettingsView())
-        navigationController?.pushViewController(settingVC, animated: true)
+        navigationController?.pushViewController(settingsVC, animated: true)
     }
 
     override func viewDidLoad() {
@@ -63,13 +66,14 @@ class NoteCollectionViewController: UICollectionViewController, DataModelControl
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let navigationController = navigationController else { return }
-
         guard let noteViewController =  NoteViewController.from(storyboard) else { return }
+        guard let index = indexPath.last else { return }
+        let preview = dataModelController.notePreviews[index]
+        guard let note = dataModelController.dataModel.notes[preview.idx] else { return }
 
-        noteViewController.dataModelController = dataModelController
-
-        let id = dataModelController.notePreviews[indexPath.last!].idx
-        noteViewController.note = dataModelController.dataModel.notes[id]?.root
+        noteViewController.viewModel = NoteEditorViewModel(note: note,
+                                                           level: note.root,
+                                                           dataModelController: dataModelController)
 
         navigationController.pushViewController(noteViewController, animated: true)
     }

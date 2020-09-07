@@ -33,6 +33,8 @@
 		31362A5724F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */; };
 		31362A5B24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */; };
 		3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */; };
+		31AD9BBF25052EB200C193CF /* NoteEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BBE25052EB200C193CF /* NoteEditorViewModel.swift */; };
+		31AD9BC12506849400C193CF /* NoteViewController+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BC02506849400C193CF /* NoteViewController+Preferences.swift */; };
 		31B1AA3424FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3324FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift */; };
 		31B1AA3624FD3AE4007DAF4D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3524FD3AE4007DAF4D /* SettingsView.swift */; };
 		31B1AA3824FD5DC7007DAF4D /* UserDefaults+withDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */; };
@@ -93,6 +95,8 @@
 		31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+UINavigationControllerDelegate.swift"; sourceTree = "<group>"; };
 		31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNSwipeGesturerecognizer.swift; sourceTree = "<group>"; };
 		3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNTapGestureRecognizer.swift; sourceTree = "<group>"; };
+		31AD9BBE25052EB200C193CF /* NoteEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorViewModel.swift; sourceTree = "<group>"; };
+		31AD9BC02506849400C193CF /* NoteViewController+Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+Preferences.swift"; sourceTree = "<group>"; };
 		31B1AA3324FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+fromStoryBoard.swift"; sourceTree = "<group>"; };
 		31B1AA3524FD3AE4007DAF4D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+withDefault.swift"; sourceTree = "<group>"; };
@@ -164,6 +168,7 @@
 		3101752C24E5211D007D3589 /* Zoomnotes */ = {
 			isa = PBXGroup;
 			children = (
+				31AD9BBD25052E9E00C193CF /* ViewModels */,
 				312820D024F6B75300338E28 /* Animator */,
 				3101756624E530D1007D3589 /* Components */,
 				3101756324E52FDE007D3589 /* Utils */,
@@ -285,8 +290,17 @@
 				3101756924E531D1007D3589 /* NoteViewController.swift */,
 				31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */,
 				31B1AA3324FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift */,
+				31AD9BC02506849400C193CF /* NoteViewController+Preferences.swift */,
 			);
 			path = NoteViewController;
+			sourceTree = "<group>";
+		};
+		31AD9BBD25052E9E00C193CF /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				31AD9BBE25052EB200C193CF /* NoteEditorViewModel.swift */,
+			);
+			path = ViewModels;
 			sourceTree = "<group>";
 		};
 		31E58E0324F95EA20052997D /* Drawer */ = {
@@ -551,6 +565,7 @@
 				3101756F24E53778007D3589 /* NoteCollectionViewCell.swift in Sources */,
 				3101753824E5211D007D3589 /* Zoomnotes.xcdatamodeld in Sources */,
 				31362A5724F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift in Sources */,
+				31AD9BC12506849400C193CF /* NoteViewController+Preferences.swift in Sources */,
 				31D6648D24EC53890062AF8D /* NoteImage.swift in Sources */,
 				312D7FE824F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift in Sources */,
 				31B1AA3424FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift in Sources */,
@@ -567,6 +582,7 @@
 				3101752E24E5211D007D3589 /* AppDelegate.swift in Sources */,
 				3101753024E5211D007D3589 /* SceneDelegate.swift in Sources */,
 				312820D224F6B76200338E28 /* ZoomTransitionAnimator.swift in Sources */,
+				31AD9BBF25052EB200C193CF /* NoteEditorViewModel.swift in Sources */,
 				3101756C24E5366A007D3589 /* NoteCollectionViewController.swift in Sources */,
 				31B1AA3624FD3AE4007DAF4D /* SettingsView.swift in Sources */,
 			);

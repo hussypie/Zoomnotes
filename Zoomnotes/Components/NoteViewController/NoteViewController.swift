@@ -8,25 +8,11 @@
 
 import UIKit
 import PencilKit
+import Combine
 
-struct ScrollViewState {
-    let frame: CGRect
-    let contentSize: CGSize
-    let contentOffset: CGPoint
-}
-
-extension PKCanvasView {
-    func saveScrollState() -> ScrollViewState {
-        return ScrollViewState(frame: self.frame,
-                               contentSize: self.contentSize,
-                               contentOffset: self.contentOffset)
-    }
-
-    func revertToScrollState(_ state: ScrollViewState) {
-        self.frame = state.frame
-        self.contentSize = state.contentSize
-        self.setContentOffset(state.contentOffset, animated: false)
-    }
+struct DragState {
+    let currentlyDraggedLevel: NoteModel.NoteLevel
+    let originalFrame: CGRect
 }
 
 class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
@@ -36,20 +22,55 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
     var toolPicker: PKToolPicker!
 
-    var dataModelController: DataModelController!
-    var note: NoteModel.NoteLevel!
+    var viewModel: NoteEditorViewModel!
+
+    var dragState: DragState? = nil
+
     var hasModifiedDrawing = false
 
     var subLevelViews: [UUID: NoteLevelPreview] = [:]
 
-    var currentlyDraggedLevel: NoteModel.NoteLevel? = nil
-
     var interactionController: UIPercentDrivenInteractiveTransition? = nil
 
-    var drawerView: UIView? = nil
+    var drawerView: DrawerView!
 
-    var statusBarHeight: CGFloat {
+    private var cancellables: Set<AnyCancellable> = []
+
+    private var statusBarHeight: CGFloat {
         self.view.window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
+    }
+
+    private func edgeGestureRecognizer(edge: UIRectEdge) -> UIScreenEdgePanGestureRecognizer {
+        let edgeGestureRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(screenEdgeSwiped(_:)))
+        edgeGestureRecognizer.edges = edge
+        edgeGestureRecognizer.delegate = self
+        #if targetEnvironment(simulator)
+        #else
+        edgeGestureRecognizer.allowedTouchTypes = [ UITouch.TouchType.pencil ]
+        #endif
+        return edgeGestureRecognizer
+    }
+
+    private func setup(_ canvasView: PKCanvasView) {
+        canvasView.delegate = self
+        canvasView.drawing = viewModel.drawing
+        canvasView.alwaysBounceVertical = true
+
+        #if targetEnvironment(simulator)
+        canvasView.allowsFingerDrawing = true
+        #else
+        canvasView.allowsFingerDrawing = false
+        #endif
+
+        canvasView.becomeFirstResponder()
+    }
+
+    private func setup(_ toolPicker: PKToolPicker) {
+        toolPicker.setVisible(true, forFirstResponder: canvasView)
+        toolPicker.addObserver(canvasView)
+        toolPicker.addObserver(self)
+
+        updateLayout(for: toolPicker)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -58,47 +79,29 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         navigationController?.setNavigationBarHidden(true, animated: true)
         navigationController?.delegate = self
 
-        canvasView.delegate = self
-        canvasView.drawing = note.data.drawing
-        canvasView.alwaysBounceVertical = true
-
-        #if targetEnvironment(simulator)
-            canvasView.allowsFingerDrawing = true
-        #else
-             canvasView.allowsFingerDrawing = false
-        #endif
+        setup(canvasView)
 
         let window = parent?.view.window
         toolPicker = PKToolPicker.shared(for: window!)
+        setup(toolPicker)
 
-        toolPicker.setVisible(true, forFirstResponder: canvasView)
-        toolPicker.addObserver(canvasView)
-        toolPicker.addObserver(self)
-
-        updateLayout(for: toolPicker)
-
-        canvasView.becomeFirstResponder()
-
-        if isMovingToParent || isBeingDismissed {
-            for note in note.children.values {
-                let sublevel = sublevelPreview(for: note)
-                subLevelViews[note.id] = sublevel
-                self.canvasView.addSubview(sublevel)
-            }
-
-            self.view.addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(onPreviewZoomUp(_:))))
-
-            if self.drawerView == nil {
-                self.drawerView = DrawerView(in: self.view, title: .constant("Title"))
-            }
-
-            self.view.addSubview(drawerView!)
-            self.view.bringSubviewToFront(drawerView!)
-        }
-
-        for note in note.children.values {
+        for note in viewModel.sublevels.values {
             subLevelViews[note.id]?.image = note.previewImage.image
         }
+
+        if self.drawerView != nil {
+            self.drawerView.removeFromSuperview()
+        }
+        self.drawerView = DrawerView(in: self.view, title: .constant("Title"))
+        for level in self.viewModel.drawerContents.values {
+            let preview = sublevelPreview(for: level)
+            self.drawerView.contents[level.id] = preview
+            self.drawerView.addSubview(preview)
+            self.drawerView.bringSubviewToFront(preview)
+        }
+
+        self.view.addSubview(drawerView!)
+        self.view.bringSubviewToFront(drawerView!)
     }
 
     override func viewDidLoad() {
@@ -106,39 +109,43 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
 
-        let rightEdgeGestureRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(screenEdgeSwiped(_:)))
-        rightEdgeGestureRecognizer.edges = .right
-        rightEdgeGestureRecognizer.delegate = self
+        let edges: [UIRectEdge] = [.left, .right]
 
-        self.view.addGestureRecognizer(rightEdgeGestureRecognizer)
+        edges.forEach { self.view.addGestureRecognizer(edgeGestureRecognizer(edge: $0)) }
 
-        let leftEdgeGestureRecognizer = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(screenEdgeSwiped(_:)))
-        leftEdgeGestureRecognizer.edges = .left
-        leftEdgeGestureRecognizer.delegate = self
+        for note in viewModel.sublevels.values {
+            let sublevel = sublevelPreview(for: note)
+            subLevelViews[note.id] = sublevel
+            self.canvasView.addSubview(sublevel)
+        }
 
-        self.view.addGestureRecognizer(leftEdgeGestureRecognizer)
+        self.view.addGestureRecognizer(ZNPinchGestureRecognizer { self.onPreviewZoomUp($0) })
 
-        let zoomGestureRecognizer = UIPinchGestureRecognizer(target: self,
-                                                             action: #selector(onPinch(_:)))
-        self.view.addGestureRecognizer(zoomGestureRecognizer)
+        viewModel.eventSubject
+            .sink(receiveValue: { self.onCommand($0) })
+            .store(in: &cancellables)
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(updateDrawingMeta),
+                                               name: UIApplication.willTerminateNotification,
+                                               object: nil)
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(updateDrawingMeta),
+                                               name: UIApplication.willResignActiveNotification,
+                                               object: nil)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         if hasModifiedDrawing {
-            updateLevel()
+            self.updateDrawingMeta()
         }
     }
 
     override func viewDidLayoutSubviews() {
         updateContentSizeForDrawing()
         canvasView.contentOffset = CGPoint(x: 0, y: -canvasView.adjustedContentInset.top)
-    }
-
-    override var prefersHomeIndicatorAutoHidden: Bool { true }
-
-    override var prefersStatusBarHidden: Bool {
-        return UserDefaults.standard.withDefault(.statusBarVisible, default: true)
     }
 
     @objc func screenEdgeSwiped(_ rec: UIScreenEdgePanGestureRecognizer) {
@@ -151,36 +158,35 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                            height: height)
 
         if rec.state == .changed {
-            if currentlyDraggedLevel == nil {
+            if dragState == nil {
                 let defaultPreviewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
 
                 let newLevel = NoteModel.NoteLevel.default(preview: defaultPreviewImage, frame: frame)
                 self.addSublevel(sublevel: newLevel)
 
-                currentlyDraggedLevel = newLevel
+                dragState = DragState(currentlyDraggedLevel: newLevel, originalFrame: frame)
             }
 
-            currentlyDraggedLevel!.frame = frame
-            subLevelViews[currentlyDraggedLevel!.id]!.frame = frame
+            dragState!.currentlyDraggedLevel.frame = frame
+            subLevelViews[dragState!.currentlyDraggedLevel.id]!.frame = frame
         }
 
         if rec.state == .ended {
-            subLevelViews[currentlyDraggedLevel!.id]!.frame = frame
-            currentlyDraggedLevel!.frame = frame
-            currentlyDraggedLevel = nil
+            subLevelViews[dragState!.currentlyDraggedLevel.id]!.frame = frame
+            dragState!.currentlyDraggedLevel.frame = frame
+            dragState = nil
         }
     }
 
     @objc func onPinch(_ rec: UIPinchGestureRecognizer) { }
 
+    @objc private func updateDrawingMeta() {
+        let screen = captureCurrentScreen()
+        self.viewModel.process(.refresh(NoteImage(wrapping: screen)))
+    }
+
     private func addSublevel(sublevel: NoteModel.NoteLevel) {
-        hasModifiedDrawing = true
-        self.note.children[sublevel.id] = sublevel
-
-        let noteLevelPreview = sublevelPreview(for: sublevel)
-        self.subLevelViews[sublevel.id] = noteLevelPreview
-
-        canvasView.addSubview(noteLevelPreview)
+        self.viewModel.process(.create(sublevel))
 
         undoManager?.registerUndo(withTarget: self) {
             $0.removeSublevel(sublevel: sublevel)
@@ -189,7 +195,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     private func removeSublevel(sublevel: NoteModel.NoteLevel) {
-        hasModifiedDrawing = true
         UIView.animate(withDuration: 0.15, animations: {
             let preview = self.subLevelViews[sublevel.id]!
             preview.frame = CGRect(x: self.canvasView.frame.width,
@@ -197,28 +202,74 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                                    width: 0,
                                    height: 0)
         }, completion: { _ in
-            self.subLevelViews[sublevel.id]!.removeFromSuperview()
-            self.note.children.removeValue(forKey: sublevel.id)
+            self.viewModel.process(.remove(sublevel))
+            self.undoManager?.registerUndo(withTarget: self) {
+                $0.addSublevel(sublevel: sublevel)
+            }
+            self.undoManager?.setActionName("RemoveSublevel")
         })
-
-        self.undoManager?.registerUndo(withTarget: self) {
-            $0.addSublevel(sublevel: sublevel)
-        }
-        self.undoManager?.setActionName("RemoveSublevel")
     }
 
     private func moveSublevel(sublevel: NoteModel.NoteLevel, from: CGRect, to: CGRect) {
-        hasModifiedDrawing = true
         UIView.animate(withDuration: 0.15, animations: {
             self.subLevelViews[sublevel.id]!.frame = to
         }, completion: { _ in
-            sublevel.frame = to
+            self.undoManager?.registerUndo(withTarget: self) {
+                $0.moveSublevel(sublevel: sublevel, from: to, to: from)
+            }
+            self.undoManager?.setActionName("MoveSublevel")
         })
+    }
 
-        undoManager?.registerUndo(withTarget: self) {
-            $0.moveSublevel(sublevel: sublevel, from: to, to: from)
+    private func moveToDrawer(sublevel: NoteModel.NoteLevel, from: CGRect, to: CGRect) {
+        self.viewModel.process(.moveToDrawer(sublevel, frame: to))
+        self.undoManager?.registerUndo(withTarget: self) {
+            $0.moveFromDrawer(sublevel: sublevel, from: to, to: from)
         }
-        self.undoManager?.setActionName("MoveSublevel")
+        self.undoManager?.setActionName("MoveToDrawer")
+    }
+
+    private func moveFromDrawer(sublevel: NoteModel.NoteLevel, from: CGRect, to: CGRect) {
+        self.viewModel.process(.moveFromDrawer(sublevel, frame: to))
+        self.undoManager?.registerUndo(withTarget: self) {
+            $0.moveToDrawer(sublevel: sublevel, from: to, to: from)
+        }
+        self.undoManager?.setActionName("MoveFromDrawer")
+    }
+
+    private func onCommand(_ command: NoteEditorCommand) {
+        self.hasModifiedDrawing = true
+
+        switch command {
+        case .create(let sublevel):
+            let noteLevelPreview = sublevelPreview(for: sublevel)
+            self.subLevelViews[sublevel.id] = noteLevelPreview
+            canvasView.addSubview(noteLevelPreview)
+
+        case .remove(let sublevel):
+            self.subLevelViews[sublevel.id]!.removeFromSuperview()
+
+        case .moveToDrawer(let sublevel, frame: let frame):
+            let preview = subLevelViews[sublevel.id]!
+            preview.removeFromSuperview()
+
+            subLevelViews.removeValue(forKey: sublevel.id)
+            self.drawerView.contents[sublevel.id] = preview
+            self.drawerView.addSubview(preview)
+            preview.frame = frame
+
+        case .moveFromDrawer(let sublevel, frame: let frame):
+            let preview = self.drawerView.contents[sublevel.id]!
+            preview.removeFromSuperview()
+
+            self.drawerView.contents.removeValue(forKey: sublevel.id)
+            self.view.addSubview(preview)
+            self.subLevelViews[sublevel.id] = preview
+            preview.frame = frame
+
+        default:
+            return
+        }
     }
 
     private func onPreviewZoomDown(_ rec: ZNPinchGestureRecognizer, _ note: NoteModel.NoteLevel) {
@@ -229,9 +280,10 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         let dist = distance(from: view.bounds, to: frameInView)
         let zoomOffset = CGPoint(x: dist.x, y: dist.y - statusBarHeight)
 
+        let ratio = view.bounds.width / note.frame.width
+
         if rec.state == .changed {
-            // TODO: Update 4 to calculated value (view width / preview width)
-            let scale = clamp(rec.scale, lower: 1, upper: 4)
+            let scale = clamp(rec.scale, lower: 1, upper: ratio)
             view.transform = zoomDownTransform(at: scale, for: zoomOffset)
         }
 
@@ -248,14 +300,13 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                     return
             }
 
-            noteViewController.dataModelController = self.dataModelController
-            noteViewController.note = note
+            noteViewController.viewModel = self.viewModel.childViewModel(for: note)
             navigationController.pushViewController(noteViewController, animated: false)
             self.view.transform = .identity
         }
     }
 
-    @objc func onPreviewZoomUp(_ rec: ZNPinchGestureRecognizer) {
+    private func onPreviewZoomUp(_ rec: ZNPinchGestureRecognizer) {
         if rec.state == .began {
             self.interactionController = UIPercentDrivenInteractiveTransition()
             navigationController?.popViewController(animated: true)
@@ -276,13 +327,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         }
     }
 
-    private func updateLevel() {
-        note.data.drawing = canvasView.drawing
-        let screen = captureCurrentScreen()
-        note.previewImage = NoteImage(wrapping: screen)
-        dataModelController.updatePreview()
-    }
-
     private func fling(_ velocity: CGPoint, _ magnitude: CGFloat, _ sublevel: NoteModel.NoteLevel) {
         let velocityPadding: CGFloat  = 35
         let preview = subLevelViews[sublevel.id]!
@@ -300,16 +344,22 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         }
     }
 
-    private func sublevelPreview(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
-        let preview = NoteLevelPreview(for: sublevel)
+    private enum MoveOrigin {
+        case drawer
+        case canvas
+    }
 
-        var originalFrame: CGRect?
-        var scrollState: ScrollViewState?
-
+    private func panGesture(for sublevel: NoteModel.NoteLevel, _ preview: NoteLevelPreview) -> UIPanGestureRecognizer {
+        var origin: MoveOrigin = .drawer
         let panGestureRecognizer = ZNPanGestureRecognizer { rec in
             if rec.state == .began {
-                originalFrame = preview.frame
-                scrollState = self.canvasView.saveScrollState()
+                if preview.superview! == self.drawerView! {
+                    origin = .drawer
+                } else {
+                    origin = .canvas
+                }
+
+                self.dragState = DragState(currentlyDraggedLevel: sublevel, originalFrame: preview.frame)
 
                 let loc = rec.location(in: self.view)
                 let rLoc = rec.location(in: preview)
@@ -322,22 +372,18 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                                        height: preview.frame.height)
 
                 self.canvasView.bringSubviewToFront(preview)
-
-                self.currentlyDraggedLevel = sublevel
             }
 
             let tran = rec.translation(in: self.canvasView)
             let frame = CGRect(x: max(0, preview.frame.minX + tran.x),
                                y: max(0, preview.frame.minY + tran.y),
-                                width: preview.frame.width,
-                                height: preview.frame.height)
+                               width: preview.frame.width,
+                               height: preview.frame.height)
 
             preview.frame = frame
             sublevel.frame = frame
 
             rec.setTranslation(CGPoint.zero, in: self.canvasView)
-
-            self.canvasView.revertToScrollState(scrollState!)
 
             if rec.state == .ended {
                 // MARK: begin snippet
@@ -351,48 +397,55 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 if magnitude > threshold {
                     self.fling(velocity, magnitude, sublevel)
                     // MARK: end snippet
-                } else if self.drawerView!.frame.contains(preview.frame) {
+                } else if self.drawerView.frame.contains(preview.frame) {
                     let locInDrawer = rec.location(in: self.drawerView)
                     let locInPreview = rec.location(in: preview)
+                    let frameInDrawer = CGRect(x: locInDrawer.x - locInPreview.x,
+                                               y: locInDrawer.y - locInPreview.y,
+                                               width: preview.frame.width,
+                                               height: preview.frame.height)
 
-                    preview.removeFromSuperview()
-                    self.note.children.removeValue(forKey: self.currentlyDraggedLevel!.id)
-
-                    preview.frame = CGRect(x: locInDrawer.x - locInPreview.x,
-                                           y: locInDrawer.y - locInPreview.y,
-                                           width: preview.frame.width,
-                                           height: preview.frame.height)
-                    self.drawerView!.addSubview(preview)
+                    let originalFrame = self.dragState!.originalFrame
+                    if origin == .canvas {
+                        self.moveToDrawer(sublevel: sublevel,
+                                          from: originalFrame,
+                                          to: frameInDrawer)
+                    } else {
+                        self.moveSublevel(sublevel: sublevel, from: originalFrame, to: frameInDrawer)
+                    }
                 } else {
                     let canvasViewOffset = self.canvasView.contentOffset.y
-
-                    self.canvasView.addSubview(preview)
                     let newFrame = CGRect(x: preview.frame.minX,
                                           y: preview.frame.minY + canvasViewOffset - self.statusBarHeight,
-                                            width: preview.frame.width,
-                                            height: preview.frame.height)
-                    preview.frame = newFrame
-                    self.moveSublevel(sublevel: sublevel, from: originalFrame!, to: newFrame)
+                                          width: preview.frame.width,
+                                          height: preview.frame.height)
+
+                    let originalFrame = self.dragState!.originalFrame
+
+                    if origin == .drawer {
+                        self.moveFromDrawer(sublevel: sublevel, from: originalFrame, to: newFrame)
+                    } else {
+                        self.moveSublevel(sublevel: sublevel, from: originalFrame, to: newFrame)
+                    }
                 }
 
-                self.canvasView.revertToScrollState(scrollState!)
-
-                originalFrame = nil
-                scrollState = nil
-                self.currentlyDraggedLevel = nil
+                self.dragState = nil
             }
         }
 
         panGestureRecognizer.maximumNumberOfTouches = 1
         panGestureRecognizer.minimumNumberOfTouches = 1
+        return panGestureRecognizer
+    }
 
-        preview.addGestureRecognizer(panGestureRecognizer)
+    private func sublevelPreview(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
+        let preview = NoteLevelPreview(frame: sublevel.frame)
 
-        preview.addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(onPinch(_:))))
+        preview.addGestureRecognizer(panGesture(for: sublevel, preview))
 
-        preview.addGestureRecognizer(ZNPinchGestureRecognizer { rec in
-            self.onPreviewZoomDown(rec, sublevel)
-        })
+        preview.addGestureRecognizer(ZNPinchGestureRecognizer { self.onPreviewZoomUp($0) })
+
+        preview.addGestureRecognizer(ZNPinchGestureRecognizer { self.onPreviewZoomDown($0, sublevel) })
 
         return preview
     }
@@ -410,9 +463,9 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     private func captureCurrentScreen() -> UIImage {
-        drawerView!.alpha = 0.0
+        drawerView.alpha = 0.0
         defer {
-            drawerView!.alpha = 1.0
+            drawerView.alpha = 1.0
         }
         UIGraphicsBeginImageContext(view.frame.size)
         let context = UIGraphicsGetCurrentContext()!
@@ -447,7 +500,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
 extension NoteViewController: PKCanvasViewDelegate {
     func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
-        hasModifiedDrawing = true
+        self.viewModel.process(.update(canvasView.drawing))
         updateContentSizeForDrawing()
     }
 

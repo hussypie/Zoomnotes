@@ -11,18 +11,16 @@ import UIKit
 import PencilKit
 
 class NoteLevelPreview: UIImageView {
-    let note: NoteModel.NoteLevel
-    init(for note: NoteModel.NoteLevel) {
-        self.note = note
-        super.init(frame: note.frame)
+    override init(frame: CGRect) {
+        super.init(frame: frame)
 
         self.backgroundColor = UIColor.white
         self.isUserInteractionEnabled = true
 
         let darklayer = UIView(frame: CGRect(x: 0,
                                              y: 0,
-                                             width: note.frame.width,
-                                             height: note.frame.height))
+                                             width: frame.width,
+                                             height: frame.height))
         darklayer.backgroundColor = UIColor.darkGray
         darklayer.layer.opacity = 0.02
         self.addSubview(darklayer)
