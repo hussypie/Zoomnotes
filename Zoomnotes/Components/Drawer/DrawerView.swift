@@ -92,7 +92,7 @@ class DrawerView: UIView {
     }
 
     lazy var titleTextField: UITextField = {
-        let textField = UITextField(frame: CGRect(x: 10, y: 10, width: 200, height: 30))
+        let textField = UITextField()
 
         textField.delegate = self
 
@@ -124,7 +124,6 @@ class DrawerView: UIView {
 
         super.init(frame: baseFrame)
 
-        self.frame = baseFrame
         self.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
         self.layer.cornerRadius = 30
@@ -134,6 +133,12 @@ class DrawerView: UIView {
         self.addSubview(blurView)
 
         self.addSubview(titleTextField)
+        NSLayoutConstraint.activate([
+            titleTextField.leadingAnchor.constraint(equalTo: self.leadingAnchor,
+                                                    constant: self.safeAreaInsets.left),
+            titleTextField.topAnchor.constraint(equalTo: self.topAnchor,
+                                                constant: self.safeAreaInsets.top)
+        ])
 
         self.addGestureRecognizer(panGesture(with: view))
         self.addGestureRecognizer(swipeUpGesture(with: view))

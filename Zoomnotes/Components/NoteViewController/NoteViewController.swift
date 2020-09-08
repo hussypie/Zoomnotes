@@ -146,6 +146,13 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         self.view.addSubview(drawerView!)
         self.view.bringSubviewToFront(drawerView!)
+
+        NSLayoutConstraint.activate([
+            self.drawerView!.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.drawerView!.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            self.drawerView!.heightAnchor.constraint(equalTo: self.view.heightAnchor,
+                                                     constant: -2 * self.view.frame.height / 3)
+        ])
     }
 
     override func viewDidLoad() {
