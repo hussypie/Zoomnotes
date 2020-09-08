@@ -14,15 +14,7 @@ class NoteLevelPreview: UIImageView {
     typealias OnResizeEndedCallback = (CGRect) -> Void
     typealias OnCopyStartedCallback = () -> Void
 
-    var isEdited: Bool {
-        didSet {
-            if isEdited {
-                showEditingChrome()
-            } else {
-                removeEditingChrome()
-            }
-        }
-    }
+    private var isEdited: Bool
 
     private var onResizeEnded: OnResizeEndedCallback
     private var onCopyStarted: OnCopyStartedCallback
@@ -35,28 +27,33 @@ class NoteLevelPreview: UIImageView {
         imageView.layer.borderColor = UIColor.systemBlue.cgColor
         imageView.layer.borderWidth = 1
         imageView.backgroundColor = UIColor.white
-        imageView.frame = indicatorFrame(yOffset: yOffset)
         return imageView
     }
 
     lazy var copyIndicator = indicator(systemName: "doc.on.doc", yOffset: 0)
     lazy var resizeIndicator = indicator(systemName: "arrow.up.left.and.arrow.down.right", yOffset: self.frame.height)
 
-    lazy var resizeGesture: ZNPanGestureRecognizer = {
-        return ZNPanGestureRecognizer { rec in
-            let translation = rec.translation(in: self.resizeIndicator)
-            let aspect = self.frame.width / self.frame.height
-            let newFrame = CGRect(x: self.frame.minX,
-                                  y: self.frame.minY,
-                                  width: self.frame.width + translation.x,
-                                  height: self.frame.height + translation.x / aspect)
-            self.setFrame(to: newFrame)
-            rec.setTranslation(CGPoint.zero, in: self.resizeIndicator)
+    struct ResizeGestureState {
+        let aspect: CGFloat
+    }
 
-            if rec.state == .ended {
-                self.onResizeEnded(self.frame)
-            }
-        }
+    lazy var resizeGesture: ZNPanGestureRecognizer = {
+        return ZNPanGestureRecognizer<ResizeGestureState>(
+            begin: { _ in
+                return ResizeGestureState(aspect: self.frame.width / self.frame.height)
+        },
+            step: { rec, state in
+                let translation = rec.translation(in: self.resizeIndicator)
+                let newFrame = CGRect(x: self.frame.minX,
+                                      y: self.frame.minY,
+                                      width: self.frame.width + translation.x,
+                                      height: self.frame.height + translation.x / state.aspect)
+                self.setFrame(to: newFrame)
+                rec.setTranslation(CGPoint.zero, in: self.resizeIndicator)
+                return state
+        }, end: { _, _ in
+            self.onResizeEnded(self.frame)
+        })
     }()
 
     lazy var copyGesture: ZNTapGestureRecognizer = {
@@ -101,27 +98,47 @@ class NoteLevelPreview: UIImageView {
         self.layer.shadowOffset = CGSize(width: 0, height: 3)
     }
 
-    private func indicatorFrame(yOffset: CGFloat) -> CGRect {
-        return CGRect(x: self.frame.width - 15,
-                      y: yOffset - 15,
+    private func indicatorFrame(offset: CGPoint) -> CGRect {
+        return CGRect(x: offset.x - 15,
+                      y: offset.y - 15,
                       width: 30,
                       height: 30)
+    }
+
+    func setEdited(in half: Half) {
+        if self.isEdited {
+            self.removeEditingChrome()
+            return
+        }
+        self.showEditingChrome(in: half)
     }
 
     func setFrame(to frame: CGRect) {
         self.frame = frame
         self.darklayer.frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
-        self.copyIndicator.frame = indicatorFrame(yOffset: 0)
-        self.resizeIndicator.frame = indicatorFrame(yOffset: self.frame.height)
         self.layer.shadowPath = UIBezierPath(rect: self.bounds).cgPath
     }
 
     private func removeEditingChrome() {
+        self.isEdited = false
         copyIndicator.removeFromSuperview()
         resizeIndicator.removeFromSuperview()
     }
 
-    private func showEditingChrome() {
+    private func showEditingChrome(in half: Half) {
+        self.isEdited = true
+
+        let xOffset: CGFloat
+        switch half.opposite {
+        case .left:
+            xOffset = 0
+        case .right:
+            xOffset = self.frame.width
+        }
+
+        self.copyIndicator.frame = indicatorFrame(offset: CGPoint(x: xOffset, y: 0))
+        self.resizeIndicator.frame = indicatorFrame(offset: CGPoint(x: xOffset, y: self.frame.height))
+
         self.addSubview(copyIndicator)
         self.addSubview(resizeIndicator)
     }

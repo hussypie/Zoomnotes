@@ -12,6 +12,15 @@ import UIKit
 enum Half {
     case left
     case right
+
+    var opposite: Half {
+        switch self {
+        case .left:
+            return .right
+        case .right:
+            return .left
+        }
+    }
 }
 
 extension CGRect {

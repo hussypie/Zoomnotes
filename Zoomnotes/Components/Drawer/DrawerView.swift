@@ -10,6 +10,10 @@ import Foundation
 import UIKit
 import SwiftUI
 
+struct PanGestureState {
+    let baseFrame: CGRect
+}
+
 class DrawerView: UIView {
     private let offset: CGFloat = 50
 
@@ -17,38 +21,48 @@ class DrawerView: UIView {
 
     var contents: [UUID: NoteLevelPreview]
 
-    private func panGesture(with view: UIView) -> ZNPanGestureRecognizer {
-        let baseFrame = CGRect(x: 0,
-                               y: view.frame.height - offset,
-                               width: view.frame.width,
-                               height: view.frame.height / 2)
+    private func panGestureStep(_ rec: UIPanGestureRecognizer,
+                                state: PanGestureState,
+                                view: UIView) -> PanGestureState {
+        let pos = rec.location(in: view)
 
-        return ZNPanGestureRecognizer { rec in
-            let pos = rec.location(in: view)
+        let min = view.frame.height - self.offset
+        let max = view.frame.height - view.frame.height / 2 + self.offset
 
-            let min = view.frame.height - self.offset
-            let max = view.frame.height - view.frame.height / 2 + self.offset
+        guard pos.y > max else { return state }
 
-            guard pos.y > max else { return }
-
-            guard pos.y < min else {
-                UIView.animate(withDuration: 0.1) {
-                    self.frame = baseFrame
-                }
-                return
+        guard pos.y < min else {
+            UIView.animate(withDuration: 0.1) {
+                self.frame = state.baseFrame
             }
-
-            let loc = rec.translation(in: view)
-
-            let newY = clamp(self.frame.minY + loc.y, lower: max, upper: min)
-
-            self.frame = CGRect(x: 0,
-                                y: newY,
-                                width: self.frame.width,
-                                height: self.frame.height)
-
-            rec.setTranslation(CGPoint.zero, in: view)
+            return state
         }
+
+        let loc = rec.translation(in: view)
+
+        let newY = clamp(self.frame.minY + loc.y, lower: max, upper: min)
+
+        self.frame = CGRect(x: 0,
+                            y: newY,
+                            width: self.frame.width,
+                            height: self.frame.height)
+
+        rec.setTranslation(CGPoint.zero, in: view)
+
+        return state
+    }
+
+    private func panGesture(with view: UIView) -> ZNPanGestureRecognizer<PanGestureState> {
+        return ZNPanGestureRecognizer(
+            begin: { _ in
+                return PanGestureState(baseFrame: CGRect(x: 0,
+                                                         y: view.frame.height - self.offset,
+                                                         width: view.frame.width,
+                                                         height: view.frame.height / 2))
+
+        },
+            step: { return self.panGestureStep($0, state: $1, view: view) },
+            end: { _, _ in })
     }
 
     private func swipeUpGesture(with view: UIView) -> ZNSwipeGestureRecognizer {

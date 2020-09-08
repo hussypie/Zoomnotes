@@ -24,7 +24,7 @@ final class ZNTapGestureRecognizer: UITapGestureRecognizer {
         return self
     }
 
-    @objc private func execute(_ recognizer: ZNPanGestureRecognizer) {
+    @objc private func execute(_ recognizer: ZNTapGestureRecognizer) {
         action(self)
     }
 }
