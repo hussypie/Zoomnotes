@@ -12,6 +12,7 @@ import PencilKit
 
 class NoteLevelPreview: UIImageView {
     typealias OnResizeEndedCallback = (CGRect) -> Void
+    typealias OnCopyStartedCallback = () -> Void
 
     var isEdited: Bool {
         didSet {
@@ -24,12 +25,10 @@ class NoteLevelPreview: UIImageView {
     }
 
     private var onResizeEnded: OnResizeEndedCallback
-    private var onCopyStarted: () -> Void
+    private var onCopyStarted: OnCopyStartedCallback
 
     private func indicator(systemName: String, yOffset: CGFloat) -> UIImageView {
-        let inset: CGFloat = -2
-        let imageView = UIImageView(image: UIImage(systemName: systemName)?
-            .withAlignmentRectInsets(UIEdgeInsets(top: inset, left: inset, bottom: inset, right: inset)))
+        let imageView = UIImageView(image: UIImage(systemName: systemName))
         imageView.isUserInteractionEnabled = true
         imageView.contentMode = .scaleAspectFill
         imageView.layer.cornerRadius = 15
@@ -45,18 +44,24 @@ class NoteLevelPreview: UIImageView {
 
     lazy var resizeGesture: ZNPanGestureRecognizer = {
         return ZNPanGestureRecognizer { rec in
-            let translation = rec.translation(in: self.superview)
+            let translation = rec.translation(in: self.resizeIndicator)
             let aspect = self.frame.width / self.frame.height
             let newFrame = CGRect(x: self.frame.minX,
                                   y: self.frame.minY,
                                   width: self.frame.width + translation.x,
                                   height: self.frame.height + translation.x / aspect)
             self.setFrame(to: newFrame)
-            rec.setTranslation(CGPoint.zero, in: self.superview)
+            rec.setTranslation(CGPoint.zero, in: self.resizeIndicator)
 
             if rec.state == .ended {
                 self.onResizeEnded(self.frame)
             }
+        }
+    }()
+
+    lazy var copyGesture: ZNTapGestureRecognizer = {
+        return ZNTapGestureRecognizer { _ in
+            self.onCopyStarted()
         }
     }()
 
@@ -71,8 +76,9 @@ class NoteLevelPreview: UIImageView {
     }()
 
     init(frame: CGRect,
+         preview: UIImage,
          resizeEnded: @escaping OnResizeEndedCallback,
-         copyStarted: @escaping () -> Void
+         copyStarted: @escaping OnCopyStartedCallback
     ) {
         self.isEdited = false
         self.onResizeEnded = resizeEnded
@@ -80,12 +86,15 @@ class NoteLevelPreview: UIImageView {
 
         super.init(frame: frame)
 
+        self.image = preview
+
         self.backgroundColor = UIColor.white
         self.isUserInteractionEnabled = true
 
         self.addSubview(darklayer)
 
         self.resizeIndicator.addGestureRecognizer(resizeGesture)
+        self.copyIndicator.addGestureRecognizer(copyGesture)
 
         self.layer.shadowPath = UIBezierPath(rect: self.bounds).cgPath
         self.layer.shadowOpacity = 0.1
@@ -99,7 +108,7 @@ class NoteLevelPreview: UIImageView {
                       height: 30)
     }
 
-    private func setFrame(to frame: CGRect) {
+    func setFrame(to frame: CGRect) {
         self.frame = frame
         self.darklayer.frame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
         self.copyIndicator.frame = indicatorFrame(yOffset: 0)

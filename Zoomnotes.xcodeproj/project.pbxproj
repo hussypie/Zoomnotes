@@ -36,6 +36,8 @@
 		31AD9BBF25052EB200C193CF /* NoteEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BBE25052EB200C193CF /* NoteEditorViewModel.swift */; };
 		31AD9BC12506849400C193CF /* NoteViewController+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BC02506849400C193CF /* NoteViewController+Preferences.swift */; };
 		31AD9BC32506A59D00C193CF /* CGRect+Quadrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BC22506A59D00C193CF /* CGRect+Quadrant.swift */; };
+		31AD9BC52507700900C193CF /* NoteViewController+commands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BC42507700900C193CF /* NoteViewController+commands.swift */; };
+		31AD9BC72507759400C193CF /* NoteViewController+utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BC62507759400C193CF /* NoteViewController+utils.swift */; };
 		31B1AA3424FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3324FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift */; };
 		31B1AA3624FD3AE4007DAF4D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3524FD3AE4007DAF4D /* SettingsView.swift */; };
 		31B1AA3824FD5DC7007DAF4D /* UserDefaults+withDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */; };
@@ -99,6 +101,8 @@
 		31AD9BBE25052EB200C193CF /* NoteEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorViewModel.swift; sourceTree = "<group>"; };
 		31AD9BC02506849400C193CF /* NoteViewController+Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+Preferences.swift"; sourceTree = "<group>"; };
 		31AD9BC22506A59D00C193CF /* CGRect+Quadrant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+Quadrant.swift"; sourceTree = "<group>"; };
+		31AD9BC42507700900C193CF /* NoteViewController+commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+commands.swift"; sourceTree = "<group>"; };
+		31AD9BC62507759400C193CF /* NoteViewController+utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+utils.swift"; sourceTree = "<group>"; };
 		31B1AA3324FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+fromStoryBoard.swift"; sourceTree = "<group>"; };
 		31B1AA3524FD3AE4007DAF4D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+withDefault.swift"; sourceTree = "<group>"; };
@@ -294,6 +298,8 @@
 				31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */,
 				31B1AA3324FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift */,
 				31AD9BC02506849400C193CF /* NoteViewController+Preferences.swift */,
+				31AD9BC42507700900C193CF /* NoteViewController+commands.swift */,
+				31AD9BC62507759400C193CF /* NoteViewController+utils.swift */,
 			);
 			path = NoteViewController;
 			sourceTree = "<group>";
@@ -565,9 +571,11 @@
 				3101756A24E531D1007D3589 /* NoteViewController.swift in Sources */,
 				310A5C6F24F411F1006394A0 /* UIImage.swift in Sources */,
 				312820CD24F6963B00338E28 /* CGRect+center.swift in Sources */,
+				31AD9BC52507700900C193CF /* NoteViewController+commands.swift in Sources */,
 				31D6648B24EC53450062AF8D /* NoteChild.swift in Sources */,
 				3101756F24E53778007D3589 /* NoteCollectionViewCell.swift in Sources */,
 				3101753824E5211D007D3589 /* Zoomnotes.xcdatamodeld in Sources */,
+				31AD9BC72507759400C193CF /* NoteViewController+utils.swift in Sources */,
 				31362A5724F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift in Sources */,
 				31AD9BC12506849400C193CF /* NoteViewController+Preferences.swift in Sources */,
 				31D6648D24EC53890062AF8D /* NoteImage.swift in Sources */,

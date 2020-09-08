@@ -185,93 +185,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         self.viewModel.process(.refresh(NoteImage(wrapping: screen)))
     }
 
-    private func addSublevel(sublevel: NoteModel.NoteLevel) {
-        self.viewModel.process(.create(sublevel))
-
-        undoManager?.registerUndo(withTarget: self) {
-            $0.removeSublevel(sublevel: sublevel)
-        }
-        self.undoManager?.setActionName("AddSublevel")
-    }
-
-    private func removeSublevel(sublevel: NoteModel.NoteLevel) {
-        UIView.animate(withDuration: 0.15, animations: {
-            let preview = self.subLevelViews[sublevel.id]!
-            preview.frame = CGRect(x: self.canvasView.frame.width,
-                                   y: preview.frame.minY,
-                                   width: 0,
-                                   height: 0)
-        }, completion: { _ in
-            self.viewModel.process(.remove(sublevel))
-            self.undoManager?.registerUndo(withTarget: self) {
-                $0.addSublevel(sublevel: sublevel)
-            }
-            self.undoManager?.setActionName("RemoveSublevel")
-        })
-    }
-
-    private func moveSublevel(sublevel: NoteModel.NoteLevel, from: CGRect, to: CGRect) {
-        UIView.animate(withDuration: 0.15, animations: {
-            self.subLevelViews[sublevel.id]!.frame = to
-        }, completion: { _ in
-            self.undoManager?.registerUndo(withTarget: self) {
-                $0.moveSublevel(sublevel: sublevel, from: to, to: from)
-            }
-            self.undoManager?.setActionName("MoveSublevel")
-        })
-    }
-
-    private func moveToDrawer(sublevel: NoteModel.NoteLevel, from: CGRect, to: CGRect) {
-        self.viewModel.process(.moveToDrawer(sublevel, frame: to))
-        self.undoManager?.registerUndo(withTarget: self) {
-            $0.moveFromDrawer(sublevel: sublevel, from: to, to: from)
-        }
-        self.undoManager?.setActionName("MoveToDrawer")
-    }
-
-    private func moveFromDrawer(sublevel: NoteModel.NoteLevel, from: CGRect, to: CGRect) {
-        self.viewModel.process(.moveFromDrawer(sublevel, frame: to))
-        self.undoManager?.registerUndo(withTarget: self) {
-            $0.moveToDrawer(sublevel: sublevel, from: to, to: from)
-        }
-        self.undoManager?.setActionName("MoveFromDrawer")
-    }
-
-    private func onCommand(_ command: NoteEditorCommand) {
-        self.hasModifiedDrawing = true
-
-        switch command {
-        case .create(let sublevel):
-            let noteLevelPreview = sublevelPreview(for: sublevel)
-            self.subLevelViews[sublevel.id] = noteLevelPreview
-            canvasView.addSubview(noteLevelPreview)
-
-        case .remove(let sublevel):
-            self.subLevelViews[sublevel.id]!.removeFromSuperview()
-
-        case .moveToDrawer(let sublevel, frame: let frame):
-            let preview = subLevelViews[sublevel.id]!
-            preview.removeFromSuperview()
-
-            subLevelViews.removeValue(forKey: sublevel.id)
-            self.drawerView.contents[sublevel.id] = preview
-            self.drawerView.addSubview(preview)
-            preview.frame = frame
-
-        case .moveFromDrawer(let sublevel, frame: let frame):
-            let preview = self.drawerView.contents[sublevel.id]!
-            preview.removeFromSuperview()
-
-            self.drawerView.contents.removeValue(forKey: sublevel.id)
-            self.view.addSubview(preview)
-            self.subLevelViews[sublevel.id] = preview
-            preview.frame = frame
-
-        default:
-            return
-        }
-    }
-
     private func onPreviewZoomDown(_ rec: ZNPinchGestureRecognizer, _ note: NoteModel.NoteLevel) {
         let frameInView = CGRect(x: note.frame.minX,
                                  y: note.frame.minY - self.canvasView.contentOffset.y,
@@ -434,10 +347,22 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         }.touches(1)
     }
 
-    private func sublevelPreview(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
-        let preview = NoteLevelPreview(frame: sublevel.frame, resizeEnded: { frame in
-            self.viewModel.process(.resize(sublevel, from: sublevel.frame, to: frame))
-        }, copyStarted: { })
+    func sublevelPreview(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
+        let preview = NoteLevelPreview(frame: sublevel.frame,
+                                       preview: sublevel.previewImage.image,
+                                       resizeEnded: { frame in
+            self.resizePreview(sublevel: sublevel, from: sublevel.frame, to: frame)
+        }, copyStarted: {
+            let newFrame = CGRect(x: sublevel.frame.minX + 100,
+                                  y: sublevel.frame.minY,
+                                  width: sublevel.frame.width,
+                                  height: sublevel.frame.height)
+            let copiedSublevel = NoteModel.NoteLevel(data: sublevel.data,
+                                                     children: sublevel.children,
+                                                     preview: sublevel.previewImage.image,
+                                                     frame: newFrame)
+            self.addSublevel(sublevel: copiedSublevel)
+        })
 
         preview.addGestureRecognizer(panGesture(for: sublevel, preview))
 
@@ -450,53 +375,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         }.taps(2))
 
         return preview
-    }
-
-    private func updateContentSizeForDrawing() {
-        let drawing = canvasView.drawing
-        let contentHeight: CGFloat
-
-        if !drawing.bounds.isNull {
-            contentHeight = max(canvasView.bounds.height, (drawing.bounds.maxY * 1.5) * canvasView.zoomScale)
-        } else {
-            contentHeight = canvasView.bounds.height
-        }
-        canvasView.contentSize = CGSize(width: view.frame.width * canvasView.zoomScale, height: contentHeight)
-    }
-
-    private func captureCurrentScreen() -> UIImage {
-        drawerView.alpha = 0.0
-        defer {
-            drawerView.alpha = 1.0
-        }
-        UIGraphicsBeginImageContext(view.frame.size)
-        let context = UIGraphicsGetCurrentContext()!
-        view.layer.render(in: context)
-        let image = UIGraphicsGetImageFromCurrentImageContext()!
-        UIGraphicsEndImageContext()
-        return image
-    }
-
-    private func setNewDrawingUndoable(_ newDrawing: PKDrawing) {
-        let oldDrawing = canvasView.drawing
-        undoManager?.registerUndo(withTarget: self) {
-            $0.setNewDrawingUndoable(oldDrawing)
-        }
-        canvasView.drawing = newDrawing
-    }
-
-    func updateLayout(for toolPicker: PKToolPicker) {
-        let obscuredFrame = toolPicker.frameObscured(in: view)
-
-        if obscuredFrame.isNull {
-            canvasView.contentInset = .zero
-            navigationItem.rightBarButtonItems = []
-        } else {
-            canvasView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: view.bounds.maxY - obscuredFrame.minY, right: 0)
-            navigationItem.rightBarButtonItems = [undoButton, redoButton]
-        }
-
-        canvasView.scrollIndicatorInsets = canvasView.contentInset
     }
 }
 
