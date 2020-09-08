@@ -11,16 +11,16 @@ import UIKit
 import PencilKit
 
 extension NoteViewController {
-    func addSublevel(sublevel: NoteModel.NoteLevel) {
+    func addSublevel(_ sublevel: NoteModel.NoteLevel) {
         self.viewModel.process(.create(sublevel))
 
         undoManager?.registerUndo(withTarget: self) {
-            $0.removeSublevel(sublevel: sublevel)
+            $0.removeSublevel(sublevel)
         }
         self.undoManager?.setActionName("AddSublevel")
     }
 
-    func removeSublevel(sublevel: NoteModel.NoteLevel) {
+    func removeSublevel(_ sublevel: NoteModel.NoteLevel) {
         UIView.animate(withDuration: 0.15, animations: {
             let preview = self.subLevelViews[sublevel.id]!
             preview.frame = CGRect(x: self.canvasView.frame.width,
@@ -30,7 +30,7 @@ extension NoteViewController {
         }, completion: { _ in
             self.viewModel.process(.remove(sublevel))
             self.undoManager?.registerUndo(withTarget: self) {
-                $0.addSublevel(sublevel: sublevel)
+                $0.addSublevel(sublevel)
             }
             self.undoManager?.setActionName("RemoveSublevel")
         })
@@ -98,6 +98,7 @@ extension NoteViewController {
 
         case .remove(let sublevel):
             self.subLevelViews[sublevel.id]!.removeFromSuperview()
+            self.subLevelViews.removeValue(forKey: sublevel.id)
 
         case .moveToDrawer(let sublevel, frame: let frame):
             let preview = subLevelViews[sublevel.id]!

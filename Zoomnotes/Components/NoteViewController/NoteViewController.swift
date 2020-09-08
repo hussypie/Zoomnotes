@@ -37,35 +37,44 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     private struct EdgePanGestureState {
-        let currentlyDraggedLevel: NoteModel.NoteLevel
+        let sublevel: NoteModel.NoteLevel
         let currentlyDraggedPreview: NoteLevelPreview
-        let originalFrame: CGRect
     }
 
     private func edgeGestureRecognizer(edge: UIRectEdge) -> ZNScreenEdgePanGesture<EdgePanGestureState> {
         let edgeGestureRecognizer = ZNScreenEdgePanGesture<EdgePanGestureState>(
             begin: { rec in
                 let frame = self.defaultPreviewFrame(from: rec.location(in: self.canvasView))
-                let defaultPreviewImage = UIImage.from(frame: self.view.frame).withBackground(color: UIColor.white)
 
+                let defaultPreviewImage = UIImage.from(frame: self.view.frame).withBackground(color: UIColor.white)
                 let newLevel = NoteModel.NoteLevel.default(preview: defaultPreviewImage, frame: frame)
+
                 let newLevelPreview = self.sublevelPreview(for: newLevel)
                 self.view.addSubview(newLevelPreview)
 
-                return EdgePanGestureState(currentlyDraggedLevel: newLevel,
-                                           currentlyDraggedPreview: newLevelPreview,
-                                           originalFrame: frame)
+                return EdgePanGestureState(sublevel: newLevel,
+                                           currentlyDraggedPreview: newLevelPreview)
         },
             step: { rec, state in
-                let frame = self.defaultPreviewFrame(from: rec.location(in: self.canvasView))
-                state.currentlyDraggedPreview.frame = frame
+                let translation = rec.translation(in: self.view)
+                let oldFrame = state.currentlyDraggedPreview.frame
+                state.currentlyDraggedPreview.frame = CGRect(x: oldFrame.minX + translation.x,
+                                                             y: oldFrame.minY + translation.y,
+                                                             width: oldFrame.width,
+                                                             height: oldFrame.height)
+                rec.setTranslation(CGPoint.zero, in: self.view)
                 return state
         },
             end: { rec, state in
-                let frame = self.defaultPreviewFrame(from: rec.location(in: self.canvasView))
-                state.currentlyDraggedLevel.frame = frame
-                self.subLevelViews[state.currentlyDraggedLevel.id] = state.currentlyDraggedPreview
-                self.addSublevel(sublevel: state.currentlyDraggedLevel)
+                let velocity = rec.velocity(in: self.canvasView)
+                let magnitude: CGFloat = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
+
+                let catapult = Catapult(threshold: 4000, in: self.view) { }
+
+                if catapult.tryFling(velocity, magnitude, state.currentlyDraggedPreview) { return }
+                state.sublevel.frame = state.currentlyDraggedPreview.frame
+                state.currentlyDraggedPreview.removeFromSuperview()
+                self.addSublevel(state.sublevel)
         })
         edgeGestureRecognizer.edges = edge
         edgeGestureRecognizer.delegate = self

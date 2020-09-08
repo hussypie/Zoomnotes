@@ -12,12 +12,10 @@ import PencilKit
 
 class NoteLevelPreview: UIImageView {
     typealias OnResizeEndedCallback = (CGRect) -> Void
-    typealias OnCopyStartedCallback = () -> Void
 
     private var isEdited: Bool
 
     private var onResizeEnded: OnResizeEndedCallback
-    private var onCopyStarted: OnCopyStartedCallback
 
     private func indicator(systemName: String, yOffset: CGFloat) -> UIImageView {
         let imageView = UIImageView(image: UIImage(systemName: systemName))
@@ -56,12 +54,6 @@ class NoteLevelPreview: UIImageView {
         })
     }()
 
-    lazy var copyGesture: ZNTapGestureRecognizer = {
-        return ZNTapGestureRecognizer { _ in
-            self.onCopyStarted()
-        }
-    }()
-
     lazy var darklayer: UIView = {
         let darklayer = UIView(frame: CGRect(x: 0,
                                              y: 0,
@@ -74,12 +66,10 @@ class NoteLevelPreview: UIImageView {
 
     init(frame: CGRect,
          preview: UIImage,
-         resizeEnded: @escaping OnResizeEndedCallback,
-         copyStarted: @escaping OnCopyStartedCallback
+         resizeEnded: @escaping OnResizeEndedCallback
     ) {
         self.isEdited = false
         self.onResizeEnded = resizeEnded
-        self.onCopyStarted = copyStarted
 
         super.init(frame: frame)
 
@@ -91,7 +81,6 @@ class NoteLevelPreview: UIImageView {
         self.addSubview(darklayer)
 
         self.resizeIndicator.addGestureRecognizer(resizeGesture)
-        self.copyIndicator.addGestureRecognizer(copyGesture)
 
         self.layer.shadowPath = UIBezierPath(rect: self.bounds).cgPath
         self.layer.shadowOpacity = 0.1

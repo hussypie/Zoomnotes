@@ -75,23 +75,30 @@ class NoteEditorViewModel: ObservableObject {
         switch command {
         case .move(let level, from: _, to: let destinationFrame):
             sublevels[level.id]!.frame = destinationFrame
+
         case .remove(let level):
             sublevels.removeValue(forKey: level.id)
+
         case .create(let level):
             sublevels[level.id] = level
+
         case .update(let drawing):
             level.data.drawing = drawing
+
         case .refresh(let image):
             level.previewImage = image
             dataModelController.updatePreview()
+
         case .moveToDrawer(let sublevel, frame: let frame):
             self.level.children.removeValue(forKey: sublevel.id)
             sublevel.frame = frame
             drawerContents[sublevel.id] = sublevel
+
         case .moveFromDrawer(let sublevel, frame: let frame):
             self.level.children[sublevel.id] = sublevel
             sublevel.frame = frame
             drawerContents.removeValue(forKey: sublevel.id)
+
         case .resize(let sublevel, from: _, to: let frame):
             sublevel.frame = frame
         }

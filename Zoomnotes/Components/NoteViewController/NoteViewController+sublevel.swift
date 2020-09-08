@@ -44,23 +44,6 @@ extension NoteViewController {
         }
     }
 
-    private func fling(_ velocity: CGPoint, _ magnitude: CGFloat, _ sublevel: NoteModel.NoteLevel) {
-        let velocityPadding: CGFloat  = 35
-        let preview = subLevelViews[sublevel.id]!
-        let animator = UIDynamicAnimator(referenceView: self.view)
-        let pushBehavior = UIPushBehavior(items: [preview], mode: .instantaneous)
-        pushBehavior.pushDirection = CGVector(dx: velocity.x / 10, dy: velocity.y / 10)
-        pushBehavior.magnitude = magnitude / velocityPadding
-
-        animator.addBehavior(pushBehavior)
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-            animator.removeAllBehaviors()
-
-            self.removeSublevel(sublevel: sublevel)
-        }
-    }
-
     private enum MoveOrigin {
         case drawer
         case canvas
@@ -114,12 +97,13 @@ extension NoteViewController {
         let velocity = rec.velocity(in: self.canvasView)
         let magnitude: CGFloat = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
 
-        let threshold: CGFloat = 4000
+        let catapult = Catapult(threshold: 4000, in: self.view) {
+            self.removeSublevel(sublevel)
+        }
 
-        if magnitude > threshold {
-            self.fling(velocity, magnitude, sublevel)
-            // MARK: end snippet
-        } else if self.drawerView.frame.contains(state.dragging.frame) {
+        if catapult.tryFling(velocity, magnitude, state.dragging) { return }
+
+        if self.drawerView.frame.contains(state.dragging.frame) {
             let locInDrawer = rec.location(in: self.drawerView)
             let locInPreview = rec.location(in: state.dragging)
             let frameInDrawer = CGRect(x: locInDrawer.x - locInPreview.x,
@@ -152,30 +136,58 @@ extension NoteViewController {
         }
     }
 
-    private func panGesture(for sublevel: NoteModel.NoteLevel, _ preview: NoteLevelPreview) -> UIPanGestureRecognizer {
+    private func panGesture(for sublevel: NoteModel.NoteLevel, _ preview: NoteLevelPreview) -> ZNPanGestureRecognizer<PanGestureState> {
         return ZNPanGestureRecognizer<PanGestureState>(
             begin: { rec in return self.panGestureBegin(rec, preview) },
             step: self.panGestureStep(_:state:),
-            end: { rec, state in self.panGestureEnded(rec, state: state, sublevel: sublevel)}
+            end: { rec, state in self.panGestureEnded(rec, state: state, sublevel: sublevel) }
         )
     }
 
-    func sublevelPreview(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
-        let preview = NoteLevelPreview(frame: sublevel.frame,
-                                       preview: sublevel.previewImage.image,
-                                       resizeEnded: { frame in
-                                        self.resizePreview(sublevel: sublevel, from: sublevel.frame, to: frame)
-        }, copyStarted: {
-            let newFrame = CGRect(x: sublevel.frame.minX + 100,
-                                  y: sublevel.frame.minY,
-                                  width: sublevel.frame.width,
-                                  height: sublevel.frame.height)
-            let copiedSublevel = NoteModel.NoteLevel(data: sublevel.data,
-                                                     children: sublevel.children,
-                                                     preview: sublevel.previewImage.image,
-                                                     frame: newFrame)
-            self.addSublevel(sublevel: copiedSublevel)
+    private struct CloneGestureState {
+        let originalFrame: CGRect
+        let dragging: NoteLevelPreview
+    }
+
+    private func cloneGesture(for sublevel: NoteModel.NoteLevel) -> ZNPanGestureRecognizer<CloneGestureState> {
+        ZNPanGestureRecognizer<CloneGestureState>(
+            begin: { rec in
+                let newPreview = self.sublevelPreview(for: sublevel)
+                self.canvasView.addSubview(newPreview)
+                return CloneGestureState(originalFrame: sublevel.frame,
+                                         dragging: newPreview)
+        },
+            step: { rec, state in
+                let tran = rec.translation(in: self.canvasView)
+                let frame = CGRect(x: max(0, state.dragging.frame.minX + tran.x),
+                                   y: max(0, state.dragging.frame.minY + tran.y),
+                                   width: state.dragging.frame.width,
+                                   height: state.dragging.frame.height)
+
+                state.dragging.frame = frame
+
+                rec.setTranslation(CGPoint.zero, in: self.canvasView)
+                return state
+        },
+            end: { _, state in
+                let copiedSublevel = NoteModel.NoteLevel(data: sublevel.data,
+                                                         children: sublevel.children,
+                                                         preview: sublevel.previewImage.image,
+                                                         frame: state.dragging.frame)
+                self.addSublevel(copiedSublevel)
+                state.dragging.removeFromSuperview()
+
         })
+    }
+
+    func sublevelPreview(for sublevel: NoteModel.NoteLevel) -> NoteLevelPreview {
+        let preview = NoteLevelPreview(
+            frame: sublevel.frame,
+            preview: sublevel.previewImage.image,
+            resizeEnded: { self.resizePreview(sublevel: sublevel, from: sublevel.frame, to: $0) }
+        )
+
+        preview.copyIndicator.addGestureRecognizer(cloneGesture(for: sublevel))
 
         preview.addGestureRecognizer(panGesture(for: sublevel, preview))
 
