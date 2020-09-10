@@ -8,6 +8,8 @@ target 'Zoomnotes' do
   # Pods for Zoomnotes
   
   pod 'SwiftLint'
+  pod 'PrediKit'
+  pod 'SwiftCheck'
 
   target 'ZoomnotesTests' do
     inherit! :search_paths

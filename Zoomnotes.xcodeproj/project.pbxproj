@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -31,6 +31,8 @@
 		312D7FE824F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312D7FE724F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift */; };
 		31362A5724F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */; };
 		31362A5B24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */; };
+		3142FE83250A81D800002DD8 /* ExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE82250A81D800002DD8 /* ExtensionsTests.swift */; };
+		3142FE84250A820000002DD8 /* UserDefaults+withDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */; };
 		3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */; };
 		31AD9BBF25052EB200C193CF /* NoteEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BBE25052EB200C193CF /* NoteEditorViewModel.swift */; };
 		31AD9BC12506849400C193CF /* NoteViewController+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BC02506849400C193CF /* NoteViewController+Preferences.swift */; };
@@ -41,12 +43,19 @@
 		31AD9BCF2507937300C193CF /* ZNStatefulGestureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BCE2507937300C193CF /* ZNStatefulGestureManager.swift */; };
 		31AD9BD1250793A300C193CF /* ZNScreenEdgePanGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BD0250793A300C193CF /* ZNScreenEdgePanGesture.swift */; };
 		31AD9BD52507B3BB00C193CF /* Catapult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BD42507B3BB00C193CF /* Catapult.swift */; };
+		31AD9BD72507CA9700C193CF /* FileBrowserViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BD62507CA9700C193CF /* FileBrowserViewModel.swift */; };
+		31AD9BDC25093EA600C193CF /* DocumentNodeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BD925093EA600C193CF /* DocumentNodeCell.swift */; };
+		31AD9BDE25093EA600C193CF /* DocumentCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BDB25093EA600C193CF /* DocumentCollectionViewController.swift */; };
+		31AD9BE12509499100C193CF /* DirectoryAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BE02509499100C193CF /* DirectoryAccess.swift */; };
+		31AD9BE325094CB900C193CF /* FileBrowserVM+dragdrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BE225094CB900C193CF /* FileBrowserVM+dragdrop.swift */; };
+		31AD9BE525094D9C00C193CF /* AlertController+closure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BE425094D9C00C193CF /* AlertController+closure.swift */; };
+		31AD9BE7250950C800C193CF /* FileBrowserDBReadingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BE6250950C800C193CF /* FileBrowserDBReadingTests.swift */; };
 		31B1AA3424FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3324FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift */; };
 		31B1AA3624FD3AE4007DAF4D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3524FD3AE4007DAF4D /* SettingsView.swift */; };
 		31B1AA3824FD5DC7007DAF4D /* UserDefaults+withDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */; };
 		31BF9E2C24E5906100142EBF /* NoteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BF9E2B24E5906100142EBF /* NoteModel.swift */; };
 		31D6648B24EC53450062AF8D /* NoteChild.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D6648A24EC53450062AF8D /* NoteChild.swift */; };
-		31D6648D24EC53890062AF8D /* NoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D6648C24EC53890062AF8D /* NoteImage.swift */; };
+		31D6648D24EC53890062AF8D /* CodableImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D6648C24EC53890062AF8D /* CodableImage.swift */; };
 		31D6648F24ED1D470062AF8D /* NoteLevelPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D6648E24ED1D470062AF8D /* NoteLevelPreview.swift */; };
 		F7F6F47D55BB5C37777B55B9 /* Pods_Zoomnotes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41CA6B1C7B18B29005E678AC /* Pods_Zoomnotes.framework */; };
 		F885CBA636E12959C8D6828F /* Pods_ZoomnotesTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE82804B11FC6B424862CD52 /* Pods_ZoomnotesTests.framework */; };
@@ -99,6 +108,7 @@
 		312D7FE724F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteLevel+NSItemProviderWriting.swift"; sourceTree = "<group>"; };
 		31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+UINavigationControllerDelegate.swift"; sourceTree = "<group>"; };
 		31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNSwipeGesturerecognizer.swift; sourceTree = "<group>"; };
+		3142FE82250A81D800002DD8 /* ExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionsTests.swift; sourceTree = "<group>"; };
 		3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNTapGestureRecognizer.swift; sourceTree = "<group>"; };
 		31AD9BBE25052EB200C193CF /* NoteEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorViewModel.swift; sourceTree = "<group>"; };
 		31AD9BC02506849400C193CF /* NoteViewController+Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+Preferences.swift"; sourceTree = "<group>"; };
@@ -109,12 +119,19 @@
 		31AD9BCE2507937300C193CF /* ZNStatefulGestureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNStatefulGestureManager.swift; sourceTree = "<group>"; };
 		31AD9BD0250793A300C193CF /* ZNScreenEdgePanGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNScreenEdgePanGesture.swift; sourceTree = "<group>"; };
 		31AD9BD42507B3BB00C193CF /* Catapult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Catapult.swift; sourceTree = "<group>"; };
+		31AD9BD62507CA9700C193CF /* FileBrowserViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserViewModel.swift; sourceTree = "<group>"; };
+		31AD9BD925093EA600C193CF /* DocumentNodeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentNodeCell.swift; sourceTree = "<group>"; };
+		31AD9BDB25093EA600C193CF /* DocumentCollectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentCollectionViewController.swift; sourceTree = "<group>"; };
+		31AD9BE02509499100C193CF /* DirectoryAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryAccess.swift; sourceTree = "<group>"; };
+		31AD9BE225094CB900C193CF /* FileBrowserVM+dragdrop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileBrowserVM+dragdrop.swift"; sourceTree = "<group>"; };
+		31AD9BE425094D9C00C193CF /* AlertController+closure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlertController+closure.swift"; sourceTree = "<group>"; };
+		31AD9BE6250950C800C193CF /* FileBrowserDBReadingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserDBReadingTests.swift; sourceTree = "<group>"; };
 		31B1AA3324FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+fromStoryBoard.swift"; sourceTree = "<group>"; };
 		31B1AA3524FD3AE4007DAF4D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+withDefault.swift"; sourceTree = "<group>"; };
 		31BF9E2B24E5906100142EBF /* NoteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteModel.swift; sourceTree = "<group>"; };
 		31D6648A24EC53450062AF8D /* NoteChild.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteChild.swift; sourceTree = "<group>"; };
-		31D6648C24EC53890062AF8D /* NoteImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteImage.swift; sourceTree = "<group>"; };
+		31D6648C24EC53890062AF8D /* CodableImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableImage.swift; sourceTree = "<group>"; };
 		31D6648E24ED1D470062AF8D /* NoteLevelPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteLevelPreview.swift; sourceTree = "<group>"; };
 		41CA6B1C7B18B29005E678AC /* Pods_Zoomnotes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Zoomnotes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		485C114CAEE2DCFC02846656 /* Pods-ZoomnotesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZoomnotesTests.release.xcconfig"; path = "Target Support Files/Pods-ZoomnotesTests/Pods-ZoomnotesTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -199,6 +216,7 @@
 		3101754624E5211F007D3589 /* ZoomnotesTests */ = {
 			isa = PBXGroup;
 			children = (
+				31AD9BE6250950C800C193CF /* FileBrowserDBReadingTests.swift */,
 				3101754724E5211F007D3589 /* ZoomnotesTests.swift */,
 				3101754924E5211F007D3589 /* Info.plist */,
 			);
@@ -208,6 +226,7 @@
 		3101755124E5211F007D3589 /* ZoomnotesUITests */ = {
 			isa = PBXGroup;
 			children = (
+				3142FE82250A81D800002DD8 /* ExtensionsTests.swift */,
 				3101755224E5211F007D3589 /* ZoomnotesUITests.swift */,
 				3101755424E5211F007D3589 /* Info.plist */,
 			);
@@ -217,6 +236,7 @@
 		3101756024E52F6B007D3589 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				31AD9BDF2509494800C193CF /* Core Data Reading */,
 				310A5C7324F42388006394A0 /* NoteModel */,
 				3101756124E52F77007D3589 /* DrawingModel.swift */,
 			);
@@ -233,6 +253,7 @@
 				31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */,
 				31AD9BC22506A59D00C193CF /* CGRect+half.swift */,
 				31AD9BD42507B3BB00C193CF /* Catapult.swift */,
+				31AD9BE425094D9C00C193CF /* AlertController+closure.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -240,6 +261,7 @@
 		3101756624E530D1007D3589 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				31AD9BD82507CDE300C193CF /* FileBrowser */,
 				31362A5524F831D70002FD98 /* NoteViewController */,
 				31E58E0324F95EA20052997D /* Drawer */,
 				310A5C7024F42338006394A0 /* NotePreview */,
@@ -272,7 +294,7 @@
 			children = (
 				31BF9E2B24E5906100142EBF /* NoteModel.swift */,
 				31D6648A24EC53450062AF8D /* NoteChild.swift */,
-				31D6648C24EC53890062AF8D /* NoteImage.swift */,
+				31D6648C24EC53890062AF8D /* CodableImage.swift */,
 				312D7FE724F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift */,
 			);
 			path = NoteModel;
@@ -317,8 +339,27 @@
 			isa = PBXGroup;
 			children = (
 				31AD9BBE25052EB200C193CF /* NoteEditorViewModel.swift */,
+				31AD9BD62507CA9700C193CF /* FileBrowserViewModel.swift */,
+				31AD9BE225094CB900C193CF /* FileBrowserVM+dragdrop.swift */,
 			);
 			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		31AD9BD82507CDE300C193CF /* FileBrowser */ = {
+			isa = PBXGroup;
+			children = (
+				31AD9BDB25093EA600C193CF /* DocumentCollectionViewController.swift */,
+				31AD9BD925093EA600C193CF /* DocumentNodeCell.swift */,
+			);
+			path = FileBrowser;
+			sourceTree = "<group>";
+		};
+		31AD9BDF2509494800C193CF /* Core Data Reading */ = {
+			isa = PBXGroup;
+			children = (
+				31AD9BE02509499100C193CF /* DirectoryAccess.swift */,
+			);
+			path = "Core Data Reading";
 			sourceTree = "<group>";
 		};
 		31E58E0324F95EA20052997D /* Drawer */ = {
@@ -364,6 +405,7 @@
 				3101752724E5211D007D3589 /* Frameworks */,
 				3101752824E5211D007D3589 /* Resources */,
 				31AD9BBC250525F000C193CF /* ShellScript */,
+				C2BD0266E8DD74C052E04733 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -401,6 +443,7 @@
 				3101754A24E5211F007D3589 /* Sources */,
 				3101754B24E5211F007D3589 /* Frameworks */,
 				3101754C24E5211F007D3589 /* Resources */,
+				E0A9A6148B74FD633D08F729 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -545,6 +588,40 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		C2BD0266E8DD74C052E04733 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Zoomnotes/Pods-Zoomnotes-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Zoomnotes/Pods-Zoomnotes-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Zoomnotes/Pods-Zoomnotes-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E0A9A6148B74FD633D08F729 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		FA55D72B0D0050F893EA56B8 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -578,19 +655,23 @@
 				31AD9BC32506A59D00C193CF /* CGRect+half.swift in Sources */,
 				3101756A24E531D1007D3589 /* NoteViewController.swift in Sources */,
 				310A5C6F24F411F1006394A0 /* UIImage.swift in Sources */,
+				31AD9BE325094CB900C193CF /* FileBrowserVM+dragdrop.swift in Sources */,
 				312820CD24F6963B00338E28 /* CGRect+center.swift in Sources */,
 				31AD9BC52507700900C193CF /* NoteViewController+commands.swift in Sources */,
+				31AD9BE525094D9C00C193CF /* AlertController+closure.swift in Sources */,
 				31D6648B24EC53450062AF8D /* NoteChild.swift in Sources */,
 				3101756F24E53778007D3589 /* NoteCollectionViewCell.swift in Sources */,
 				3101753824E5211D007D3589 /* Zoomnotes.xcdatamodeld in Sources */,
 				31AD9BC72507759400C193CF /* NoteViewController+utils.swift in Sources */,
 				31362A5724F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift in Sources */,
+				31AD9BDC25093EA600C193CF /* DocumentNodeCell.swift in Sources */,
 				31AD9BC12506849400C193CF /* NoteViewController+Preferences.swift in Sources */,
-				31D6648D24EC53890062AF8D /* NoteImage.swift in Sources */,
+				31D6648D24EC53890062AF8D /* CodableImage.swift in Sources */,
 				312D7FE824F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift in Sources */,
 				31B1AA3424FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift in Sources */,
 				312820CF24F69A2700338E28 /* Graphics.swift in Sources */,
 				31AD9BCF2507937300C193CF /* ZNStatefulGestureManager.swift in Sources */,
+				31AD9BE12509499100C193CF /* DirectoryAccess.swift in Sources */,
 				3101756524E52FED007D3589 /* ZoomNotesNavigationController.swift in Sources */,
 				312820CB24F6926B00338E28 /* ZNPinchGestureRecognizer.swift in Sources */,
 				310A5C6D24F40A44006394A0 /* ZNPanGestureRecognizer.swift in Sources */,
@@ -598,7 +679,9 @@
 				31362A5B24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift in Sources */,
 				31AD9BD52507B3BB00C193CF /* Catapult.swift in Sources */,
 				3101756224E52F77007D3589 /* DrawingModel.swift in Sources */,
+				31AD9BDE25093EA600C193CF /* DocumentCollectionViewController.swift in Sources */,
 				3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */,
+				31AD9BD72507CA9700C193CF /* FileBrowserViewModel.swift in Sources */,
 				31BF9E2C24E5906100142EBF /* NoteModel.swift in Sources */,
 				31B1AA3824FD5DC7007DAF4D /* UserDefaults+withDefault.swift in Sources */,
 				31AD9BC925077FBB00C193CF /* NoteViewController+sublevel.swift in Sources */,
@@ -616,7 +699,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3142FE84250A820000002DD8 /* UserDefaults+withDefault.swift in Sources */,
 				3101754824E5211F007D3589 /* ZoomnotesTests.swift in Sources */,
+				31AD9BE7250950C800C193CF /* FileBrowserDBReadingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -625,6 +710,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3101755324E5211F007D3589 /* ZoomnotesUITests.swift in Sources */,
+				3142FE83250A81D800002DD8 /* ExtensionsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

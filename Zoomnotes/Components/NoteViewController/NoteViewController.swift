@@ -46,7 +46,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
             begin: { rec in
                 let frame = self.defaultPreviewFrame(from: rec.location(in: self.canvasView))
 
-                let defaultPreviewImage = UIImage.from(frame: self.view.frame).withBackground(color: UIColor.white)
+                let defaultPreviewImage = UIImage.from(size: self.view.frame.size).withBackground(color: UIColor.white)
                 let newLevel = NoteModel.NoteLevel.default(preview: defaultPreviewImage, frame: frame)
 
                 let newLevelPreview = self.sublevelPreview(for: newLevel)
@@ -76,8 +76,8 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 state.currentlyDraggedPreview.removeFromSuperview()
                 self.addSublevel(state.sublevel)
         })
+
         edgeGestureRecognizer.edges = edge
-        edgeGestureRecognizer.delegate = self
         #if targetEnvironment(simulator)
         #else
         edgeGestureRecognizer.allowedTouchTypes = [ UITouch.TouchType.pencil ]
@@ -150,8 +150,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         NSLayoutConstraint.activate([
             self.drawerView!.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.drawerView!.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            self.drawerView!.heightAnchor.constraint(equalTo: self.view.heightAnchor,
-                                                     constant: -2 * self.view.frame.height / 3)
+            self.drawerView!.heightAnchor.constraint(equalToConstant: -2 * self.view.frame.height / 3)
         ])
     }
 
@@ -203,7 +202,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
     @objc private func updateDrawingMeta() {
         let screen = captureCurrentScreen()
-        self.viewModel.process(.refresh(NoteImage(wrapping: screen)))
+        self.viewModel.process(.refresh(CodableImage(wrapping: screen)))
     }
 
     func onPreviewZoomUp(_ rec: ZNPinchGestureRecognizer) {

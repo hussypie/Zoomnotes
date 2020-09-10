@@ -9,6 +9,6 @@
 import Foundation
 
 enum NoteChild {
-    case image(NoteImage)
+    case image(CodableImage)
     case level(NoteModel.NoteLevel)
 }

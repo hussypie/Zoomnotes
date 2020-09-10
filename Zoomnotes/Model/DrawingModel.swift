@@ -56,7 +56,7 @@ class DataModelController {
         let url = saveURL
         serializationQueue.async {
             do {
-                let encoder = PropertyListEncoder()
+                let encoder = JSONEncoder()
                 let data = try encoder.encode(savingDataModel)
                 try data.write(to: url)
             } catch {
@@ -70,7 +70,7 @@ class DataModelController {
         serializationQueue.async {
             if FileManager.default.fileExists(atPath: url.path) {
                 do {
-                    let decoder = PropertyListDecoder()
+                    let decoder = JSONDecoder()
                     let data = try Data(contentsOf: url)
                     let dataModel = try decoder.decode(DrawingModel.self, from: data)
 

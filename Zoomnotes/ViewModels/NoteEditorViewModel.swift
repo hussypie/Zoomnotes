@@ -17,11 +17,12 @@ enum NoteEditorCommand {
     case create(NoteModel.NoteLevel)
     case resize(NoteModel.NoteLevel, from: CGRect, to: CGRect)
     case update(PKDrawing)
-    case refresh(NoteImage)
+    case refresh(CodableImage)
     case moveToDrawer(NoteModel.NoteLevel, frame: CGRect)
     case moveFromDrawer(NoteModel.NoteLevel, frame: CGRect)
 }
 
+// TODO: test
 class NoteEditorViewModel: ObservableObject {
     let note: NoteModel
     let level: NoteModel.NoteLevel

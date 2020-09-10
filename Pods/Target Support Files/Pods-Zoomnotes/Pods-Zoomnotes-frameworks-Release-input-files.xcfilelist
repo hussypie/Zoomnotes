@@ -1,2 +1,3 @@
 ${PODS_ROOT}/Target Support Files/Pods-Zoomnotes/Pods-Zoomnotes-frameworks.sh
-${BUILT_PRODUCTS_DIR}/DrawerView/DrawerView.framework
+${BUILT_PRODUCTS_DIR}/PrediKit/PrediKit.framework
+${BUILT_PRODUCTS_DIR}/SwiftCheck/SwiftCheck.framework

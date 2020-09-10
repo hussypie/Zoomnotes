@@ -1,16 +1,24 @@
 PODS:
+  - PrediKit (4.0.0)
+  - SwiftCheck (0.12.0)
   - SwiftLint (0.40.1)
 
 DEPENDENCIES:
+  - PrediKit
+  - SwiftCheck
   - SwiftLint
 
 SPEC REPOS:
   trunk:
+    - PrediKit
+    - SwiftCheck
     - SwiftLint
 
 SPEC CHECKSUMS:
+  PrediKit: b8c45a86e6793e31d14a52dfc545fabe3a5b8e52
+  SwiftCheck: d1dd04d955cc76620b0f84e087536bd059a11c24
   SwiftLint: bbfed21bf4451dcbd0f5cdbee44a18e06cf91b12
 
-PODFILE CHECKSUM: 3f8f52178ac40575aee32e44dbc1594e084c4f55
+PODFILE CHECKSUM: 0543fe506ea13ddc5fcb01d52a13430650c213b3
 
 COCOAPODS: 1.8.4

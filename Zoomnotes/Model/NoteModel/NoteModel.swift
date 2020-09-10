@@ -15,14 +15,14 @@ class NoteModel: Codable {
         let id: UUID
         var data: NoteData
         var children: [UUID: NoteLevel]
-        var previewImage: NoteImage
+        var previewImage: CodableImage
         var frame: CGRect
 
         required init(data: NoteData, children: [UUID: NoteLevel], preview: UIImage, frame: CGRect) {
             self.id = UUID()
             self.data = data
             self.children = children
-            self.previewImage = NoteImage(wrapping: preview)
+            self.previewImage = CodableImage(wrapping: preview)
             self.frame = frame
         }
 
@@ -33,9 +33,9 @@ class NoteModel: Codable {
 
     class NoteData: Codable {
         var drawing: PKDrawing
-        var images: [UUID: NoteImage]
+        var images: [UUID: CodableImage]
 
-        init(drawing: PKDrawing, images: [UUID: NoteImage]) {
+        init(drawing: PKDrawing, images: [UUID: CodableImage]) {
             self.drawing = drawing
             self.images = images
         }
@@ -65,5 +65,31 @@ class NoteModel: Codable {
 
     static func `default`(image: UIImage, frame: CGRect) -> NoteModel {
         NoteModel(title: "Untitled", root: NoteLevel.default(preview: image, frame: frame))
+    }
+}
+
+extension NoteModel {
+    func serialize(done: @escaping (Data) -> Void, error: @escaping (Error) -> Void) {
+        let encoder = JSONEncoder()
+        DispatchQueue.main.async {
+            do {
+                let json = try encoder.encode(self)
+                done(json)
+            } catch let err {
+                error(err)
+            }
+        }
+    }
+
+    static func from(data: Data, done: @escaping (NoteModel) -> Void, error: @escaping (Error) -> Void) {
+        let decoder = JSONDecoder()
+        DispatchQueue.main.async {
+            do {
+                let note = try decoder.decode(NoteModel.self, from: data)
+                done(note)
+            } catch let err {
+                error(err)
+            }
+        }
     }
 }

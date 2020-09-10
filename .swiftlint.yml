@@ -11,4 +11,5 @@ enabled_rules:
 excluded:
   - Zoomnotes/SceneDelegate.swift
   - Zoomnotes/AppDelegate.swift
+  - Pods/*
 

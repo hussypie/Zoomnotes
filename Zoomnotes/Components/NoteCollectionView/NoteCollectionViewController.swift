@@ -22,7 +22,7 @@ class NoteCollectionViewController: UICollectionViewController, DataModelControl
     }()
 
     @IBAction func newDrawing(_ sender: Any) {
-        let previewImage = UIImage.from(frame: view.frame).withBackground(color: UIColor.white)
+        let previewImage = UIImage.from(size: view.frame.size).withBackground(color: UIColor.white)
         dataModelController.newDrawing(with: previewImage)
     }
 

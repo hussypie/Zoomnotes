@@ -28,8 +28,8 @@ extension UIImage {
 }
 
 extension UIImage {
-    static func from(frame: CGRect) -> UIImage {
-        UIGraphicsBeginImageContext(frame.size)
+    static func from(size: CGSize) -> UIImage {
+        UIGraphicsBeginImageContext(size)
         let image = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
         return image
