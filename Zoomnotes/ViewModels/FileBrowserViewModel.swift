@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import Combine
+import CoreData
 
 enum FileBrowserCommand {
     case createFile
@@ -83,118 +84,216 @@ enum Node: Codable, Equatable {
 }
 
 class FileVM: NSObject, ObservableObject, Codable {
-    let id = UUID()
-
+    let id: UUID
     var preview: CodableImage
     var name: String
     var lastModified: Date
 
-    required init(preview: UIImage, name: String, lastModified: Date) {
+    required init(id: UUID, preview: UIImage, name: String, lastModified: Date) {
+        self.id = id
         self.preview = CodableImage(wrapping: preview)
         self.name = name
         self.lastModified = lastModified
     }
+
+    static func fresh(preview: UIImage, name: String, created on: Date) -> FileVM {
+        return FileVM(id: UUID(),
+                      preview: preview,
+                      name: name,
+                      lastModified: on)
+    }
+
 }
 
 class DirectoryVM: NSObject, ObservableObject, Codable {
-    let id = UUID()
-    var nodes: [Node]
+    let id: UUID
     var name: String
     var created: Date
 
-    required init(name: String, created: Date, nodes: [Node]) {
+    required init(id: UUID, name: String, created: Date) {
+        self.id = id
         self.name = name
         self.created = created
-        self.nodes = nodes
+    }
+
+    static func fresh(name: String, created: Date) -> DirectoryVM {
+        return DirectoryVM(id: UUID(), name: name, created: created)
     }
 
     static var `default`: DirectoryVM {
-        return DirectoryVM(name: "Documents", created: Date(), nodes: [])
+        return DirectoryVM.fresh(name: "Documents", created: Date())
     }
 }
 
 class FolderBrowserViewModel: ObservableObject {
-    private var folderModel: DirectoryVM
-
+    private let directoryId: UUID
     @Published private(set) var nodes: [Node]
     @Published private(set) var title: String
 
-    private var cancellables: Set<AnyCancellable> = []
+    private var cdaccess: CoreDataAccess
 
-    static func root() -> FolderBrowserViewModel {
-        return FolderBrowserViewModel(folder: DirectoryAccess().root())
+    static func root(defaults: UserDefaults, using moc: NSManagedObjectContext) -> FolderBrowserViewModel {
+        let access = CoreDataAccess(using: moc)
+        let rootDirIdPlaceholder: String? = defaults.withDefault(.rootDirectoryId, default: nil)
+        if let rootDirId: String = rootDirIdPlaceholder {
+            do {
+                let id: UUID = UUID(uuidString: rootDirId)!
+                guard let rootDir = try access.directory.read(id: id) else {
+                    fatalError("Cannot find root dir, although id is noted")
+                }
+                let directoryChildren =
+                    try access.directory
+                        .children(of: id)
+                        .map { Node.directory($0) }
+
+                let documentChildren =
+                    try access.file
+                        .children(of: rootDir.id)
+                        .map { Node.file($0) }
+
+                return FolderBrowserViewModel(directoryId: id,
+                                              name: rootDir.name,
+                                              nodes: directoryChildren + documentChildren,
+                                              access: access)
+            } catch let error {
+                fatalError(error.localizedDescription)
+            }
+        } else {
+            let defaultRootDir = DirectoryVM.fresh(name: "Documents", created: Date())
+            do {
+                try access.directory.create(from: defaultRootDir, with: defaultRootDir.id)
+                defaults.set(.rootDirectoryId, value: defaultRootDir.id.uuidString)
+            } catch let error {
+                fatalError(error.localizedDescription)
+            }
+        }
+
+        return FolderBrowserViewModel.stub
     }
 
-    init(folder: DirectoryVM) {
-        self.folderModel = folder
+    init(directoryId: UUID, name: String, nodes: [Node], access: CoreDataAccess) {
+        self.directoryId = directoryId
+        self.nodes = nodes
+        self.title = name
 
-        self.nodes = folder.nodes
-        self.title = folder.name
-
-        self.$nodes
-            .sink(receiveValue: { self.folderModel.nodes = $0})
-            .store(in: &cancellables)
+        self.cdaccess = access
     }
 
-    private func newFile() -> Node {
+    private func newFile() -> FileVM {
         let defaultImage = UIImage.from(size: CGSize(width: 300, height: 200)).withBackground(color: UIColor.white)
-        return .file(FileVM(preview: defaultImage, name: "Untitled", lastModified: Date()))
+        return FileVM.fresh(preview: defaultImage, name: "Untitled", created: Date())
     }
 
-    private func newDirectory() -> Node {
-        return .directory(DirectoryVM(name: "Untitled", created: Date(), nodes: []))
+    private func newDirectory() -> DirectoryVM {
+        return DirectoryVM.fresh(name: "Untitled", created: Date())
+    }
+
+    private func delete(_ node: Node) {
+        do {
+            switch node {
+            case .directory(let dir):
+                try self.cdaccess.directory.delete(directory: dir)
+            case .file(let file):
+                try self.cdaccess.file.delete(file)
+            }
+            self.nodes = self.nodes.filter { $0.id != node.id }
+        } catch let error {
+            fatalError(error.localizedDescription)
+        }
+    }
+
+    private func createFile(_ file: FileVM) {
+        do {
+            try self.cdaccess.file.create(from: file, with: self.directoryId)
+            self.nodes.append(.file(file))
+        } catch let error {
+            fatalError(error.localizedDescription)
+        }
+    }
+
+    private func createFolder(_ folder: DirectoryVM) {
+        do {
+            try self.cdaccess.directory.create(from: folder, with: self.directoryId)
+            self.nodes.append(.directory(folder))
+        } catch let error {
+            fatalError(error.localizedDescription)
+        }
     }
 
     private func move(_ node: Node, to dest: DirectoryVM) {
-        guard let selectedNodeIdx = self.folderModel.nodes.firstIndex(where: { $0.id == node.id }) else {
-            return
+        do {
+            switch node {
+            case .directory(let dir):
+                try self.cdaccess.directory.reparent(from: self.directoryId, node: dir, to: dest.id)
+            case .file(let file):
+                try self.cdaccess.file.reparent(from: self.directoryId, file: file, to: dest.id)
+            }
+
+            self.nodes = self.nodes.filter { $0.id != node.id }
+        } catch let error {
+            fatalError(error.localizedDescription)
         }
-        self.nodes.remove(at: selectedNodeIdx)
-        dest.nodes.append(node)
     }
 
-    func process(command: FileBrowserCommand) {
-        switch command {
-        case .delete(let node):
-            self.nodes = self.nodes.filter { $0.id != node.id }
+    private func rename(_ node: Node, to name: String) {
+        do {
+            switch node {
+            case .directory(let dir):
+                try self.cdaccess.directory.updateName(for: dir, to: name)
+            case .file(let file):
+                try self.cdaccess.file.updateName(of: file, to: name)
+            }
 
-        case .createFile:
-            self.nodes.append(self.newFile())
-
-        case .createDirectory:
-            self.nodes.append(self.newDirectory())
-
-        case .move(let node, to: let dest):
-            self.move(node, to: dest)
-
-        case .rename(let node, to: let name):
             self.nodes = self.nodes.map {
                 if $0.id == node.id {
                     switch $0 {
                     case .directory(let dir):
                         dir.name = name
+
                     case .file(let file):
                         file.name = name
+
                     }
                 }
                 return $0
             }
+        } catch let error {
+            fatalError(error.localizedDescription)
+        }
+    }
+
+    func process(command: FileBrowserCommand) {
+        switch command {
+        case .delete(let node):
+            self.delete(node)
+
+        case .createFile:
+            self.createFile(self.newFile())
+
+        case .createDirectory:
+            self.createFolder(self.newDirectory())
+
+        case .move(let node, to: let dest):
+            self.move(node, to: dest)
+
+        case .rename(let node, to: let name):
+            self.rename(node, to: name)
         }
     }
 }
 
 extension FolderBrowserViewModel {
     static var stub: FolderBrowserViewModel {
-        let dir = DirectoryVM(name: "Documents", created: Date(), nodes: [])
-        let vm = FolderBrowserViewModel(folder: dir)
-
-        return vm
+        return FolderBrowserViewModel(directoryId: UUID(),
+                                      name: "Stub folder",
+                                      nodes: [],
+                                      access: CoreDataAccess.stub)
     }
 
     static func stub(nodes: [Node]) -> FolderBrowserViewModel {
-        let dir = DirectoryVM(name: "Documents", created: Date(), nodes: nodes)
-        let vm = FolderBrowserViewModel(folder: dir)
-
-        return vm
+        return FolderBrowserViewModel(directoryId: UUID(),
+                                      name: "Stub folder",
+                                      nodes: nodes,
+                                      access: CoreDataAccess.stub)
     }
 }

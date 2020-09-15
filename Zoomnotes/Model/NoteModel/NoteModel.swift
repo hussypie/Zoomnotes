@@ -93,3 +93,9 @@ extension NoteModel {
         }
     }
 }
+
+extension NoteModel {
+    static var stub: NoteModel {
+        return NoteModel.default(image: .checkmark, frame: CGRect(x: 0, y: 0, width: 200, height: 300))
+    }
+}

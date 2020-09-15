@@ -10,7 +10,7 @@ import XCTest
 import CoreData
 @testable import Zoomnotes
 
-class FileBrowserDBReadingTests: XCTestCase {
+class FileBrowserVMTests: XCTestCase {
     func testCreateFile() {
         let vm = FolderBrowserViewModel.stub
 
@@ -39,15 +39,14 @@ class FileBrowserDBReadingTests: XCTestCase {
         }
 
         XCTAssertTrue(dir.name == "Untitled")
-        XCTAssertTrue(dir.nodes.isEmpty)
     }
 
     func testDeleteNode() {
-        let node: Node = .file(FileVM(preview: .remove, name: "Stuff I'd rather forget", lastModified: Date().advanced(by: -24*60*60)))
+        let node: Node = .file(FileVM.fresh(preview: .remove, name: "Stuff I'd rather forget", created: Date().advanced(by: -24*60*60)))
         let nodes: [Node] = [
             node,
-            .file(FileVM(preview: .actions, name: "Best Schwarzenegger Movies", lastModified: Date())),
-            .file(FileVM(preview: .checkmark, name: "TODOs", lastModified: Date()))
+            .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
+            .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
         ]
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
 
@@ -57,11 +56,11 @@ class FileBrowserDBReadingTests: XCTestCase {
     }
 
     func testDeleteNodeNonExistentNode() {
-        let node: Node = .file(FileVM(preview: .remove, name: "Stuff I'd rather forget", lastModified: Date().advanced(by: -24*60*60)))
+        let node: Node = .file(FileVM.fresh(preview: .remove, name: "Stuff I'd rather forget", created: Date().advanced(by: -24*60*60)))
 
         let nodes: [Node] = [
-            .file(FileVM(preview: .actions, name: "Best Schwarzenegger Movies", lastModified: Date())),
-            .file(FileVM(preview: .checkmark, name: "TODOs", lastModified: Date()))
+            .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
+            .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
         ]
 
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
@@ -72,12 +71,12 @@ class FileBrowserDBReadingTests: XCTestCase {
     }
 
     func testRenameNode() {
-        let node: Node = .file(FileVM(preview: .remove, name: "Stuff I'd rather forget", lastModified: Date().advanced(by: -24*60*60)))
+        let node: Node = .file(FileVM.fresh(preview: .remove, name: "Stuff I'd rather forget", created: Date().advanced(by: -24*60*60)))
 
         let nodes: [Node] = [
             node,
-            .file(FileVM(preview: .actions, name: "Best Schwarzenegger Movies", lastModified: Date())),
-            .file(FileVM(preview: .checkmark, name: "TODOs", lastModified: Date()))
+            .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
+            .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
         ]
 
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
@@ -91,11 +90,11 @@ class FileBrowserDBReadingTests: XCTestCase {
     }
 
     func testRenameNodeNonExistentNode() {
-        let node: Node = .file(FileVM(preview: .remove, name: "Stuff I'd rather forget", lastModified: Date().advanced(by: -24*60*60)))
+        let node: Node = .file(FileVM.fresh(preview: .remove, name: "Stuff I'd rather forget", created: Date().advanced(by: -24*60*60)))
 
         let nodes: [Node] = [
-            .file(FileVM(preview: .actions, name: "Best Schwarzenegger Movies", lastModified: Date())),
-            .file(FileVM(preview: .checkmark, name: "TODOs", lastModified: Date()))
+            .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
+            .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
         ]
 
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
@@ -109,15 +108,15 @@ class FileBrowserDBReadingTests: XCTestCase {
     }
 
     func testMoveNodeToDirectory() {
-        let node: Node = .file(FileVM(preview: .remove, name: "Stuff I'd rather forget", lastModified: Date().advanced(by: -24*60*60)))
+        let node: Node = .file(FileVM.fresh(preview: .remove, name: "Stuff I'd rather forget", created: Date().advanced(by: -24*60*60)))
 
-        let dir: DirectoryVM = DirectoryVM(name: "Don't look here", created: Date(), nodes: [])
+        let dir: DirectoryVM = DirectoryVM.fresh(name: "Don't look here", created: Date())
 
         let nodes: [Node] = [
             node,
             .directory(dir),
-            .file(FileVM(preview: .actions, name: "Best Schwarzenegger Movies", lastModified: Date())),
-            .file(FileVM(preview: .checkmark, name: "TODOs", lastModified: Date()))
+            .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
+            .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
         ]
 
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
@@ -128,11 +127,5 @@ class FileBrowserDBReadingTests: XCTestCase {
 
         XCTAssert(vm.nodes.count == originalNodeCount - 1)
         XCTAssert(vm.nodes.filter { $0.id == node.id }.isEmpty)
-        XCTAssert(dir.nodes.count == 1)
-        guard let nodeInDir = dir.nodes.filter({ $0.id == node.id }).first else {
-            XCTFail("Moved node not in destination folder")
-            return
-        }
-        XCTAssert(node.id == nodeInDir.id)
     }
 }

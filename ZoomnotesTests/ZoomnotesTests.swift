@@ -45,4 +45,9 @@ class ZoomnotesTests: XCTestCase {
                 })
         }
     }
+
+    func testHalfOpposite() {
+        XCTAssert(Half.left.opposite  == .right)
+        XCTAssert(Half.right.opposite == .left)
+    }
 }

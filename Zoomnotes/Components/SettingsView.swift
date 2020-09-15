@@ -13,7 +13,7 @@ struct SettingsView: View {
         Binding(get: {
             UserDefaults.standard.withDefault(.statusBarVisible, default: true)
         }, set: {
-            UserDefaults.standard.set($0, forKey: UserDefaultsKey.statusBarVisible.rawValue)
+            UserDefaults.standard.set(.statusBarVisible, value: $0)
         })
     }
 

@@ -9,6 +9,7 @@
 import UIKit
 import Combine
 import SwiftUI
+import CoreData
 
 class DocumentCollectionViewController: UICollectionViewController {
     private var folderVM: FolderBrowserViewModel!
@@ -21,6 +22,11 @@ class DocumentCollectionViewController: UICollectionViewController {
         return dateFormatter
     }()
 
+    lazy var moc: NSManagedObjectContext = {
+        // swiftlint:disable:next force_cast
+        return (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    }()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -28,7 +34,9 @@ class DocumentCollectionViewController: UICollectionViewController {
         collectionView.dropDelegate = self
 
         if folderVM == nil {
-            folderVM = FolderBrowserViewModel.root()
+            folderVM = FolderBrowserViewModel.stub
+//            folderVM = FolderBrowserViewModel.root(defaults: UserDefaults.standard,
+//                                                   using: self.moc)
         }
 
         folderVM.$title
@@ -47,15 +55,33 @@ class DocumentCollectionViewController: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return folderVM.nodes.count
+        return 3 // folderVM.nodes.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let index = indexPath.last else { fatalError() }
 
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DocumentNodeCell.identifier, for: indexPath) as? DocumentNodeCell else { fatalError() }
-        let node = folderVM.nodes[index]
+//        let node = folderVM.nodes[index]
 
+        if index == 0 {
+            return nodeCell(using: cell, with: .directory(DirectoryVM.fresh(name: "My favorite creations",
+                                                                      created: Date())))
+        }
+
+        if index == 1 {
+            return nodeCell(using: cell, with: .file(FileVM.fresh(preview: UIImage.from(size: CGSize(width: 300, height: 200)).withBackground(color: .green),
+                                                                  name: "Map of Amazonas",
+                                                                  created: Date())))
+        }
+
+        return nodeCell(using: cell, with: .file(FileVM.fresh(preview: UIImage.from(size: CGSize(width: 300, height: 200)).withBackground(color: .blue),
+                                                              name: "Map of Pacific Ocean",
+                                                              created: Date())))
+//        return nodeCell(using: cell, with: node)
+    }
+
+    private func nodeCell(using cell: DocumentNodeCell, with node: Node) -> DocumentNodeCell {
         let name: Binding<String>
         switch node {
         case .file(let doc):
@@ -101,13 +127,12 @@ class DocumentCollectionViewController: UICollectionViewController {
                 return
             case .directory(let subFolder):
                 guard let folderBrowser = self.storyboard?.instantiateViewController(identifier: String(describing: DocumentCollectionViewController.self)) as? DocumentCollectionViewController else { return }
-                folderBrowser.folderVM = FolderBrowserViewModel(folder: subFolder)
+                folderBrowser.folderVM = FolderBrowserViewModel.stub
                 self.navigationController?.pushViewController(folderBrowser, animated: true)
             }
         })
 
         return cell
-
     }
 
     private func adderSheet() -> UIAlertController {
@@ -169,4 +194,16 @@ extension DocumentCollectionViewController: UICollectionViewDropDelegate {
             return
         }
     }
+}
+
+extension DocumentCollectionViewController {
+    @IBAction func onSettingsButtonClick(_ sender: Any) {
+        let settingsController = UIHostingController(rootView: SettingsView())
+        self.navigationController?.pushViewController(settingsController, animated: true)
+    }
+
+    @IBAction func onAddNewButtonClicked(_ sender: Any) {
+        print("Add new item")
+    }
+
 }

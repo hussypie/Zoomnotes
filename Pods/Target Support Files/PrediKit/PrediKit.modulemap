@@ -1,0 +1,6 @@
+framework module PrediKit {
+  umbrella header "PrediKit-umbrella.h"
+
+  export *
+  module * { export * }
+}

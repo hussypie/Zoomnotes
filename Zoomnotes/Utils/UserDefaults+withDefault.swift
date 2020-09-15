@@ -21,4 +21,8 @@ extension UserDefaults {
     func withDefault<T>(_ key: UserDefaultsKey, default value: T) -> T {
         return self.withDefaultValue(key.rawValue, default: value)
     }
+
+    func set<T>(_ key: UserDefaultsKey, value: T) {
+        self.set(value, forKey: key.rawValue)
+    }
 }

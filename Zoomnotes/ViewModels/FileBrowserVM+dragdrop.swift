@@ -65,9 +65,7 @@ extension DirectoryVM: NSItemProviderReading {
                   DirectoryVM.self, forKey: NSKeyedArchiveRootObjectKey) else {
                     throw EncodingError.invalidData
               }
-                return self.init(name: folder.name,
-                                 created: folder.created,
-                                 nodes: folder.nodes)
+                return self.init(id: folder.id, name: folder.name, created: folder.created)
             } catch {
                 throw EncodingError.invalidData
             }
@@ -91,7 +89,8 @@ extension FileVM: NSItemProviderReading {
                   FileVM.self, forKey: NSKeyedArchiveRootObjectKey) else {
                     throw EncodingError.invalidData
               }
-                return self.init(preview: document.preview.image,
+                return self.init(id: document.id,
+                                 preview: document.preview.image,
                                  name: document.name,
                                  lastModified: document.lastModified)
             } catch {
