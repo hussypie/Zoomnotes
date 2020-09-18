@@ -10,6 +10,7 @@ target 'Zoomnotes' do
   pod 'SwiftLint'
   pod 'PrediKit'
   pod 'SwiftCheck'
+  pod 'Introspect'
 
   target 'ZoomnotesTests' do
     inherit! :search_paths

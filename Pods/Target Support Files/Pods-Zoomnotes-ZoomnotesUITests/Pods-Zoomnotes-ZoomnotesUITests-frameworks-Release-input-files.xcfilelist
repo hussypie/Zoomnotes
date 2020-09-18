@@ -1,3 +1,4 @@
 ${PODS_ROOT}/Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests-frameworks.sh
+${BUILT_PRODUCTS_DIR}/Introspect/Introspect.framework
 ${BUILT_PRODUCTS_DIR}/PrediKit/PrediKit.framework
 ${BUILT_PRODUCTS_DIR}/SwiftCheck/SwiftCheck.framework

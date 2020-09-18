@@ -39,6 +39,7 @@
 		313B6CE42511125B00789595 /* FileBrowserBoundaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313B6CE32511125B00789595 /* FileBrowserBoundaryTests.swift */; };
 		313B6CE62511612B00789595 /* XCTestCase+asynch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313B6CE52511612B00789595 /* XCTestCase+asynch.swift */; };
 		313B6CEC25155B0300789595 /* NodeDetailEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313B6CEB25155B0300789595 /* NodeDetailEditor.swift */; };
+		313B6CEE2515629100789595 /* OkayableTextfield.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313B6CED2515629100789595 /* OkayableTextfield.swift */; };
 		3142FE83250A81D800002DD8 /* ExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE82250A81D800002DD8 /* ExtensionsTests.swift */; };
 		3142FE86250B59AF00002DD8 /* NoteEditorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE85250B59AF00002DD8 /* NoteEditorTests.swift */; };
 		3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */; };
@@ -123,6 +124,7 @@
 		313B6CE32511125B00789595 /* FileBrowserBoundaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserBoundaryTests.swift; sourceTree = "<group>"; };
 		313B6CE52511612B00789595 /* XCTestCase+asynch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+asynch.swift"; sourceTree = "<group>"; };
 		313B6CEB25155B0300789595 /* NodeDetailEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeDetailEditor.swift; sourceTree = "<group>"; };
+		313B6CED2515629100789595 /* OkayableTextfield.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OkayableTextfield.swift; sourceTree = "<group>"; };
 		3142FE82250A81D800002DD8 /* ExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionsTests.swift; sourceTree = "<group>"; };
 		3142FE85250B59AF00002DD8 /* NoteEditorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorTests.swift; sourceTree = "<group>"; };
 		3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNTapGestureRecognizer.swift; sourceTree = "<group>"; };
@@ -370,6 +372,7 @@
 			isa = PBXGroup;
 			children = (
 				313B6CEB25155B0300789595 /* NodeDetailEditor.swift */,
+				313B6CED2515629100789595 /* OkayableTextfield.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -716,6 +719,7 @@
 				3101756524E52FED007D3589 /* ZoomNotesNavigationController.swift in Sources */,
 				312820CB24F6926B00338E28 /* ZNPinchGestureRecognizer.swift in Sources */,
 				310F03D12510DE31000CF0F0 /* CoreDataAccess.swift in Sources */,
+				313B6CEE2515629100789595 /* OkayableTextfield.swift in Sources */,
 				310F03D32510DF1D000CF0F0 /* ManagedContext+inMemory.swift in Sources */,
 				310A5C6D24F40A44006394A0 /* ZNPanGestureRecognizer.swift in Sources */,
 				31D6648F24ED1D470062AF8D /* NoteLevelPreview.swift in Sources */,

@@ -10,16 +10,21 @@ import SwiftUI
 
 struct NodeDetailEditor: View {
     private let onDelete: () -> Void
-    @Binding var name: String
+    private let onTextfieldEdtitingChanged: (String) -> Void
+    var name: String
 
-    init(name: Binding<String>, onDelete: @escaping () -> Void) {
-        self._name = name
+    init(name: String,
+         onTextfieldEdtitingChanged: @escaping (String) -> Void,
+         onDelete: @escaping () -> Void
+    ) {
+        self.name = name
+        self.onTextfieldEdtitingChanged = onTextfieldEdtitingChanged
         self.onDelete = onDelete
     }
 
     var body: some View {
         VStack(alignment: .leading) {
-            TextField("Name", text: $name)
+            OkayableTextfield("Title", text: self.name, onCommit: self.onTextfieldEdtitingChanged)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             Divider()
             Button(action: self.onDelete,
@@ -36,6 +41,8 @@ struct NodeDetailEditor: View {
 
 struct NodeDetailEditor_Previews: PreviewProvider {
     static var previews: some View {
-        NodeDetailEditor(name: .constant("Title"), onDelete: { })
+        NodeDetailEditor(name: "Title",
+                         onTextfieldEdtitingChanged: { print($0) },
+                         onDelete: { })
     }
 }

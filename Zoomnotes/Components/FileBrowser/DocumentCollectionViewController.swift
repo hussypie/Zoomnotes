@@ -72,22 +72,22 @@ class DocumentCollectionViewController: UICollectionViewController {
     }
 
     private func nodeCell(using cell: DocumentNodeCell, with node: Node) -> DocumentNodeCell {
-        let name: Binding<String>
+        cell.nameLabel.text = node.name
+        cell.dateLabel.text = dateLabelFormatter.string(from: node.date)
+
         switch node {
         case .file(let doc):
             cell.image.image = doc.preview.image
-            cell.nameLabel.text = doc.name
-            name = .init(get: { doc.name }, set: { doc.name = $0 })
-        case .directory(let folder):
+        case .directory:
             cell.image.image = UIImage(named: "folder")
-            cell.nameLabel.text = folder.name
-            name = .init(get: { folder.name }, set: { folder.name = $0 })
         }
 
-        cell.dateLabel.text = dateLabelFormatter.string(from: node.date)
-
         cell.detailsIndicator.addGestureRecognizer(ZNTapGestureRecognizer { _ in
-            let editor = NodeDetailEditor(name: name,
+            let editor = NodeDetailEditor(name: node.name,
+                                          onTextfieldEdtitingChanged: {
+                                            self.folderVM.process(command: .rename(node, to: $0))
+                                            self.dismiss(animated: true, completion: nil)
+            },
                                           onDelete: {
                                             self.folderVM.process(command: .delete(node))
                                             self.dismiss(animated: true, completion: nil)

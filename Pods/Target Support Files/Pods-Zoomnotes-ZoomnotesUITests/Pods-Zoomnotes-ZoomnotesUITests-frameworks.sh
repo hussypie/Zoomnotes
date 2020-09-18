@@ -161,10 +161,12 @@ strip_invalid_archs() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/Introspect/Introspect.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/PrediKit/PrediKit.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SwiftCheck/SwiftCheck.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/Introspect/Introspect.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/PrediKit/PrediKit.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SwiftCheck/SwiftCheck.framework"
 fi
