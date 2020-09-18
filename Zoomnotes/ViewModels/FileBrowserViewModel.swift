@@ -134,16 +134,14 @@ class FolderBrowserViewModel: ObservableObject {
 
     static func root(defaults: UserDefaults, using moc: NSManagedObjectContext) -> FolderBrowserViewModel {
         let access = CoreDataAccess(using: moc)
-        let rootDirIdPlaceholder: String? = defaults.withDefault(.rootDirectoryId, default: nil)
-        if let rootDirId: String = rootDirIdPlaceholder {
+        if let rootDirId: UUID = defaults.uuid(forKey: UserDefaultsKey.rootDirectoryId.rawValue) {
             do {
-                let id: UUID = UUID(uuidString: rootDirId)!
-                guard let rootDir = try access.directory.read(id: id) else {
+                guard let rootDir = try access.directory.read(id: rootDirId) else {
                     fatalError("Cannot find root dir, although id is noted")
                 }
                 let directoryChildren =
                     try access.directory
-                        .children(of: id)
+                        .children(of: rootDir.id)
                         .map { Node.directory($0) }
 
                 let documentChildren =
@@ -151,24 +149,27 @@ class FolderBrowserViewModel: ObservableObject {
                         .children(of: rootDir.id)
                         .map { Node.file($0) }
 
-                return FolderBrowserViewModel(directoryId: id,
+                return FolderBrowserViewModel(directoryId: rootDir.id,
                                               name: rootDir.name,
                                               nodes: directoryChildren + documentChildren,
                                               access: access)
             } catch let error {
                 fatalError(error.localizedDescription)
             }
-        } else {
-            let defaultRootDir = DirectoryVM.fresh(name: "Documents", created: Date())
-            do {
-                try access.directory.create(from: defaultRootDir, with: defaultRootDir.id)
-                defaults.set(.rootDirectoryId, value: defaultRootDir.id.uuidString)
-            } catch let error {
-                fatalError(error.localizedDescription)
-            }
         }
 
-        return FolderBrowserViewModel.stub
+        let defaultRootDir = DirectoryVM.fresh(name: "Documents", created: Date())
+        do {
+            try access.directory.create(from: defaultRootDir, with: defaultRootDir.id)
+            defaults.set(defaultRootDir.id, forKey: UserDefaultsKey.rootDirectoryId.rawValue)
+        } catch let error {
+            fatalError(error.localizedDescription)
+        }
+
+        return FolderBrowserViewModel(directoryId: defaultRootDir.id,
+                                      name: defaultRootDir.name,
+                                      nodes: [],
+                                      access: access)
     }
 
     init(directoryId: UUID, name: String, nodes: [Node], access: CoreDataAccess) {
@@ -177,6 +178,25 @@ class FolderBrowserViewModel: ObservableObject {
         self.title = name
 
         self.cdaccess = access
+    }
+
+    func subFolderBrowserVM(for directory: DirectoryVM) -> FolderBrowserViewModel? {
+        do {
+            let directoryChildren =
+                try self.cdaccess.directory
+                    .children(of: directory.id)
+                    .map { Node.directory($0) }
+            let documentChilden =
+                try self.cdaccess.file
+                    .children(of: directory.id)
+                    .map { Node.file($0) }
+            return FolderBrowserViewModel(directoryId: directory.id,
+                                          name: directory.name,
+                                          nodes: directoryChildren + documentChilden,
+                                          access: self.cdaccess)
+        } catch let error {
+            fatalError(error.localizedDescription)
+        }
     }
 
     private func newFile() -> FileVM {

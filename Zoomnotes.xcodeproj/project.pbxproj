@@ -37,6 +37,8 @@
 		31362A5724F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */; };
 		31362A5B24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */; };
 		313B6CE42511125B00789595 /* FileBrowserBoundaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313B6CE32511125B00789595 /* FileBrowserBoundaryTests.swift */; };
+		313B6CE62511612B00789595 /* XCTestCase+asynch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313B6CE52511612B00789595 /* XCTestCase+asynch.swift */; };
+		313B6CEC25155B0300789595 /* NodeDetailEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313B6CEB25155B0300789595 /* NodeDetailEditor.swift */; };
 		3142FE83250A81D800002DD8 /* ExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE82250A81D800002DD8 /* ExtensionsTests.swift */; };
 		3142FE86250B59AF00002DD8 /* NoteEditorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE85250B59AF00002DD8 /* NoteEditorTests.swift */; };
 		3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */; };
@@ -119,6 +121,8 @@
 		31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+UINavigationControllerDelegate.swift"; sourceTree = "<group>"; };
 		31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNSwipeGesturerecognizer.swift; sourceTree = "<group>"; };
 		313B6CE32511125B00789595 /* FileBrowserBoundaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserBoundaryTests.swift; sourceTree = "<group>"; };
+		313B6CE52511612B00789595 /* XCTestCase+asynch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+asynch.swift"; sourceTree = "<group>"; };
+		313B6CEB25155B0300789595 /* NodeDetailEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeDetailEditor.swift; sourceTree = "<group>"; };
 		3142FE82250A81D800002DD8 /* ExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionsTests.swift; sourceTree = "<group>"; };
 		3142FE85250B59AF00002DD8 /* NoteEditorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorTests.swift; sourceTree = "<group>"; };
 		3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNTapGestureRecognizer.swift; sourceTree = "<group>"; };
@@ -269,6 +273,7 @@
 				31AD9BD42507B3BB00C193CF /* Catapult.swift */,
 				31AD9BE425094D9C00C193CF /* AlertController+closure.swift */,
 				310F03D22510DF1D000CF0F0 /* ManagedContext+inMemory.swift */,
+				313B6CE52511612B00789595 /* XCTestCase+asynch.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -276,6 +281,7 @@
 		3101756624E530D1007D3589 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				313B6CE925155ADD00789595 /* SwiftUI */,
 				31AD9BD82507CDE300C193CF /* FileBrowser */,
 				31362A5524F831D70002FD98 /* NoteViewController */,
 				31E58E0324F95EA20052997D /* Drawer */,
@@ -358,6 +364,14 @@
 				31AD9BC825077FBB00C193CF /* NoteViewController+sublevel.swift */,
 			);
 			path = NoteViewController;
+			sourceTree = "<group>";
+		};
+		313B6CE925155ADD00789595 /* SwiftUI */ = {
+			isa = PBXGroup;
+			children = (
+				313B6CEB25155B0300789595 /* NodeDetailEditor.swift */,
+			);
+			path = SwiftUI;
 			sourceTree = "<group>";
 		};
 		31AD9BBD25052E9E00C193CF /* ViewModels */ = {
@@ -679,6 +693,7 @@
 				312820D624F826EF00338E28 /* DrawerView.swift in Sources */,
 				31AD9BC32506A59D00C193CF /* CGRect+half.swift in Sources */,
 				3101756A24E531D1007D3589 /* NoteViewController.swift in Sources */,
+				313B6CEC25155B0300789595 /* NodeDetailEditor.swift in Sources */,
 				310A5C6F24F411F1006394A0 /* UIImage.swift in Sources */,
 				31AD9BE325094CB900C193CF /* FileBrowserVM+dragdrop.swift in Sources */,
 				312820CD24F6963B00338E28 /* CGRect+center.swift in Sources */,
@@ -709,6 +724,7 @@
 				3101756224E52F77007D3589 /* DrawingModel.swift in Sources */,
 				31AD9BDE25093EA600C193CF /* DocumentCollectionViewController.swift in Sources */,
 				3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */,
+				313B6CE62511612B00789595 /* XCTestCase+asynch.swift in Sources */,
 				31AD9BD72507CA9700C193CF /* FileBrowserViewModel.swift in Sources */,
 				31BF9E2C24E5906100142EBF /* NoteModel.swift in Sources */,
 				31B1AA3824FD5DC7007DAF4D /* UserDefaults+withDefault.swift in Sources */,

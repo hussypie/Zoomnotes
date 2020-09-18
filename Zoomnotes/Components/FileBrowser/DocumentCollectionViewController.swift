@@ -19,6 +19,7 @@ class DocumentCollectionViewController: UICollectionViewController {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .short
         dateFormatter.timeStyle = .short
+        dateFormatter.doesRelativeDateFormatting = true
         return dateFormatter
     }()
 
@@ -33,10 +34,11 @@ class DocumentCollectionViewController: UICollectionViewController {
         collectionView.dragDelegate = self
         collectionView.dropDelegate = self
 
+        self.navigationItem.leftItemsSupplementBackButton = true
+
         if folderVM == nil {
-            folderVM = FolderBrowserViewModel.stub
-//            folderVM = FolderBrowserViewModel.root(defaults: UserDefaults.standard,
-//                                                   using: self.moc)
+            folderVM = FolderBrowserViewModel.root(defaults: UserDefaults.standard,
+                                                   using: self.moc)
         }
 
         folderVM.$title
@@ -55,30 +57,18 @@ class DocumentCollectionViewController: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 3 // folderVM.nodes.count
+        return folderVM.nodes.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let index = indexPath.last else { fatalError() }
+        guard let index = indexPath.last else { fatalError("Indexpath has no `last` component") }
 
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DocumentNodeCell.identifier, for: indexPath) as? DocumentNodeCell else { fatalError() }
-//        let node = folderVM.nodes[index]
-
-        if index == 0 {
-            return nodeCell(using: cell, with: .directory(DirectoryVM.fresh(name: "My favorite creations",
-                                                                      created: Date())))
+        let node = folderVM.nodes[index]
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: DocumentNodeCell.self),
+                                                      for: indexPath) as? DocumentNodeCell else {
+                                                        fatalError("Unknown cell type dequeued")
         }
-
-        if index == 1 {
-            return nodeCell(using: cell, with: .file(FileVM.fresh(preview: UIImage.from(size: CGSize(width: 300, height: 200)).withBackground(color: .green),
-                                                                  name: "Map of Amazonas",
-                                                                  created: Date())))
-        }
-
-        return nodeCell(using: cell, with: .file(FileVM.fresh(preview: UIImage.from(size: CGSize(width: 300, height: 200)).withBackground(color: .blue),
-                                                              name: "Map of Pacific Ocean",
-                                                              created: Date())))
-//        return nodeCell(using: cell, with: node)
+        return nodeCell(using: cell, with: node)
     }
 
     private func nodeCell(using cell: DocumentNodeCell, with node: Node) -> DocumentNodeCell {
@@ -96,39 +86,29 @@ class DocumentCollectionViewController: UICollectionViewController {
 
         cell.dateLabel.text = dateLabelFormatter.string(from: node.date)
 
-        cell.detailsIndicator.addGestureRecognizer(ZNTapGestureRecognizer { rec in
-            if rec.state == .ended {
-                let optionsVC = UIHostingController(rootView: VStack {
-                    TextField("Name",
-                              text: name,
-                              onEditingChanged: { _ in },
-                              onCommit: {
-                                self.folderVM.process(command: .rename(node, to: name.wrappedValue))
-                                self.collectionView.reloadData()
-                    })
-                        .cornerRadius(5)
-                        .border(Color.black, width: 3)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    Button(action: {
-                        self.folderVM.process(command: .delete(node))
-                        self.collectionView.reloadData()
-                    }, label: {
-                        Text("Delete") }).foregroundColor(Color.red)
-                })
-                optionsVC.modalPresentationStyle = .popover
-                optionsVC.popoverPresentationController?.sourceView = cell.detailsIndicator
-                self.present(optionsVC, animated: true, completion: nil)
-            }
+        cell.detailsIndicator.addGestureRecognizer(ZNTapGestureRecognizer { _ in
+            let editor = NodeDetailEditor(name: name,
+                                          onDelete: {
+                                            self.folderVM.process(command: .delete(node))
+                                            self.dismiss(animated: true, completion: nil)
+            })
+
+            let optionsVC = UIHostingController(rootView: editor)
+
+            optionsVC.modalPresentationStyle = .popover
+            optionsVC.popoverPresentationController?.sourceView = cell.detailsIndicator
+            optionsVC.preferredContentSize = CGSize(width: 200,
+                                                    height: optionsVC.view.intrinsicContentSize.height)
+
+            self.present(optionsVC, animated: true, completion: nil)
         })
 
         cell.addGestureRecognizer(ZNTapGestureRecognizer { _ in
             switch node {
-            case .file:
-                return
+            case .file(let note):
+                self.openNoteEditor(for: note)
             case .directory(let subFolder):
-                guard let folderBrowser = self.storyboard?.instantiateViewController(identifier: String(describing: DocumentCollectionViewController.self)) as? DocumentCollectionViewController else { return }
-                folderBrowser.folderVM = FolderBrowserViewModel.stub
-                self.navigationController?.pushViewController(folderBrowser, animated: true)
+                self.navigateTo(folder: subFolder)
             }
         })
 
@@ -150,6 +130,17 @@ class DocumentCollectionViewController: UICollectionViewController {
             ]
         }
         return alert
+    }
+
+    private func navigateTo(folder: DirectoryVM) {
+        guard let destinationViewController =
+            DocumentCollectionViewController.from(storyboard: self.storyboard) else { return }
+        destinationViewController.folderVM = self.folderVM.subFolderBrowserVM(for: folder)
+        self.navigationController?.pushViewController(destinationViewController, animated: true)
+    }
+
+    private func openNoteEditor(for note: FileVM) {
+        print("Open note view controller")
     }
 }
 
@@ -203,7 +194,30 @@ extension DocumentCollectionViewController {
     }
 
     @IBAction func onAddNewButtonClicked(_ sender: Any) {
-        print("Add new item")
+        guard let addButton = sender as? UIBarButtonItem else { return }
+        let adderSheet = UIAlertController(title: nil,
+                                           message: "Add a note or a folder",
+                                           preferredStyle: .actionSheet)
+        adderSheet.addAction(
+            UIAlertAction(title: "Note",
+                          style: .default) { _ in
+                            self.folderVM.process(command: .createFile)
+        })
+        adderSheet.addAction(
+            UIAlertAction(title: "Folder",
+                          style: .default) { _ in
+                            self.folderVM.process(command: .createDirectory)
+        })
+
+        adderSheet.popoverPresentationController?.barButtonItem = addButton
+
+        self.present(adderSheet, animated: true, completion: nil)
     }
 
+}
+
+extension DocumentCollectionViewController {
+    static func from(storyboard: UIStoryboard?) -> DocumentCollectionViewController? {
+        return storyboard?.instantiateViewController(identifier: String(describing: DocumentCollectionViewController.self)) as? DocumentCollectionViewController
+    }
 }

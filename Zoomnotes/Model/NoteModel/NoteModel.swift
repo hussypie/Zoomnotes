@@ -69,23 +69,28 @@ class NoteModel: Codable {
 }
 
 extension NoteModel {
-    func serialize(done: @escaping (Data) -> Void, error: @escaping (Error) -> Void) {
+    func serialize(done: @escaping (String) -> Void, error: @escaping (Error) -> Void) {
         let encoder = JSONEncoder()
         DispatchQueue.main.async {
             do {
                 let json = try encoder.encode(self)
-                done(json)
+                let jsonString = String(data: json, encoding: String.Encoding.utf8)
+
+                assert(jsonString != nil)
+                done(jsonString!)
             } catch let err {
                 error(err)
             }
         }
     }
 
-    static func from(data: Data, done: @escaping (NoteModel) -> Void, error: @escaping (Error) -> Void) {
+    static func from(json string: String, done: @escaping (NoteModel) -> Void, error: @escaping (Error) -> Void) {
         let decoder = JSONDecoder()
         DispatchQueue.main.async {
             do {
-                let note = try decoder.decode(NoteModel.self, from: data)
+                let data = string.data(using: .utf8)
+                assert(data != nil)
+                let note = try decoder.decode(NoteModel.self, from: data!)
                 done(note)
             } catch let err {
                 error(err)

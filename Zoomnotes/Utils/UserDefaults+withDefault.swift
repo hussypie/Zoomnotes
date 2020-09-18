@@ -25,4 +25,15 @@ extension UserDefaults {
     func set<T>(_ key: UserDefaultsKey, value: T) {
         self.set(value, forKey: key.rawValue)
     }
+
+    func set(_ value: UUID, forKey: String) {
+        self.set(value.uuidString, forKey: forKey)
+    }
+
+    func uuid(forKey: String) -> UUID? {
+        guard let uuidString = self.string(forKey: forKey) else { return nil }
+        return UUID(uuidString: uuidString)
+    }
+
+
 }
