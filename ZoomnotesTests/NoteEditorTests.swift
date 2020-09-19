@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import PencilKit
 @testable import Zoomnotes
 
 //enum NoteEditorCommand {
@@ -19,6 +20,31 @@ import XCTest
 //    case moveToDrawer(NoteModel.NoteLevel, frame: CGRect)
 //    case moveFromDrawer(NoteModel.NoteLevel, frame: CGRect)
 //}
+
+/*
+    Editing:
+    create:         nothing => canvas
+    remove:         canvas => nothing
+    move:           canvas => canvas
+    moveToDrawer:   canvas => drawer
+    moveFromDrawer: drawer => canvas
+    resize:         updates child view frame
+    update:         updates canvas drawing
+    refresh:        updates child view preview image
+*/
+
+extension NoteEditorViewModel {
+    static var stub: NoteEditorViewModel {
+        let level = NoteModel.NoteLevel(data: NoteModel.NoteData(drawing: PKDrawing(),
+                                                                 images: [:]),
+                                        children: [:],
+                                        preview: .add,
+                                        frame: CGRect())
+        let note = NoteModel(id: UUID(), title: "Title", root: level)
+        return NoteEditorViewModel(note: note, level: level, dataModelController: DataModelController())
+    }
+}
+
 
 class NoteEditorTests: XCTestCase {
     func testCreate() {

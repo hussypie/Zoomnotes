@@ -105,15 +105,3 @@ class NoteEditorViewModel: ObservableObject {
         eventSubject.send(command)
     }
 }
-
-extension NoteEditorViewModel {
-    static var stub: NoteEditorViewModel {
-        let level = NoteModel.NoteLevel(data: NoteModel.NoteData(drawing: PKDrawing(),
-                                                                 images: [:]),
-                                        children: [:],
-                                        preview: .add,
-                                        frame: CGRect())
-        let note = NoteModel(id: UUID(), title: "Title", root: level)
-        return NoteEditorViewModel(note: note, level: level, dataModelController: DataModelController())
-    }
-}

@@ -29,12 +29,13 @@
 		310F03D12510DE31000CF0F0 /* CoreDataAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310F03D02510DE31000CF0F0 /* CoreDataAccess.swift */; };
 		310F03D32510DF1D000CF0F0 /* ManagedContext+inMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310F03D22510DF1D000CF0F0 /* ManagedContext+inMemory.swift */; };
 		3121A8312516007D00D8AD37 /* String+empty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3121A8302516007D00D8AD37 /* String+empty.swift */; };
+		3121A83425160E7A00D8AD37 /* NoteModelAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3121A83325160E7A00D8AD37 /* NoteModelAccess.swift */; };
+		3121A83625168D7A00D8AD37 /* NoteModelDBAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3121A83525168D7A00D8AD37 /* NoteModelDBAccessTests.swift */; };
 		312820CB24F6926B00338E28 /* ZNPinchGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820CA24F6926B00338E28 /* ZNPinchGestureRecognizer.swift */; };
 		312820CD24F6963B00338E28 /* CGRect+center.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820CC24F6963B00338E28 /* CGRect+center.swift */; };
 		312820CF24F69A2700338E28 /* Graphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820CE24F69A2700338E28 /* Graphics.swift */; };
 		312820D224F6B76200338E28 /* ZoomTransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820D124F6B76200338E28 /* ZoomTransitionAnimator.swift */; };
 		312820D624F826EF00338E28 /* DrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820D524F826EF00338E28 /* DrawerView.swift */; };
-		312D7FE824F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312D7FE724F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift */; };
 		31362A5724F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */; };
 		31362A5B24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */; };
 		313B6CE42511125B00789595 /* FileBrowserBoundaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313B6CE32511125B00789595 /* FileBrowserBoundaryTests.swift */; };
@@ -115,12 +116,13 @@
 		310F03D02510DE31000CF0F0 /* CoreDataAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataAccess.swift; sourceTree = "<group>"; };
 		310F03D22510DF1D000CF0F0 /* ManagedContext+inMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ManagedContext+inMemory.swift"; sourceTree = "<group>"; };
 		3121A8302516007D00D8AD37 /* String+empty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+empty.swift"; sourceTree = "<group>"; };
+		3121A83325160E7A00D8AD37 /* NoteModelAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteModelAccess.swift; sourceTree = "<group>"; };
+		3121A83525168D7A00D8AD37 /* NoteModelDBAccessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteModelDBAccessTests.swift; sourceTree = "<group>"; };
 		312820CA24F6926B00338E28 /* ZNPinchGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNPinchGestureRecognizer.swift; sourceTree = "<group>"; };
 		312820CC24F6963B00338E28 /* CGRect+center.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+center.swift"; sourceTree = "<group>"; };
 		312820CE24F69A2700338E28 /* Graphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graphics.swift; sourceTree = "<group>"; };
 		312820D124F6B76200338E28 /* ZoomTransitionAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomTransitionAnimator.swift; sourceTree = "<group>"; };
 		312820D524F826EF00338E28 /* DrawerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawerView.swift; sourceTree = "<group>"; };
-		312D7FE724F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteLevel+NSItemProviderWriting.swift"; sourceTree = "<group>"; };
 		31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+UINavigationControllerDelegate.swift"; sourceTree = "<group>"; };
 		31362A5A24F83F410002FD98 /* ZNSwipeGesturerecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNSwipeGesturerecognizer.swift; sourceTree = "<group>"; };
 		313B6CE32511125B00789595 /* FileBrowserBoundaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserBoundaryTests.swift; sourceTree = "<group>"; };
@@ -150,7 +152,7 @@
 		31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+withDefault.swift"; sourceTree = "<group>"; };
 		31BF9E2B24E5906100142EBF /* NoteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteModel.swift; sourceTree = "<group>"; };
 		31D6648A24EC53450062AF8D /* NoteChild.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteChild.swift; sourceTree = "<group>"; };
-		31D6648C24EC53890062AF8D /* CodableImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableImage.swift; sourceTree = "<group>"; };
+		31D6648C24EC53890062AF8D /* CodableImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CodableImage.swift; path = ../Model/NoteModel/CodableImage.swift; sourceTree = "<group>"; };
 		31D6648E24ED1D470062AF8D /* NoteLevelPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteLevelPreview.swift; sourceTree = "<group>"; };
 		41CA6B1C7B18B29005E678AC /* Pods_Zoomnotes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Zoomnotes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		485C114CAEE2DCFC02846656 /* Pods-ZoomnotesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZoomnotesTests.release.xcconfig"; path = "Target Support Files/Pods-ZoomnotesTests/Pods-ZoomnotesTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -235,6 +237,7 @@
 		3101754624E5211F007D3589 /* ZoomnotesTests */ = {
 			isa = PBXGroup;
 			children = (
+				3121A83525168D7A00D8AD37 /* NoteModelDBAccessTests.swift */,
 				313B6CE32511125B00789595 /* FileBrowserBoundaryTests.swift */,
 				310F03B8251009A6000CF0F0 /* FileBrowserDBAccessTests.swift */,
 				310F03B62510095B000CF0F0 /* FileBrowserDBReadingTests.swift */,
@@ -273,6 +276,7 @@
 				312820CC24F6963B00338E28 /* CGRect+center.swift */,
 				312820CE24F69A2700338E28 /* Graphics.swift */,
 				31B1AA3724FD5DC7007DAF4D /* UserDefaults+withDefault.swift */,
+				31D6648C24EC53890062AF8D /* CodableImage.swift */,
 				31AD9BC22506A59D00C193CF /* CGRect+half.swift */,
 				31AD9BD42507B3BB00C193CF /* Catapult.swift */,
 				31AD9BE425094D9C00C193CF /* AlertController+closure.swift */,
@@ -320,8 +324,6 @@
 			children = (
 				31BF9E2B24E5906100142EBF /* NoteModel.swift */,
 				31D6648A24EC53450062AF8D /* NoteChild.swift */,
-				31D6648C24EC53890062AF8D /* CodableImage.swift */,
-				312D7FE724F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift */,
 			);
 			path = NoteModel;
 			sourceTree = "<group>";
@@ -334,6 +336,14 @@
 				310F03D02510DE31000CF0F0 /* CoreDataAccess.swift */,
 			);
 			path = FileBrowser;
+			sourceTree = "<group>";
+		};
+		3121A83225160E6200D8AD37 /* NoteEditor */ = {
+			isa = PBXGroup;
+			children = (
+				3121A83325160E7A00D8AD37 /* NoteModelAccess.swift */,
+			);
+			path = NoteEditor;
 			sourceTree = "<group>";
 		};
 		312820D024F6B75300338E28 /* Animator */ = {
@@ -402,6 +412,7 @@
 		31AD9BDF2509494800C193CF /* Core Data Stack */ = {
 			isa = PBXGroup;
 			children = (
+				3121A83225160E6200D8AD37 /* NoteEditor */,
 				310F03CF2510DE03000CF0F0 /* FileBrowser */,
 			);
 			path = "Core Data Stack";
@@ -714,7 +725,6 @@
 				310F03BB25100CA3000CF0F0 /* DocumentAccess.swift in Sources */,
 				31AD9BC12506849400C193CF /* NoteViewController+Preferences.swift in Sources */,
 				31D6648D24EC53890062AF8D /* CodableImage.swift in Sources */,
-				312D7FE824F93117008B13F8 /* NoteLevel+NSItemProviderWriting.swift in Sources */,
 				31B1AA3424FD1C05007DAF4D /* NoteViewController+fromStoryBoard.swift in Sources */,
 				312820CF24F69A2700338E28 /* Graphics.swift in Sources */,
 				31AD9BCF2507937300C193CF /* ZNStatefulGestureManager.swift in Sources */,
@@ -739,6 +749,7 @@
 				3101752E24E5211D007D3589 /* AppDelegate.swift in Sources */,
 				3101753024E5211D007D3589 /* SceneDelegate.swift in Sources */,
 				31AD9BD1250793A300C193CF /* ZNScreenEdgePanGesture.swift in Sources */,
+				3121A83425160E7A00D8AD37 /* NoteModelAccess.swift in Sources */,
 				312820D224F6B76200338E28 /* ZoomTransitionAnimator.swift in Sources */,
 				31AD9BBF25052EB200C193CF /* NoteEditorViewModel.swift in Sources */,
 				3101756C24E5366A007D3589 /* NoteCollectionViewController.swift in Sources */,
@@ -754,6 +765,7 @@
 				3142FE86250B59AF00002DD8 /* NoteEditorTests.swift in Sources */,
 				310F03B72510095B000CF0F0 /* FileBrowserDBReadingTests.swift in Sources */,
 				310F03B9251009A6000CF0F0 /* FileBrowserDBAccessTests.swift in Sources */,
+				3121A83625168D7A00D8AD37 /* NoteModelDBAccessTests.swift in Sources */,
 				313B6CE42511125B00789595 /* FileBrowserBoundaryTests.swift in Sources */,
 				3101754824E5211F007D3589 /* ZoomnotesTests.swift in Sources */,
 			);
