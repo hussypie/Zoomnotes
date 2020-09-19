@@ -22,11 +22,11 @@ class DocumentAccess {
         case write
     }
 
-    enum AccessError : Error {
+    enum AccessError: Error {
         case moreThanOneUniqueEntry
     }
 
-    private func accessing<T>(to mode: AccessMode, id: UUID, action: (NoteStore?) -> T) throws -> T {
+    private func accessing<T>(to mode: AccessMode, id: UUID, action: (NoteStore?) throws -> T) throws -> T {
         let request: NSFetchRequest<NoteStore> = NoteStore.fetchRequest()
         request.predicate = NSPredicate(format: "id = %@", id as CVarArg)
 
@@ -34,7 +34,7 @@ class DocumentAccess {
 
         guard results.count < 2 else { throw AccessError.moreThanOneUniqueEntry }
 
-        let result = action(results.first)
+        let result = try action(results.first)
 
         if mode == .write {
             try self.moc.save()
@@ -53,15 +53,23 @@ class DocumentAccess {
         }
     }
 
-    func updateLastModified(of file: FileVM, with date: Date) throws {
-        try accessing(to: .write, id: file.id) { store in
+    func noteModel(of id: UUID) throws -> NoteModel? {
+        return try accessing(to: .read, id: id) { store in
+            guard let store = store else { return nil }
+            assert(store.data != nil)
+            return try NoteModel.from(json: store.data!)
+        }
+    }
+
+    func updateLastModified(of file: UUID, with date: Date) throws {
+        try accessing(to: .write, id: file) { store in
             guard let store = store else { return }
             store.lastModified = date
         }
     }
 
-    func updateData(of file: FileVM, with data: String) throws {
-        try accessing(to: .write, id: file.id) { store in
+    func updateData(of file: UUID, with data: String) throws {
+        try accessing(to: .write, id: file) { store in
             guard let store = store else { return }
             store.data = data
         }
@@ -74,15 +82,15 @@ class DocumentAccess {
         }
     }
 
-    func updateName(of file: FileVM, to name: String) throws {
-        try accessing(to: .write, id: file.id) { store in
+    func updateName(of file: UUID, to name: String) throws {
+        try accessing(to: .write, id: file) { store in
             guard let store = store else { return }
             store.name = name
         }
     }
 
-    func reparent(from src: UUID, file: FileVM, to dest: UUID) throws {
-        try accessing(to: .write, id: file.id) { store in
+    func reparent(from src: UUID, file: UUID, to dest: UUID) throws {
+        try accessing(to: .write, id: file) { store in
             guard let store = store else { return }
             store.parent = dest
         }
@@ -100,35 +108,43 @@ class DocumentAccess {
                                     lastModified: $0.lastModified!) }
     }
 
-    func delete(_ file: FileVM) throws {
-        try accessing(to: .write, id: file.id) { store in
+    func delete(_ file: UUID) throws {
+        try accessing(to: .write, id: file) { store in
             guard let store = store else { return }
             self.moc.delete(store)
         }
     }
 
-    func create(from data: FileVM, with parent: UUID) throws {
+    func create(from description: StoreDescription) throws {
         let descprition = NSEntityDescription.entity(forEntityName: String(describing: NoteStore.self),
                                                                  in: self.moc)!
         let entity = NSManagedObject(entity: descprition, insertInto: self.moc)
 
-        entity.setValue(data.id, forKey: "id")
-        entity.setValue(parent, forKey: "parent")
-        entity.setValue(data.preview.image.pngData()!, forKey: "thumbnail")
-        entity.setValue(data.lastModified, forKey: "lastModified")
-        entity.setValue(data.name, forKey: "name")
-        entity.setValue("dummy", forKey: "data")
+        entity.setValue(description.id, forKey: "id")
+        entity.setValue(description.parent, forKey: "parent")
+        entity.setValue(description.thumbnail.pngData()!, forKey: "thumbnail")
+        entity.setValue(description.lastModified, forKey: "lastModified")
+        entity.setValue(description.name, forKey: "name")
+        entity.setValue(description.data, forKey: "data")
 
         try self.moc.save()
     }
 }
 
 extension DocumentAccess {
-    func stub(with defaults: [FileVM]) -> DocumentAccess {
-        let parentId = UUID()
+    struct StoreDescription {
+        let data: String
+        let id: UUID
+        let lastModified: Date
+        let name: String
+        let parent: UUID
+        let thumbnail: UIImage
+    }
+
+    func stub(with defaults: [StoreDescription]) -> DocumentAccess {
         for stub in defaults {
             // swiftlint:disable:next force_try
-            _ = try! self.create(from: stub, with: parentId)
+            _ = try! self.create(from: stub)
         }
         return self
     }

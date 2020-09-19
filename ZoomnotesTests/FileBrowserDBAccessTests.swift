@@ -11,14 +11,17 @@ import CoreData
 
 @testable import Zoomnotes
 
-extension FileVM {
+extension DocumentAccess.StoreDescription {
     private static let stubImages: [UIImage] = [.actions, .checkmark, .remove, .add]
     private static let stubNames: [String] = ["Cats", "Dogs", "Unit tests"]
 
-    static var stub: FileVM {
-        return FileVM.fresh(preview: stubImages.randomElement()!,
-                            name: stubNames.randomElement()!,
-                            created: Date())
+    static func stub(data: String, parent: UUID) -> DocumentAccess.StoreDescription {
+        return DocumentAccess.StoreDescription(data: data,
+                                               id: UUID(),
+                                               lastModified: Date(),
+                                               name: stubNames.randomElement()!,
+                                               parent: parent,
+                                               thumbnail: stubImages.randomElement()!)
     }
 }
 
@@ -45,7 +48,7 @@ class FileBrowserDBAccessTests: XCTestCase {
         case .read:
             expectation = self.expectation(description: "Do it!")
         case .write:
-             expectation = self.expectation(forNotification: .NSManagedObjectContextDidSave, object: self.moc) { _ in return true }
+            expectation = self.expectation(forNotification: .NSManagedObjectContextDidSave, object: self.moc) { _ in return true }
         }
 
         do {
@@ -78,25 +81,39 @@ class FileBrowserDBAccessTests: XCTestCase {
 
         let access = DocumentAccess(using: self.moc)
         let parentId = UUID()
-        let fileToBeCreated = FileVM.fresh(preview: .checkmark, name: "New file", created: Date())
+        let fileToBeCreated =
+            DocumentAccess.StoreDescription(data: "Dummy",
+                                            id: UUID(),
+                                            lastModified: Date(),
+                                            name: "New file",
+                                            parent: parentId,
+                                            thumbnail: .checkmark)
 
-        asynchronously(access: .write) { try access.create(from: fileToBeCreated, with: parentId) }
+        asynchronously(access: .write) { try access.create(from: fileToBeCreated) }
 
         let result = asynchronously(access: .read) { return try access.read(id: fileToBeCreated.id) }
 
         XCTAssertNotNil(result)
         XCTAssertEqual(result!.name, fileToBeCreated.name)
         XCTAssertEqual(result!.lastModified, fileToBeCreated.lastModified)
+
     }
 
     func testUpdateFileLastModified() {
         self.continueAfterFailure = false
 
-        let fileToBeUpdated = FileVM.stub
-        let access = DocumentAccess(using: self.moc).stub(with: [ FileVM.stub, fileToBeUpdated, FileVM.stub])
+        let fileToBeUpdated = DocumentAccess.StoreDescription.stub(data: String.empty, parent: UUID())
+        let access = DocumentAccess(using: self.moc)
+            .stub(with: [
+                DocumentAccess.StoreDescription.stub(data: String.empty, parent: UUID()),
+                fileToBeUpdated,
+                DocumentAccess.StoreDescription.stub(data: String.empty, parent: UUID())
+            ])
+
         let newDate = Date().advanced(by: 24*68*60)
-        asynchronously(access: .write) { try access.updateLastModified(of: fileToBeUpdated,
-                                                with: newDate)}
+        asynchronously(access: .write) { try access.updateLastModified(of: fileToBeUpdated.id,
+                                                                       with: newDate)}
+
         let updatedFile = asynchronously(access: .read) { return try access.read(id: fileToBeUpdated.id) }
         XCTAssertNotNil(updatedFile)
         XCTAssertEqual(updatedFile!.lastModified, newDate)
@@ -105,10 +122,16 @@ class FileBrowserDBAccessTests: XCTestCase {
     func testUpdateFileName() {
         self.continueAfterFailure = false
 
-        let fileToBeUpdated = FileVM.stub
-        let access = DocumentAccess(using: self.moc).stub(with: [ FileVM.stub, fileToBeUpdated, FileVM.stub])
+        let fileToBeUpdated = DocumentAccess.StoreDescription.stub(data: String.empty, parent: UUID())
+        let access = DocumentAccess(using: self.moc)
+            .stub(with: [
+                DocumentAccess.StoreDescription.stub(data: String.empty, parent: UUID()),
+                fileToBeUpdated,
+                DocumentAccess.StoreDescription.stub(data: String.empty, parent: UUID())
+            ])
+
         let newName = "This name is surely better than the prevoius one"
-        asynchronously(access: .write) { try access.updateName(of: fileToBeUpdated, to: newName) }
+        asynchronously(access: .write) { try access.updateName(of: fileToBeUpdated.id, to: newName) }
         let updatedFile = asynchronously(access: .read) { return try access.read(id: fileToBeUpdated.id) }
 
         XCTAssertNotNil(updatedFile)
@@ -131,37 +154,38 @@ class FileBrowserDBAccessTests: XCTestCase {
     }
 
     func testDeleteFile() {
-        let fileToBeDeleted = FileVM.stub
-        let access = DocumentAccess(using: self.moc).stub(with: [ FileVM.stub, fileToBeDeleted, FileVM.stub ])
+        let fileToBeDeleted = DocumentAccess.StoreDescription.stub(data: String.empty, parent: UUID())
+        let access = DocumentAccess(using: self.moc)
+            .stub(with: [
+                DocumentAccess.StoreDescription.stub(data: String.empty, parent: UUID()),
+                fileToBeDeleted,
+                DocumentAccess.StoreDescription.stub(data: String.empty, parent: UUID())
+            ])
 
-        asynchronously(access: .write) { try access.delete(fileToBeDeleted) }
+        asynchronously(access: .write) { try access.delete(fileToBeDeleted.id) }
 
         let filePlaceholder = asynchronously(access: .read) { return try access.read(id: fileToBeDeleted.id) }
 
         XCTAssertNil(filePlaceholder)
     }
 
-    func testUpdateNoteData() {
-        XCTFail("Not implemented")
-    }
-
     func testReparentDocument() {
         self.continueAfterFailure = false
         let access = CoreDataAccess(using: self.moc)
-        let noteToBeMoved = FileVM.stub
         let destinationDirectory = DirectoryVM.stub
         let parentDirectory = DirectoryVM.stub
+        let noteToBeMoved = DocumentAccess.StoreDescription.stub(data: "", parent: parentDirectory.id)
 
         asynchronously(access: .write) {
             try access.directory.create(from: destinationDirectory, with: parentDirectory.id)
             try access.directory.create(from: parentDirectory, with: parentDirectory.id)
-            try access.file.create(from: noteToBeMoved, with: parentDirectory.id)
+            try access.file.create(from: noteToBeMoved)
         }
 
         asynchronously(access: .write) {
             try access.file.reparent(from: parentDirectory.id,
-                                 file: noteToBeMoved,
-                                 to: destinationDirectory.id)
+                                     file: noteToBeMoved.id,
+                                     to: destinationDirectory.id)
         }
 
         asynchronously(access: .read) {
@@ -232,8 +256,8 @@ class FileBrowserDBAccessTests: XCTestCase {
         let access = DirectoryAccess(using: self.moc).stub(with: [newParent, child], to: parent.id)
 
         asynchronously(access: .write) { try access.reparent(from: parent.id,
-                                                            node: child,
-                                                            to: newParent.id) }
+                                                             node: child,
+                                                             to: newParent.id) }
 
         let children = asynchronously(access: .read) { return try access.children(of: newParent.id) }
 

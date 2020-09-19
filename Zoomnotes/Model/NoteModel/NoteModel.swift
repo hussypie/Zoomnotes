@@ -57,50 +57,40 @@ class NoteModel: Codable {
         self.root.previewImage.image
     }
 
-    init(title: String, root: NoteLevel) {
-        self.id = UUID()
+    init(id: UUID, title: String, root: NoteLevel) {
+        self.id = id
         self.title = title
         self.root = root
     }
 
-    static func `default`(image: UIImage, frame: CGRect) -> NoteModel {
-        NoteModel(title: "Untitled", root: NoteLevel.default(preview: image, frame: frame))
+    static func `default`(id: UUID, image: UIImage, frame: CGRect) -> NoteModel {
+        NoteModel(id: id, title: "Untitled", root: NoteLevel.default(preview: image, frame: frame))
     }
 }
 
 extension NoteModel {
-    func serialize(done: @escaping (String) -> Void, error: @escaping (Error) -> Void) {
+    func serialize() throws -> String {
         let encoder = JSONEncoder()
-        DispatchQueue.main.async {
-            do {
-                let json = try encoder.encode(self)
-                let jsonString = String(data: json, encoding: String.Encoding.utf8)
+        let json = try encoder.encode(self)
+        let jsonString = String(data: json, encoding: String.Encoding.utf8)
 
-                assert(jsonString != nil)
-                done(jsonString!)
-            } catch let err {
-                error(err)
-            }
-        }
+        assert(jsonString != nil)
+        return jsonString!
     }
 
-    static func from(json string: String, done: @escaping (NoteModel) -> Void, error: @escaping (Error) -> Void) {
+    static func from(json string: String) throws -> NoteModel {
         let decoder = JSONDecoder()
-        DispatchQueue.main.async {
-            do {
-                let data = string.data(using: .utf8)
-                assert(data != nil)
-                let note = try decoder.decode(NoteModel.self, from: data!)
-                done(note)
-            } catch let err {
-                error(err)
-            }
-        }
+        let data = string.data(using: .utf8)
+        assert(data != nil)
+        let note = try decoder.decode(NoteModel.self, from: data!)
+        return note
     }
 }
 
 extension NoteModel {
     static var stub: NoteModel {
-        return NoteModel.default(image: .checkmark, frame: CGRect(x: 0, y: 0, width: 200, height: 300))
+        return NoteModel.default(id: UUID(),
+                                 image: .checkmark,
+                                 frame: CGRect(x: 0, y: 0, width: 200, height: 300))
     }
 }

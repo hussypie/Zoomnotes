@@ -14,7 +14,7 @@ class FileBrowserVMTests: XCTestCase {
     func testCreateFile() {
         let vm = FolderBrowserViewModel.stub
 
-        vm.process(command: .createFile)
+        vm.process(command: .createFile(preview: .checkmark))
 
         XCTAssertTrue(vm.nodes.count == 1)
 

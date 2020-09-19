@@ -10,7 +10,7 @@ import SwiftUI
 import Introspect
 
 struct OkayableTextfield: View {
-    @State var text: String = ""
+    @State var text: String = String.empty
     private let initialText: String
     private let placeholder: String
     private let onCommit: (String) -> Void

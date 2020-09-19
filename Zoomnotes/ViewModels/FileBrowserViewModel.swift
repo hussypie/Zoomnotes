@@ -12,7 +12,7 @@ import Combine
 import CoreData
 
 enum FileBrowserCommand {
-    case createFile
+    case createFile(preview: UIImage)
     case createDirectory
     case delete(Node)
     case move(Node, to: DirectoryVM)
@@ -214,7 +214,7 @@ class FolderBrowserViewModel: ObservableObject {
             case .directory(let dir):
                 try self.cdaccess.directory.delete(directory: dir)
             case .file(let file):
-                try self.cdaccess.file.delete(file)
+                try self.cdaccess.file.delete(file.id)
             }
             self.nodes = self.nodes.filter { $0.id != node.id }
         } catch let error {
@@ -222,9 +222,25 @@ class FolderBrowserViewModel: ObservableObject {
         }
     }
 
-    private func createFile(_ file: FileVM) {
+    private func createFile(_ file: FileVM, with preview: UIImage) {
         do {
-            try self.cdaccess.file.create(from: file, with: self.directoryId)
+            let newNoteData = NoteModel.default(id: UUID(),
+                                                image: preview,
+                                                frame: CGRect(x: 0,
+                                                              y: 0,
+                                                              width: preview.size.width,
+                                                              height: preview.size.height))
+
+            let newNoteDataSerialized = try newNoteData.serialize()
+            let description: DocumentAccess.StoreDescription
+                = DocumentAccess.StoreDescription(data: newNoteDataSerialized,
+                                                  id: file.id,
+                                                  lastModified: file.lastModified,
+                                                  name: file.name,
+                                                  parent: self.directoryId,
+                                                  thumbnail: preview)
+
+            try self.cdaccess.file.create(from: description)
             self.nodes.append(.file(file))
         } catch let error {
             fatalError(error.localizedDescription)
@@ -246,7 +262,7 @@ class FolderBrowserViewModel: ObservableObject {
             case .directory(let dir):
                 try self.cdaccess.directory.reparent(from: self.directoryId, node: dir, to: dest.id)
             case .file(let file):
-                try self.cdaccess.file.reparent(from: self.directoryId, file: file, to: dest.id)
+                try self.cdaccess.file.reparent(from: self.directoryId, file: file.id, to: dest.id)
             }
 
             self.nodes = self.nodes.filter { $0.id != node.id }
@@ -261,7 +277,7 @@ class FolderBrowserViewModel: ObservableObject {
             case .directory(let dir):
                 try self.cdaccess.directory.updateName(for: dir, to: name)
             case .file(let file):
-                try self.cdaccess.file.updateName(of: file, to: name)
+                try self.cdaccess.file.updateName(of: file.id, to: name)
             }
 
             self.nodes = self.nodes.map {
@@ -287,8 +303,8 @@ class FolderBrowserViewModel: ObservableObject {
         case .delete(let node):
             self.delete(node)
 
-        case .createFile:
-            self.createFile(self.newFile())
+        case .createFile(let preview):
+            self.createFile(self.newFile(), with: preview)
 
         case .createDirectory:
             self.createFolder(self.newDirectory())

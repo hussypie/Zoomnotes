@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 
 func clamp<T: Comparable>(_ value: T, lower: T, upper: T) -> T {
+    assert(lower < upper)
     return max(lower, min(value, upper))
 }
 

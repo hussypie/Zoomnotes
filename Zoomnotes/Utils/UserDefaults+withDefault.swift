@@ -34,6 +34,4 @@ extension UserDefaults {
         guard let uuidString = self.string(forKey: forKey) else { return nil }
         return UUID(uuidString: uuidString)
     }
-
-
 }

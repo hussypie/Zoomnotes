@@ -88,10 +88,7 @@ class DocumentCollectionViewController: UICollectionViewController {
                                             self.folderVM.process(command: .rename(node, to: $0))
                                             self.dismiss(animated: true, completion: nil)
             },
-                                          onDelete: {
-                                            self.folderVM.process(command: .delete(node))
-                                            self.dismiss(animated: true, completion: nil)
-            })
+                                          onDelete: { self.delete(node: node) })
 
             let optionsVC = UIHostingController(rootView: editor)
 
@@ -115,21 +112,15 @@ class DocumentCollectionViewController: UICollectionViewController {
         return cell
     }
 
-    private func adderSheet() -> UIAlertController {
-        let alert = UIAlertController.withActions(title: "Add new...", message: nil, style: .actionSheet) { alert in
-            [
-                UIAlertAction(title: "Folder", style: .default) { _ in
-                    self.folderVM.process(command: .createDirectory)
-                },
-                UIAlertAction(title: "Document", style: .default) { _ in
-                    self.folderVM.process(command: .createFile)
-                },
-                UIAlertAction(title: "Cancel", style: .cancel) { _ in
-                    alert.dismiss(animated: true, completion: { })
-                }
-            ]
-        }
-        return alert
+    private func delete(node: Node) {
+        let alert = UIAlertController(title: "Delete \(node.name)?", message: "Are you sure to delete \(node.name)?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "Delete",
+                                      style: .destructive,
+                                      handler: { _ in self.folderVM.process(command: .delete(node)) }))
+
+        self.dismiss(animated: true, completion: nil)
+        self.present(alert, animated: true, completion: nil)
     }
 
     private func navigateTo(folder: DirectoryVM) {
@@ -201,7 +192,8 @@ extension DocumentCollectionViewController {
         adderSheet.addAction(
             UIAlertAction(title: "Note",
                           style: .default) { _ in
-                            self.folderVM.process(command: .createFile)
+                            let preview = UIImage.from(size: self.view.frame.size).withBackground(color: .white)
+                            self.folderVM.process(command: .createFile(preview: preview))
         })
         adderSheet.addAction(
             UIAlertAction(title: "Folder",

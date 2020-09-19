@@ -90,7 +90,7 @@ class DataModelController {
     }
 
     func newDrawing(with image: UIImage) {
-        let newlyAddedDrawing = NoteModel.default(image: image, frame: CGRect())
+        let newlyAddedDrawing = NoteModel.default(id: UUID(), image: image, frame: CGRect())
         dataModel.notes[newlyAddedDrawing.id] = newlyAddedDrawing
         updatePreview()
     }

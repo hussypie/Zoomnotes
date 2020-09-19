@@ -22,7 +22,6 @@ enum NoteEditorCommand {
     case moveFromDrawer(NoteModel.NoteLevel, frame: CGRect)
 }
 
-// TODO: test
 class NoteEditorViewModel: ObservableObject {
     let note: NoteModel
     let level: NoteModel.NoteLevel
@@ -114,7 +113,7 @@ extension NoteEditorViewModel {
                                         children: [:],
                                         preview: .add,
                                         frame: CGRect())
-        let note = NoteModel(title: "Title", root: level)
+        let note = NoteModel(id: UUID(), title: "Title", root: level)
         return NoteEditorViewModel(note: note, level: level, dataModelController: DataModelController())
     }
 }

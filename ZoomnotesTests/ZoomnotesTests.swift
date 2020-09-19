@@ -46,8 +46,39 @@ class ZoomnotesTests: XCTestCase {
         }
     }
 
+    func testCGRectCenter() {
+        property("CGRect center is a CGPoint of the midX and midY of the rect")
+            <- forAll { (x: Double, y: Double, width: Double, height: Double) in
+                let rect = CGRect(x: x, y: y, width: width, height: height)
+                let center = rect.center
+
+                return rect.midX == center.x && rect.midY == center.y
+        }
+    }
+
+    func testClamp() {
+        property("a clamped value is itself when between lower and upper, otherwise at elast lower and at most upper")
+            <- forAll { (x: Int, lower: Int, upper: Int) in
+                return ((lower < upper) ==> {
+                    let clamped = clamp(x, lower: lower, upper: upper)
+                    if x < lower {
+                        return clamped == lower
+                    } else if x > upper {
+                        return clamped == upper
+                    } else {
+                        return clamped == x
+                    }
+                })
+        }
+    }
+
     func testHalfOpposite() {
         XCTAssert(Half.left.opposite  == .right)
         XCTAssert(Half.right.opposite == .left)
+    }
+
+    func testStringEmptyIsEmpty() {
+        XCTAssertEqual(String.empty.count, 0)
+        XCTAssertEqual(String.empty, "")
     }
 }
