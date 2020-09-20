@@ -15,34 +15,6 @@ class FileBrowserBoundaryTests: XCTestCase {
 
     let moc = NSPersistentContainer.inMemory(name: "Zoomnotes").viewContext
 
-    enum AccessType {
-        case read
-        case write
-    }
-
-    func asynchronously<T>(access: AccessType, _ action: () throws -> T) -> T {
-        let expectation: XCTestExpectation
-
-        switch access {
-        case .read:
-            expectation = self.expectation(description: "Do it!")
-        case .write:
-            expectation = self.expectation(forNotification: .NSManagedObjectContextDidSave, object: self.moc) { _ in return true }
-        }
-
-        do {
-            let result = try action()
-            if access == .read {
-                expectation.fulfill()
-            }
-            self.waitForExpectations(timeout: 2.0) { error in XCTAssertNil(error)}
-            return result
-        } catch let error {
-            XCTFail(error.localizedDescription)
-            fatalError(error.localizedDescription)
-        }
-    }
-
     func testCreateRootFoleBrowserVMIfNotExists() {
         let defaults = UserDefaults(suiteName: #file)!
         defaults.removePersistentDomain(forName: #file)
@@ -72,7 +44,7 @@ class FileBrowserBoundaryTests: XCTestCase {
                                             thumbnail: .checkmark)
         let access = CoreDataAccess(using: self.moc)
 
-        asynchronously(access: .write) {
+        asynchronously(access: .write, moc: self.moc) {
             try access.directory.create(from: defaultRootDir, with: defaultRootDir.id)
             try access.directory.create(from: defaultDirectoryChild, with: defaultRootDir.id)
             try access.file.create(from: defaultDocumentChild)
@@ -110,7 +82,7 @@ class FileBrowserBoundaryTests: XCTestCase {
                                                 thumbnail: .checkmark)
             ])
 
-        let data = asynchronously(access: .read) { try access.noteModel(of: noteId) }
+        let data = asynchronously(access: .read, moc: self.moc) { try access.noteModel(of: noteId) }
         XCTAssertNotNil(data)
         XCTAssertEqual(data!.id, noteId)
         XCTAssertEqual(data!.title, noteTitle)
@@ -138,7 +110,7 @@ class FileBrowserBoundaryTests: XCTestCase {
                                                 thumbnail: .checkmark)
             ])
 
-        let data = asynchronously(access: .read) { try access.noteModel(of: noteId) }
+        let data = asynchronously(access: .read, moc: self.moc) { try access.noteModel(of: noteId) }
 
         XCTAssertNotNil(data)
         XCTAssertEqual(data!.id, noteId)
@@ -151,9 +123,9 @@ class FileBrowserBoundaryTests: XCTestCase {
         // swiftlint:disable:next force_try
         let seri = try! note.serialize()
 
-        asynchronously(access: .write) { try access.updateData(of: noteId, with: seri) }
+        asynchronously(access: .write, moc: self.moc) { try access.updateData(of: noteId, with: seri) }
 
-        let data2 = asynchronously(access: .read) { try access.noteModel(of: noteId) }
+        let data2 = asynchronously(access: .read, moc: self.moc) { try access.noteModel(of: noteId) }
 
         XCTAssertNotNil(data2)
         XCTAssertEqual(data2!.id, noteId)

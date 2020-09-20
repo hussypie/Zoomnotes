@@ -10,7 +10,7 @@ import XCTest
 import SwiftCheck
 @testable import Zoomnotes
 
-class ZoomnotesTests: XCTestCase {
+class ZoomnotesUtilsTests: XCTestCase {
     func testUserDefaultsWithDefaultsMissingKey() {
         let mockUserDefaults = UserDefaults()
         property("For any key not set in defaults, the default value is returned") <- forAll { (key: String, defaultValue: Int) in

@@ -34,47 +34,7 @@ extension DirectoryVM {
 }
 
 class FileBrowserDBAccessTests: XCTestCase {
-    var moc: NSManagedObjectContext!
-
-    enum AccessType {
-        case read
-        case write
-    }
-
-    private func asynchronously<T>(access: AccessType, _ action: () throws -> T) -> T {
-        let expectation: XCTestExpectation
-
-        switch access {
-        case .read:
-            expectation = self.expectation(description: "Do it!")
-        case .write:
-            expectation = self.expectation(forNotification: .NSManagedObjectContextDidSave, object: self.moc) { _ in return true }
-        }
-
-        do {
-            let result = try action()
-            if access == .read {
-                expectation.fulfill()
-            }
-            self.waitForExpectations(timeout: 2.0) { error in XCTAssertNil(error)}
-            return result
-        } catch let error {
-            XCTFail(error.localizedDescription)
-            fatalError(error.localizedDescription)
-        }
-    }
-
-    override func setUp() {
-        super.setUp()
-
-        let container = NSPersistentContainer.inMemory(name: "Zoomnotes")
-        self.moc = container.viewContext
-    }
-
-    override func tearDown() {
-        super.tearDown()
-        self.moc = nil
-    }
+    let moc = NSPersistentContainer.inMemory(name: "Zoomnotes").viewContext
 
     func testCreateFile() {
         self.continueAfterFailure = false
@@ -89,9 +49,13 @@ class FileBrowserDBAccessTests: XCTestCase {
                                             parent: parentId,
                                             thumbnail: .checkmark)
 
-        asynchronously(access: .write) { try access.create(from: fileToBeCreated) }
+        asynchronously(access: .write, moc: self.moc) {
+            try access.create(from: fileToBeCreated)
+        }
 
-        let result = asynchronously(access: .read) { return try access.read(id: fileToBeCreated.id) }
+        let result = asynchronously(access: .read, moc: self.moc) {
+            return try access.read(id: fileToBeCreated.id)
+        }
 
         XCTAssertNotNil(result)
         XCTAssertEqual(result!.name, fileToBeCreated.name)
@@ -111,10 +75,13 @@ class FileBrowserDBAccessTests: XCTestCase {
             ])
 
         let newDate = Date().advanced(by: 24*68*60)
-        asynchronously(access: .write) { try access.updateLastModified(of: fileToBeUpdated.id,
-                                                                       with: newDate)}
+        asynchronously(access: .write, moc: self.moc) {
+            try access.updateLastModified(of: fileToBeUpdated.id, with: newDate)
+        }
 
-        let updatedFile = asynchronously(access: .read) { return try access.read(id: fileToBeUpdated.id) }
+        let updatedFile = asynchronously(access: .read, moc: self.moc) {
+            return try access.read(id: fileToBeUpdated.id)
+        }
         XCTAssertNotNil(updatedFile)
         XCTAssertEqual(updatedFile!.lastModified, newDate)
     }
@@ -131,8 +98,13 @@ class FileBrowserDBAccessTests: XCTestCase {
             ])
 
         let newName = "This name is surely better than the prevoius one"
-        asynchronously(access: .write) { try access.updateName(of: fileToBeUpdated.id, to: newName) }
-        let updatedFile = asynchronously(access: .read) { return try access.read(id: fileToBeUpdated.id) }
+        asynchronously(access: .write, moc: self.moc) {
+            try access.updateName(of: fileToBeUpdated.id, to: newName)
+        }
+
+        let updatedFile = asynchronously(access: .read, moc: self.moc) {
+            return try access.read(id: fileToBeUpdated.id)
+        }
 
         XCTAssertNotNil(updatedFile)
         XCTAssertEqual(updatedFile!.name, newName)
@@ -144,10 +116,14 @@ class FileBrowserDBAccessTests: XCTestCase {
         let directoryToBeUpdated = DirectoryVM.stub
         let access = DirectoryAccess(using: self.moc).stub(with: [ DirectoryVM.stub, directoryToBeUpdated, DirectoryVM.stub])
         let newName = "This name is surely better than the previous one"
-        asynchronously(access: .write) {
+
+        asynchronously(access: .write, moc: self.moc) {
             return try access.updateName(for: directoryToBeUpdated, to: newName)
         }
-        let updatedFile = asynchronously(access: .read) { return try access.read(id: directoryToBeUpdated.id) }
+
+        let updatedFile = asynchronously(access: .read, moc: self.moc) {
+            return try access.read(id: directoryToBeUpdated.id)
+        }
 
         XCTAssertNotNil(updatedFile)
         XCTAssertEqual(updatedFile!.name, newName)
@@ -162,9 +138,9 @@ class FileBrowserDBAccessTests: XCTestCase {
                 DocumentAccess.StoreDescription.stub(data: String.empty, parent: UUID())
             ])
 
-        asynchronously(access: .write) { try access.delete(fileToBeDeleted.id) }
+        asynchronously(access: .write, moc: self.moc) { try access.delete(fileToBeDeleted.id) }
 
-        let filePlaceholder = asynchronously(access: .read) { return try access.read(id: fileToBeDeleted.id) }
+        let filePlaceholder = asynchronously(access: .read, moc: self.moc) { return try access.read(id: fileToBeDeleted.id) }
 
         XCTAssertNil(filePlaceholder)
     }
@@ -176,19 +152,19 @@ class FileBrowserDBAccessTests: XCTestCase {
         let parentDirectory = DirectoryVM.stub
         let noteToBeMoved = DocumentAccess.StoreDescription.stub(data: "", parent: parentDirectory.id)
 
-        asynchronously(access: .write) {
+        asynchronously(access: .write, moc: self.moc) {
             try access.directory.create(from: destinationDirectory, with: parentDirectory.id)
             try access.directory.create(from: parentDirectory, with: parentDirectory.id)
             try access.file.create(from: noteToBeMoved)
         }
 
-        asynchronously(access: .write) {
+        asynchronously(access: .write, moc: self.moc) {
             try access.file.reparent(from: parentDirectory.id,
                                      file: noteToBeMoved.id,
                                      to: destinationDirectory.id)
         }
 
-        asynchronously(access: .read) {
+        asynchronously(access: .read, moc: self.moc) {
             let folders = try access.directory.children(of: parentDirectory.id)
             let documentsInParent = try access.file.children(of: parentDirectory.id)
 
@@ -196,7 +172,7 @@ class FileBrowserDBAccessTests: XCTestCase {
             XCTAssertEqual(documentsInParent.count, 0)
         }
 
-        asynchronously(access: .read) {
+        asynchronously(access: .read, moc: self.moc) {
             let foldersInDestination = try access.directory.children(of: destinationDirectory.id)
             let documentsInDestination = try access.file.children(of: destinationDirectory.id)
 
@@ -214,9 +190,9 @@ class FileBrowserDBAccessTests: XCTestCase {
         let access = DirectoryAccess(using: self.moc)
         let parentId = UUID()
         let dirToBeCreated = DirectoryVM.fresh(name: "New folder", created: Date())
-        asynchronously(access: .write) { return try access.create(from: dirToBeCreated, with: parentId) }
+        asynchronously(access: .write, moc: self.moc) { return try access.create(from: dirToBeCreated, with: parentId) }
 
-        let result = asynchronously(access: .read) { return try access.read(id: dirToBeCreated.id) }
+        let result = asynchronously(access: .read, moc: self.moc) { return try access.read(id: dirToBeCreated.id) }
 
         XCTAssertNotNil(result)
 
@@ -231,13 +207,13 @@ class FileBrowserDBAccessTests: XCTestCase {
         let unaffectedDirectory2 = DirectoryVM.stub
         let access = DirectoryAccess(using: self.moc).stub(with: [ unAffectedDirectory1, directoryToBeDeleted, unaffectedDirectory2])
 
-        asynchronously(access: .write) { try access.delete(directory: directoryToBeDeleted) }
+        asynchronously(access: .write, moc: self.moc) { try access.delete(directory: directoryToBeDeleted) }
 
-        let directoryPlaceholder = asynchronously(access: .read) { return try access.read(id: directoryToBeDeleted.id) }
+        let directoryPlaceholder = asynchronously(access: .read, moc: self.moc) { return try access.read(id: directoryToBeDeleted.id) }
 
         XCTAssertNil(directoryPlaceholder)
 
-        let (u1, u2) = asynchronously(access: .read) {
+        let (u1, u2) = asynchronously(access: .read, moc: self.moc) {
             return (try access.read(id: unAffectedDirectory1.id),
                     try access.read(id: unaffectedDirectory2.id))
         }
@@ -255,11 +231,11 @@ class FileBrowserDBAccessTests: XCTestCase {
         let child = DirectoryVM.fresh(name: "Best Dogs", created: Date())
         let access = DirectoryAccess(using: self.moc).stub(with: [newParent, child], to: parent.id)
 
-        asynchronously(access: .write) { try access.reparent(from: parent.id,
+        asynchronously(access: .write, moc: self.moc) { try access.reparent(from: parent.id,
                                                              node: child,
                                                              to: newParent.id) }
 
-        let children = asynchronously(access: .read) { return try access.children(of: newParent.id) }
+        let children = asynchronously(access: .read, moc: self.moc) { return try access.children(of: newParent.id) }
 
         XCTAssertEqual(children.count, 1)
         XCTAssertEqual(children[0].id, child.id)
