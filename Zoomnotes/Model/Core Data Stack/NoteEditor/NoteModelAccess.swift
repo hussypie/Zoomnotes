@@ -126,11 +126,17 @@ class NoteLevelAccess: NoteLevelAccessProtocol {
     }
 
     func update(drawing: PKDrawing, for id: UUID) throws {
-
+        try accessing(to: .write, id: id) { store in
+            guard let store = store else { return }
+            store.drawing = drawing.dataRepresentation()
+        }
     }
 
     func update(preview: CodableImage, for id: UUID) throws {
-
+        try accessing(to: .write, id: id) { store in
+            guard let store = store else { return }
+            store.preview = preview.image.pngData()!
+        }
     }
 
     func update(frame: CGRect, for id: UUID) throws {

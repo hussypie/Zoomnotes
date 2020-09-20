@@ -77,7 +77,24 @@ class NoteModelDBAccessTests: XCTestCase {
     }
 
     func testUpdateDrawing() {
-        XCTFail("Not implemented")
+        let access = NoteLevelAccess(using: self.moc)
+        let description = NoteLevelDescription(parent: UUID(),
+                                               id: UUID(),
+                                               preview: CodableImage(wrapping: .checkmark),
+                                               frame: CGRect(x: 0, y: 0, width: 100, height: 200),
+                                               drawing: PKDrawing())
+
+        asynchronously(access: .write) { try access.create(from: description) }
+
+        let newDrawing = PKDrawing()
+        asynchronously(access: .write) { try access.update(drawing: newDrawing, for: description.id) }
+
+        let descriptionFromDB = asynchronously(access: .read) { try access.read(level: description.id) }
+        XCTAssertNotNil(descriptionFromDB)
+        XCTAssertEqual(descriptionFromDB!.parent, description.parent)
+        XCTAssertEqual(descriptionFromDB!.id, description.id)
+        XCTAssertEqual(descriptionFromDB!.frame, description.frame)
+        XCTAssertEqual(descriptionFromDB!.drawing, newDrawing)
     }
 
     func testUpdateFrame() {
