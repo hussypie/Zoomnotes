@@ -10,7 +10,7 @@ import Foundation
 import CoreData
 import UIKit
 
-class DocumentAccess {
+struct DocumentAccessImpl {
     let moc: NSManagedObjectContext
 
     init(using moc: NSManagedObjectContext) {
@@ -26,7 +26,10 @@ class DocumentAccess {
         case moreThanOneUniqueEntry
     }
 
-    private func accessing<T>(to mode: AccessMode, id: UUID, action: (NoteStore?) throws -> T) throws -> T {
+    private func accessing<T>(to mode: AccessMode,
+                              id: UUID,
+                              action: (NoteStore?) throws -> T
+    ) throws -> T {
         let request: NSFetchRequest<NoteStore> = NoteStore.fetchRequest()
         request.predicate = NSPredicate(format: "id = %@", id as CVarArg)
 
@@ -89,63 +92,10 @@ class DocumentAccess {
         }
     }
 
-    func reparent(from src: UUID, file: UUID, to dest: UUID) throws {
-        try accessing(to: .write, id: file) { store in
-            guard let store = store else { return }
-            store.parent = dest
-        }
-    }
-
-    func children(of id: UUID) throws -> [FileVM] {
-        let request: NSFetchRequest<NoteStore> = NoteStore.fetchRequest()
-        request.predicate = NSPredicate(format: "parent = %@", id as CVarArg)
-
-        let results = try self.moc.fetch(request)
-
-        return results.map { FileVM(id: $0.id!,
-                                    preview: UIImage(data: $0.thumbnail!)!,
-                                    name: $0.name!,
-                                    lastModified: $0.lastModified!) }
-    }
-
     func delete(_ file: UUID) throws {
         try accessing(to: .write, id: file) { store in
             guard let store = store else { return }
             self.moc.delete(store)
         }
-    }
-
-    func create(from description: StoreDescription) throws {
-        let descprition = NSEntityDescription.entity(forEntityName: String(describing: NoteStore.self),
-                                                                 in: self.moc)!
-        let entity = NSManagedObject(entity: descprition, insertInto: self.moc)
-
-        entity.setValue(description.id, forKey: "id")
-        entity.setValue(description.parent, forKey: "parent")
-        entity.setValue(description.thumbnail.pngData()!, forKey: "thumbnail")
-        entity.setValue(description.lastModified, forKey: "lastModified")
-        entity.setValue(description.name, forKey: "name")
-        entity.setValue(description.data, forKey: "data")
-
-        try self.moc.save()
-    }
-}
-
-extension DocumentAccess {
-    struct StoreDescription {
-        let data: String
-        let id: UUID
-        let lastModified: Date
-        let name: String
-        let parent: UUID
-        let thumbnail: UIImage
-    }
-
-    func stub(with defaults: [StoreDescription]) -> DocumentAccess {
-        for stub in defaults {
-            // swiftlint:disable:next force_try
-            _ = try! self.create(from: stub)
-        }
-        return self
     }
 }

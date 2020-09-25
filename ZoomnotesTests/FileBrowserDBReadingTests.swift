@@ -42,8 +42,13 @@ class FileBrowserVMTests: XCTestCase {
     }
 
     func testDeleteNode() {
-        let node: Node = .file(FileVM.fresh(preview: .remove, name: "Stuff I'd rather forget", created: Date().advanced(by: -24*60*60)))
-        let nodes: [Node] = [
+        let node: FolderBrowserViewModel.Node =
+            .file(
+                FileVM.fresh(preview: .remove,
+                             name: "Stuff I'd rather forget",
+                             created: Date().advanced(by: -24*60*60))
+        )
+        let nodes: [FolderBrowserViewModel.Node] = [
             node,
             .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
             .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
@@ -56,9 +61,13 @@ class FileBrowserVMTests: XCTestCase {
     }
 
     func testDeleteNodeNonExistentNode() {
-        let node: Node = .file(FileVM.fresh(preview: .remove, name: "Stuff I'd rather forget", created: Date().advanced(by: -24*60*60)))
+        let node: FolderBrowserViewModel.Node =
+            .file(
+                FileVM.fresh(preview: .remove,
+                             name: "Stuff I'd rather forget",
+                             created: Date().advanced(by: -24*60*60)))
 
-        let nodes: [Node] = [
+        let nodes: [FolderBrowserViewModel.Node] = [
             .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
             .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
         ]
@@ -71,9 +80,13 @@ class FileBrowserVMTests: XCTestCase {
     }
 
     func testRenameNode() {
-        let node: Node = .file(FileVM.fresh(preview: .remove, name: "Stuff I'd rather forget", created: Date().advanced(by: -24*60*60)))
+        let node: FolderBrowserViewModel.Node =
+            .file(
+                FileVM.fresh(preview: .remove,
+                             name: "Stuff I'd rather forget",
+                             created: Date().advanced(by: -24*60*60)))
 
-        let nodes: [Node] = [
+        let nodes: [FolderBrowserViewModel.Node] = [
             node,
             .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
             .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
@@ -90,9 +103,12 @@ class FileBrowserVMTests: XCTestCase {
     }
 
     func testRenameNodeNonExistentNode() {
-        let node: Node = .file(FileVM.fresh(preview: .remove, name: "Stuff I'd rather forget", created: Date().advanced(by: -24*60*60)))
+        let node: FolderBrowserViewModel.Node = .file(
+            FileVM.fresh(preview: .remove,
+                         name: "Stuff I'd rather forget",
+                         created: Date().advanced(by: -24*60*60)))
 
-        let nodes: [Node] = [
+        let nodes: [FolderBrowserViewModel.Node] = [
             .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
             .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
         ]
@@ -108,11 +124,15 @@ class FileBrowserVMTests: XCTestCase {
     }
 
     func testMoveNodeToDirectory() {
-        let node: Node = .file(FileVM.fresh(preview: .remove, name: "Stuff I'd rather forget", created: Date().advanced(by: -24*60*60)))
+        let node: FolderBrowserViewModel.Node =
+            .file(
+                FileVM.fresh(preview: .remove,
+                             name: "Stuff I'd rather forget",
+                             created: Date().advanced(by: -24*60*60)))
 
         let dir: DirectoryVM = DirectoryVM.fresh(name: "Don't look here", created: Date())
 
-        let nodes: [Node] = [
+        let nodes: [FolderBrowserViewModel.Node] = [
             node,
             .directory(dir),
             .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),

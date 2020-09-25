@@ -72,8 +72,7 @@ class NoteCollectionViewController: UICollectionViewController, DataModelControl
         guard let note = dataModelController.dataModel.notes[preview.idx] else { return }
 
         noteViewController.viewModel = NoteEditorViewModel(note: note,
-                                                           level: note.root,
-                                                           dataModelController: dataModelController)
+                                                           level: note.root)
 
         navigationController.pushViewController(noteViewController, animated: true)
     }

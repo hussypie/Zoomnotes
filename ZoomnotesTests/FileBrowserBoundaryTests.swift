@@ -15,6 +15,11 @@ class FileBrowserBoundaryTests: XCTestCase {
 
     let moc = NSPersistentContainer.inMemory(name: "Zoomnotes").viewContext
 
+    override func setUp() {
+        super.setUp()
+        self.continueAfterFailure = false
+    }
+
     func testCreateRootFoleBrowserVMIfNotExists() {
         let defaults = UserDefaults(suiteName: #file)!
         defaults.removePersistentDomain(forName: #file)
@@ -29,28 +34,27 @@ class FileBrowserBoundaryTests: XCTestCase {
     }
 
     func testCreateRootFileBrowser () {
-        let defaults = UserDefaults(suiteName: #file)!
-        defaults.removePersistentDomain(forName: #file)
+        self.continueAfterFailure = false
 
-        let defaultId = UUID()
-        let defaultRootDir = DirectoryVM(id: defaultId, name: "Mock Documents", created: Date())
-        let defaultDirectoryChild = DirectoryVM.fresh(name: "Pages", created: Date())
+        let defaults = UserDefaults.mock(name: #file)
+
+        let defaultDirectoryChild = DirectoryStoreDescription.stub
         let defaultDocumentChild =
-            DocumentAccess.StoreDescription(data: "dummy",
-                                            id: UUID(),
-                                            lastModified: Date(),
-                                            name: "CV",
-                                            parent: defaultRootDir.id,
-                                            thumbnail: .checkmark)
-        let access = CoreDataAccess(using: self.moc)
+            DocumentStoreDescription(data: "dummy",
+                                     id: UUID(),
+                                     lastModified: Date(),
+                                     name: "CV",
+                                     thumbnail: .checkmark)
 
-        asynchronously(access: .write, moc: self.moc) {
-            try access.directory.create(from: defaultRootDir, with: defaultRootDir.id)
-            try access.directory.create(from: defaultDirectoryChild, with: defaultRootDir.id)
-            try access.file.create(from: defaultDocumentChild)
+        let defaultRootDir =
+            DirectoryStoreDescription.stub(documents: [ defaultDocumentChild ],
+                                           directories: [ defaultDirectoryChild ])
 
-            defaults.set(defaultId, forKey: UserDefaultsKey.rootDirectoryId.rawValue)
-        }
+        _ = CoreDataAccess(directory: DirectoryAccessImpl(using: self.moc),
+                           file: DocumentAccessImpl(using: self.moc))
+            .stub(root: defaultRootDir)
+
+        defaults.set(defaultRootDir.id, forKey: UserDefaultsKey.rootDirectoryId.rawValue)
 
         let vm = FolderBrowserViewModel.root(defaults: defaults, using: self.moc)
 
@@ -72,17 +76,18 @@ class FileBrowserBoundaryTests: XCTestCase {
         // swiftlint:disable:next force_try
         let noteData = try! note.serialize()
 
-        let access = DocumentAccess(using: self.moc)
-            .stub(with: [
-                DocumentAccess.StoreDescription(data: noteData,
+        let document = DocumentStoreDescription(data: noteData,
                                                 id: noteId,
                                                 lastModified: Date(),
                                                 name: noteTitle,
-                                                parent: UUID(),
                                                 thumbnail: .checkmark)
-            ])
 
-        let data = asynchronously(access: .read, moc: self.moc) { try access.noteModel(of: noteId) }
+        let access = CoreDataAccess(directory: DirectoryAccessImpl(using: self.moc),
+                                    file: DocumentAccessImpl(using: self.moc))
+            .stub(root: DirectoryStoreDescription.stub(documents: [ document ],
+                                                       directories: []))
+
+        let data = asynchronously(access: .read, moc: self.moc) { try access.file.noteModel(of: noteId) }
         XCTAssertNotNil(data)
         XCTAssertEqual(data!.id, noteId)
         XCTAssertEqual(data!.title, noteTitle)
@@ -100,17 +105,20 @@ class FileBrowserBoundaryTests: XCTestCase {
         // swiftlint:disable:next force_try
         let noteData = try! note.serialize()
 
-        let access = DocumentAccess(using: self.moc)
-            .stub(with: [
-                DocumentAccess.StoreDescription(data: noteData,
-                                                id: noteId,
-                                                lastModified: Date(),
-                                                name: noteTitle,
-                                                parent: UUID(),
-                                                thumbnail: .checkmark)
-            ])
+        let access = CoreDataAccess(directory: DirectoryAccessImpl(using: self.moc),
+                                    file: DocumentAccessImpl(using: self.moc))
+            .stub(root: DirectoryStoreDescription.stub(documents: [
+                DocumentStoreDescription(data: noteData,
+                                         id: noteId,
+                                         lastModified: Date(),
+                                         name: noteTitle,
+                                         thumbnail: .checkmark)
+                ],
+                                                       directories: []))
 
-        let data = asynchronously(access: .read, moc: self.moc) { try access.noteModel(of: noteId) }
+        let data = asynchronously(access: .read, moc: self.moc) {
+            try access.file.noteModel(of: noteId)
+        }
 
         XCTAssertNotNil(data)
         XCTAssertEqual(data!.id, noteId)
@@ -123,13 +131,16 @@ class FileBrowserBoundaryTests: XCTestCase {
         // swiftlint:disable:next force_try
         let seri = try! note.serialize()
 
-        asynchronously(access: .write, moc: self.moc) { try access.updateData(of: noteId, with: seri) }
+        asynchronously(access: .write, moc: self.moc) {
+            try access.file.updateData(of: noteId, with: seri)
+        }
 
-        let data2 = asynchronously(access: .read, moc: self.moc) { try access.noteModel(of: noteId) }
+        let data2 = asynchronously(access: .read, moc: self.moc) {
+            try access.file.noteModel(of: noteId)
+        }
 
         XCTAssertNotNil(data2)
         XCTAssertEqual(data2!.id, noteId)
         XCTAssertEqual(data2!.title, newTitle)
-
     }
 }

@@ -4,7 +4,8 @@
         <attribute name="created" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="name" attributeType="String"/>
-        <attribute name="parent" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="directoryChildren" toMany="YES" deletionRule="Cascade" destinationEntity="DirectoryStore"/>
+        <relationship name="documentChildren" toMany="YES" deletionRule="Cascade" destinationEntity="NoteStore"/>
     </entity>
     <entity name="NoteLevelStore" representedClassName="NoteLevelStore" syncable="YES" codeGenerationType="class">
         <attribute name="drawing" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
@@ -18,7 +19,6 @@
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="lastModified" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="name" attributeType="String"/>
-        <attribute name="parent" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="thumbnail" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
     </entity>
     <entity name="RectStore" representedClassName="RectStore" syncable="YES" codeGenerationType="class">
@@ -28,9 +28,9 @@
         <attribute name="y" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
     </entity>
     <elements>
-        <element name="DirectoryStore" positionX="-54" positionY="18" width="128" height="103"/>
+        <element name="DirectoryStore" positionX="-54" positionY="18" width="128" height="118"/>
         <element name="NoteLevelStore" positionX="-54" positionY="27" width="128" height="118"/>
-        <element name="NoteStore" positionX="-63" positionY="-18" width="128" height="133"/>
+        <element name="NoteStore" positionX="-63" positionY="-18" width="128" height="118"/>
         <element name="RectStore" positionX="-45" positionY="36" width="128" height="103"/>
     </elements>
 </model>

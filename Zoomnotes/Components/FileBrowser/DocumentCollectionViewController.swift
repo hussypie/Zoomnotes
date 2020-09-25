@@ -28,6 +28,15 @@ class DocumentCollectionViewController: UICollectionViewController {
         return (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     }()
 
+    func deleteAlertController(for node: FolderBrowserViewModel.Node) -> UIAlertController {
+        let alert = UIAlertController(title: "Delete \(node.name)?", message: "Are you sure to delete \(node.name)?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
+        alert.addAction(UIAlertAction(title: "Delete",
+                                      style: .destructive,
+                                      handler: { _ in self.folderVM.process(command: .delete(node)) }))
+        return alert
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -71,7 +80,9 @@ class DocumentCollectionViewController: UICollectionViewController {
         return nodeCell(using: cell, with: node)
     }
 
-    private func nodeCell(using cell: DocumentNodeCell, with node: Node) -> DocumentNodeCell {
+    private func nodeCell(using cell: DocumentNodeCell,
+                          with node: FolderBrowserViewModel.Node
+    ) -> DocumentNodeCell {
         cell.nameLabel.text = node.name
         cell.dateLabel.text = dateLabelFormatter.string(from: node.date)
 
@@ -112,15 +123,10 @@ class DocumentCollectionViewController: UICollectionViewController {
         return cell
     }
 
-    private func delete(node: Node) {
-        let alert = UIAlertController(title: "Delete \(node.name)?", message: "Are you sure to delete \(node.name)?", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
-        alert.addAction(UIAlertAction(title: "Delete",
-                                      style: .destructive,
-                                      handler: { _ in self.folderVM.process(command: .delete(node)) }))
-
+    private func delete(node: FolderBrowserViewModel.Node) {
+        let controller = deleteAlertController(for: node)
         self.dismiss(animated: true, completion: nil)
-        self.present(alert, animated: true, completion: nil)
+        self.present(controller, animated: true, completion: nil)
     }
 
     private func navigateTo(folder: DirectoryVM) {
@@ -164,9 +170,11 @@ extension DocumentCollectionViewController: UICollectionViewDropDelegate {
 
     func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
         guard let index = coordinator.destinationIndexPath?.last else { return }
-        guard index > 0 && index < folderVM.nodes.count else { return }
 
-        guard let node = coordinator.items.first?.dragItem.localObject as? Node else { return }
+        guard let node =
+            coordinator.items.first?.dragItem.localObject as? FolderBrowserViewModel.Node else {
+                return
+        }
 
         let destination = folderVM.nodes[index]
         switch destination {
@@ -205,7 +213,6 @@ extension DocumentCollectionViewController {
 
         self.present(adderSheet, animated: true, completion: nil)
     }
-
 }
 
 extension DocumentCollectionViewController {

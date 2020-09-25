@@ -10,22 +10,11 @@ import Foundation
 import UIKit
 import PencilKit
 import Combine
+import CoreData
 
-enum NoteEditorCommand {
-    case move(NoteModel.NoteLevel, from: CGRect, to: CGRect)
-    case remove(NoteModel.NoteLevel)
-    case create(NoteModel.NoteLevel)
-    case resize(NoteModel.NoteLevel, from: CGRect, to: CGRect)
-    case update(PKDrawing)
-    case refresh(CodableImage)
-    case moveToDrawer(NoteModel.NoteLevel, frame: CGRect)
-    case moveFromDrawer(NoteModel.NoteLevel, frame: CGRect)
-}
-
-class NoteEditorViewModel: ObservableObject {
+class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
     let note: NoteModel
     let level: NoteModel.NoteLevel
-    let dataModelController: DataModelController
 
     @Published var noteTitle: String
     @Published var sublevels: [UUID: NoteModel.NoteLevel]
@@ -35,12 +24,18 @@ class NoteEditorViewModel: ObservableObject {
 
     var eventSubject = PassthroughSubject<NoteEditorCommand, Never>()
 
+    lazy var moc: NSManagedObjectContext = {
+        guard let delegate = UIApplication.shared.delegate as? AppDelegate else {
+                fatalError("Cannot cast app delegate")
+        }
+        return delegate.persistentContainer.viewContext
+    }()
+
     private var cancellables: Set<AnyCancellable> = []
 
-    init(note: NoteModel, level: NoteModel.NoteLevel, dataModelController: DataModelController) {
+    init(note: NoteModel, level: NoteModel.NoteLevel) {
         self.note = note
         self.level = level
-        self.dataModelController = dataModelController
 
         self.noteTitle = note.title
         self.sublevels = level.children
@@ -55,39 +50,66 @@ class NoteEditorViewModel: ObservableObject {
 
     private convenience init(note: NoteModel,
                              level: NoteModel.NoteLevel,
-                             dataModelController: DataModelController,
                              drawer: [UUID: NoteModel.NoteLevel]
     ) {
         self.init(note: note,
-                  level: level,
-                  dataModelController: dataModelController)
+                  level: level)
         self.drawerContents = drawer
     }
 
     func childViewModel(for level: NoteModel.NoteLevel) -> NoteEditorViewModel {
         return NoteEditorViewModel(note: self.note,
                                    level: level,
-                                   dataModelController: self.dataModelController,
                                    drawer: self.drawerContents)
     }
 
     func process(_ command: NoteEditorCommand) {
+        let access = NoteLevelAccess(using: self.moc)
         switch command {
         case .move(let level, from: _, to: let destinationFrame):
-            sublevels[level.id]!.frame = destinationFrame
+            do {
+                try access.update(frame: destinationFrame, for: level.id)
+                sublevels[level.id]!.frame = destinationFrame
+            } catch let error {
+                fatalError(error.localizedDescription)
+            }
 
         case .remove(let level):
-            sublevels.removeValue(forKey: level.id)
+            do {
+                try access.delete(level: level.id)
+                sublevels.removeValue(forKey: level.id)
+            } catch let error {
+                fatalError(error.localizedDescription)
+            }
 
         case .create(let level):
-            sublevels[level.id] = level
+            do {
+                let description = NoteLevelDescription(parent: level.id,
+                                                       id: UUID(),
+                                                       preview: level.previewImage,
+                                                       frame: level.frame,
+                                                       drawing: PKDrawing())
+                try access.create(from: description)
+                sublevels[level.id] = level
+            } catch let error {
+                fatalError(error.localizedDescription)
+            }
 
         case .update(let drawing):
-            level.data.drawing = drawing
+            do {
+                try access.update(drawing: drawing, for: level.id)
+                level.data.drawing = drawing
+            } catch let error {
+                fatalError(error.localizedDescription)
+            }
 
         case .refresh(let image):
-            level.previewImage = image
-            dataModelController.updatePreview()
+            do {
+                try access.update(preview: image, for: level.id)
+                level.previewImage = image
+            } catch let error {
+                fatalError(error.localizedDescription)
+            }
 
         case .moveToDrawer(let sublevel, frame: let frame):
             self.level.children.removeValue(forKey: sublevel.id)

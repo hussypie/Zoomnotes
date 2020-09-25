@@ -35,3 +35,11 @@ extension UserDefaults {
         return UUID(uuidString: uuidString)
     }
 }
+
+extension UserDefaults {
+    static func mock(name: String) -> UserDefaults {
+        let defaults = UserDefaults(suiteName: name)!
+        defaults.removePersistentDomain(forName: name)
+        return defaults
+    }
+}

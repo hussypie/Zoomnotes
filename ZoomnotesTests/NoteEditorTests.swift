@@ -41,10 +41,9 @@ extension NoteEditorViewModel {
                                         preview: .add,
                                         frame: CGRect())
         let note = NoteModel(id: UUID(), title: "Title", root: level)
-        return NoteEditorViewModel(note: note, level: level, dataModelController: DataModelController())
+        return NoteEditorViewModel(note: note, level: level)
     }
 }
-
 
 class NoteEditorTests: XCTestCase {
     func testCreate() {
