@@ -11,9 +11,8 @@ import UIKit
 
 protocol DocumentAccess {
     func read(id: UUID) throws -> FileVM?
-    func noteModel(of id: UUID) throws -> NoteModel?
+    func noteModel(of id: UUID) throws -> NoteLevelDescription?
     func updateLastModified(of file: UUID, with date: Date) throws
-    func updateData(of file: UUID, with data: String) throws
     func updatePreviewImage(of file: FileVM, with image: UIImage) throws
     func updateName(of file: UUID, to name: String) throws
 }

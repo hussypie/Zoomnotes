@@ -41,7 +41,7 @@ extension NoteEditorViewModel {
                                         preview: .add,
                                         frame: CGRect())
         let note = NoteModel(id: UUID(), title: "Title", root: level)
-        return NoteEditorViewModel(note: note, level: level)
+        return NoteEditorViewModel(note: note, level: level, access: NoteLevelAccessMock())
     }
 }
 

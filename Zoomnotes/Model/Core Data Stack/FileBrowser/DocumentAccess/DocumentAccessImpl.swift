@@ -9,6 +9,7 @@
 import Foundation
 import CoreData
 import UIKit
+import PencilKit
 
 struct DocumentAccessImpl: DocumentAccess {
     let moc: NSManagedObjectContext
@@ -56,11 +57,26 @@ struct DocumentAccessImpl: DocumentAccess {
         }
     }
 
-    func noteModel(of id: UUID) throws -> NoteModel? {
+    func noteModel(of id: UUID) throws -> NoteLevelDescription? {
         return try accessing(to: .read, id: id) { store in
             guard let store = store else { return nil }
-            assert(store.data != nil)
-            return try NoteModel.from(json: store.data!)
+
+            guard let root = store.root else {
+                preconditionFailure("Document must have a root level")
+            }
+
+            let frame = CGRect(x: CGFloat(root.frame!.x),
+                               y: CGFloat(root.frame!.y),
+                               width: CGFloat(root.frame!.width),
+                               height: CGFloat(root.frame!.height))
+
+            let drawing = try PKDrawing(data: root.drawing!)
+
+            return NoteLevelDescription(parent: root.parent,
+                                        preview: root.preview!,
+                                        frame: frame,
+                                        id: root.id!,
+                                        drawing: drawing)
         }
     }
 
@@ -68,13 +84,6 @@ struct DocumentAccessImpl: DocumentAccess {
         try accessing(to: .write, id: file) { store in
             guard let store = store else { return }
             store.lastModified = date
-        }
-    }
-
-    func updateData(of file: UUID, with data: String) throws {
-        try accessing(to: .write, id: file) { store in
-            guard let store = store else { return }
-            store.data = data
         }
     }
 

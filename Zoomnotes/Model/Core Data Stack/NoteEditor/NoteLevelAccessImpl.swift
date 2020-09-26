@@ -11,15 +11,7 @@ import CoreData
 import PencilKit
 import UIKit
 
-struct NoteLevelDescription {
-    let parent: UUID
-    let id: UUID
-    let preview: CodableImage
-    let frame: CGRect
-    let drawing: PKDrawing
-}
-
-protocol NoteLevelAccessProtocol {
+protocol NoteLevelAccess {
     func create(from description: NoteLevelDescription) throws
     func delete(level id: UUID) throws
     func read(level id: UUID) throws -> NoteLevelDescription?
@@ -28,7 +20,7 @@ protocol NoteLevelAccessProtocol {
     func update(frame: CGRect, for id: UUID) throws
 }
 
-class NoteLevelAccess: NoteLevelAccessProtocol {
+class NoteLevelAccessImpl: NoteLevelAccess {
     let moc: NSManagedObjectContext
 
     init(using moc: NSManagedObjectContext) {
@@ -65,46 +57,31 @@ class NoteLevelAccess: NoteLevelAccessProtocol {
     }
 
     func create(from description: NoteLevelDescription) throws {
-        let entityDescription = NSEntityDescription.entity(forEntityName: String(describing: NoteLevelStore.self),
-                                                           in: self.moc)!
+        let rect = try StoreBuilder<RectStore>(prepare: { store in
+            store.x = Float(description.frame.minX)
+            store.y = Float(description.frame.minY)
+            store.width = Float(description.frame.width)
+            store.height = Float(description.frame.height)
 
-        let entity = NoteLevelStore(entity: entityDescription, insertInto: self.moc)
+            return store
+        }).build(using: self.moc)
 
-        entity.parent = description.parent
-        entity.id = description.id
+        _ = try StoreBuilder<NoteLevelStore>(prepare: { entity in
+            entity.parent = description.parent
+            entity.id = description.id
+            entity.preview = description.preview
+            entity.frame = rect
+            entity.drawing = description.drawing.dataRepresentation()
 
-        let previewImageData = description.preview.image.pngData()!
-        entity.preview = previewImageData
-
-        let rectDescription = NSEntityDescription.entity(forEntityName: String(describing: RectStore.self),
-                                                         in: self.moc)!
-        let rect = RectStore(entity: rectDescription, insertInto: self.moc)
-        rect.x = Float(description.frame.minX)
-        rect.y = Float(description.frame.minY)
-        rect.width = Float(description.frame.width)
-        rect.height = Float(description.frame.height)
-
-        entity.frame = rect
-
-        let drawingData = description.drawing.dataRepresentation()
-        entity.drawing = drawingData
-
-        try self.moc.save()
+            return entity
+        }).build(using: self.moc)
     }
 
     func delete(level id: UUID) throws {
-        let fetchRequest: NSFetchRequest<NoteLevelStore> = NoteLevelStore.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id = %@", id as CVarArg)
-        let results = try self.moc.fetch(fetchRequest)
-        if results.count > 1 {
-            throw AccessError.moreThanOneEntryFound
+        try accessing(to: .write, id: id) { store in
+            guard let store = store else { return }
+            self.moc.delete(store)
         }
-
-        guard let first = results.first else { return }
-
-        self.moc.delete(first)
-
-        try self.moc.save()
     }
 
     func read(level id: UUID) throws -> NoteLevelDescription? {
@@ -117,10 +94,10 @@ class NoteLevelAccess: NoteLevelAccessProtocol {
 
             let drawing = try PKDrawing(data: store.drawing!)
 
-            return NoteLevelDescription(parent: store.parent!,
-                                        id: store.id!,
-                                        preview: CodableImage(wrapping: UIImage(data: store.preview!)!),
+            return NoteLevelDescription(parent: store.parent,
+                                        preview: store.preview!,
                                         frame: frame,
+                                        id: store.id!,
                                         drawing: drawing)
         }
     }

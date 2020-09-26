@@ -71,10 +71,13 @@ class NoteCollectionViewController: UICollectionViewController, DataModelControl
         let preview = dataModelController.notePreviews[index]
         guard let note = dataModelController.dataModel.notes[preview.idx] else { return }
 
+        // swiftlint:disable:next force_cast
+        let moc = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+
         noteViewController.viewModel = NoteEditorViewModel(note: note,
-                                                           level: note.root)
+                                                           level: note.root,
+                                                           access: NoteLevelAccessImpl(using: moc))
 
         navigationController.pushViewController(noteViewController, animated: true)
     }
-
 }

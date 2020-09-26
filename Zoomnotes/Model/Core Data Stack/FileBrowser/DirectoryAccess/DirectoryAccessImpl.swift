@@ -9,6 +9,7 @@
 import Foundation
 import CoreData
 import PrediKit
+import PencilKit
 
 struct DirectoryAccessImpl: DirectoryAccess {
     let moc: NSManagedObjectContext
@@ -160,12 +161,34 @@ struct DirectoryAccessImpl: DirectoryAccess {
         try accessing(to: .write, id: id) { store in
             guard let store = store else { return }
 
-            guard let document = try? StoreBuilder<NoteStore>(prepare: { document in
+            guard let rootRect = try StoreBuilder<RectStore>(prepare: { store in
+                store.x = Float(description.root.frame.minX)
+                store.y = Float(description.root.frame.minY)
+                store.width = Float(description.root.frame.width)
+                store.height = Float(description.root.frame.height)
+
+                return store
+            }).build(using: self.moc) else { return }
+
+            guard let rootLevel = try StoreBuilder<NoteLevelStore>(prepare: { level in
+                level.id = description.root.id
+                level.drawing = description.root.drawing.dataRepresentation()
+                level.preview = description.root.preview
+                level.frame = rootRect
+                level.parent = description.root.parent
+                level.sublevels = NSSet()
+
+                return level
+
+            }).build(using: self.moc) else { return }
+
+            guard let document = try StoreBuilder<NoteStore>(prepare: { document in
                 document.id = description.id
                 document.thumbnail = description.thumbnail.pngData()!
                 document.lastModified = description.lastModified
                 document.name = description.name
-                document.data = description.data
+
+                document.root = rootLevel
 
                 return document
             }).build(using: self.moc) else { return }

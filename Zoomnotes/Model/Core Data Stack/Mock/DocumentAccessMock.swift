@@ -14,14 +14,11 @@ class DocumentAccessMock: DocumentAccess {
         return nil
     }
 
-    func noteModel(of id: UUID) throws -> NoteModel? {
+    func noteModel(of id: UUID) throws -> NoteLevelDescription? {
         return nil
     }
 
     func updateLastModified(of file: UUID, with date: Date) throws {
-    }
-
-    func updateData(of file: UUID, with data: String) throws {
     }
 
     func updatePreviewImage(of file: FileVM, with image: UIImage) throws {

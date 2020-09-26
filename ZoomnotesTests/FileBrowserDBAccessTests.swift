@@ -30,12 +30,13 @@ class FileBrowserDBAccessTests: XCTestCase {
                                     file: DocumentAccessImpl(using: self.moc))
             .stub(root: root)
 
+        let rootLevel = NoteLevelDescription.stub(parent: nil)
         let fileToBeCreated =
-            DocumentStoreDescription(data: "Dummy",
-                                     id: UUID(),
+            DocumentStoreDescription(id: UUID(),
                                      lastModified: Date(),
                                      name: "New file",
-                                     thumbnail: .checkmark)
+                                     thumbnail: .checkmark,
+                                     root: rootLevel)
 
         asynchronously(access: .write, moc: self.moc) {
             try access.directory.append(document: fileToBeCreated, to: root.id)
@@ -49,6 +50,15 @@ class FileBrowserDBAccessTests: XCTestCase {
         XCTAssertEqual(result!.name, fileToBeCreated.name)
         XCTAssertEqual(result!.lastModified, fileToBeCreated.lastModified)
 
+        let noteLevelAccess = NoteLevelAccessImpl(using: self.moc)
+
+        let rootLevel2 = asynchronously(access: .read, moc: self.moc) {
+            return try noteLevelAccess.read(level: rootLevel.id)
+        }
+
+        XCTAssertNotNil(rootLevel2)
+        XCTAssertEqual(rootLevel2!.id, rootLevel.id)
+        XCTAssertEqual(rootLevel2!.parent, rootLevel.parent)
     }
 
     func testUpdateFileLastModified() {

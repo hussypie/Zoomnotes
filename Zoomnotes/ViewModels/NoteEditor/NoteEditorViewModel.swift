@@ -22,18 +22,12 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
 
     @Published var drawerContents: [UUID: NoteModel.NoteLevel]
 
-    var eventSubject = PassthroughSubject<NoteEditorCommand, Never>()
-
-    lazy var moc: NSManagedObjectContext = {
-        guard let delegate = UIApplication.shared.delegate as? AppDelegate else {
-                fatalError("Cannot cast app delegate")
-        }
-        return delegate.persistentContainer.viewContext
-    }()
+    let eventSubject = PassthroughSubject<NoteEditorCommand, Never>()
+    private let access: NoteLevelAccess
 
     private var cancellables: Set<AnyCancellable> = []
 
-    init(note: NoteModel, level: NoteModel.NoteLevel) {
+    init(note: NoteModel, level: NoteModel.NoteLevel, access: NoteLevelAccess) {
         self.note = note
         self.level = level
 
@@ -43,6 +37,8 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
 
         self.drawerContents = [:]
 
+        self.access = access
+
         self.$sublevels
             .sink(receiveValue: { level.children = $0 })
             .store(in: &cancellables)
@@ -50,21 +46,23 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
 
     private convenience init(note: NoteModel,
                              level: NoteModel.NoteLevel,
-                             drawer: [UUID: NoteModel.NoteLevel]
+                             drawer: [UUID: NoteModel.NoteLevel],
+                             access: NoteLevelAccess
     ) {
         self.init(note: note,
-                  level: level)
+                  level: level,
+                  access: access)
         self.drawerContents = drawer
     }
 
     func childViewModel(for level: NoteModel.NoteLevel) -> NoteEditorViewModel {
         return NoteEditorViewModel(note: self.note,
                                    level: level,
-                                   drawer: self.drawerContents)
+                                   drawer: self.drawerContents,
+                                   access: self.access)
     }
 
     func process(_ command: NoteEditorCommand) {
-        let access = NoteLevelAccess(using: self.moc)
         switch command {
         case .move(let level, from: _, to: let destinationFrame):
             do {
@@ -85,9 +83,9 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
         case .create(let level):
             do {
                 let description = NoteLevelDescription(parent: level.id,
-                                                       id: UUID(),
-                                                       preview: level.previewImage,
+                                                       preview: level.previewImage.image.pngData()!,
                                                        frame: level.frame,
+                                                       id: UUID(),
                                                        drawing: PKDrawing())
                 try access.create(from: description)
                 sublevels[level.id] = level

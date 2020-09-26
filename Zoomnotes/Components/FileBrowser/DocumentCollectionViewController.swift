@@ -23,11 +23,6 @@ class DocumentCollectionViewController: UICollectionViewController {
         return dateFormatter
     }()
 
-    lazy var moc: NSManagedObjectContext = {
-        // swiftlint:disable:next force_cast
-        return (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    }()
-
     func deleteAlertController(for node: FolderBrowserViewModel.Node) -> UIAlertController {
         let alert = UIAlertController(title: "Delete \(node.name)?", message: "Are you sure to delete \(node.name)?", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
@@ -46,8 +41,12 @@ class DocumentCollectionViewController: UICollectionViewController {
         self.navigationItem.leftItemsSupplementBackButton = true
 
         if folderVM == nil {
-            folderVM = FolderBrowserViewModel.root(defaults: UserDefaults.standard,
-                                                   using: self.moc)
+            // swiftlint:disable:next force_cast
+            let moc = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+            folderVM =
+                FolderBrowserViewModel.root(defaults: UserDefaults.standard,
+                                            access: CoreDataAccess(directory: DirectoryAccessImpl(using: moc),
+                                                                   file: DocumentAccessImpl(using: moc)))
         }
 
         folderVM.$title

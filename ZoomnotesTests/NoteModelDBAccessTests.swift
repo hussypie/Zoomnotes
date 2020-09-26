@@ -15,11 +15,11 @@ class NoteModelDBAccessTests: XCTestCase {
     let moc: NSManagedObjectContext = NSPersistentContainer.inMemory(name: "Zoomnotes").viewContext
 
     func testNoteLevelCreation() {
-        let access = NoteLevelAccess(using: self.moc)
+        let access = NoteLevelAccessImpl(using: self.moc)
         let description = NoteLevelDescription(parent: UUID(),
-                                               id: UUID(),
-                                               preview: CodableImage(wrapping: .checkmark),
+                                               preview: UIImage.checkmark.pngData()!,
                                                frame: CGRect(x: 0, y: 0, width: 100, height: 200),
+                                               id: UUID(),
                                                drawing: PKDrawing())
 
         asynchronously(access: .write, moc: self.moc) { try access.create(from: description) }
@@ -33,12 +33,8 @@ class NoteModelDBAccessTests: XCTestCase {
     }
 
     func testNoteLevelDeletion() {
-        let access = NoteLevelAccess(using: self.moc)
-        let description = NoteLevelDescription(parent: UUID(),
-                                               id: UUID(),
-                                               preview: CodableImage(wrapping: .checkmark),
-                                               frame: CGRect(x: 0, y: 0, width: 100, height: 200),
-                                               drawing: PKDrawing())
+        let access = NoteLevelAccessImpl(using: self.moc)
+        let description = NoteLevelDescription.stub(parent: UUID())
 
         asynchronously(access: .write, moc: self.moc) { try access.create(from: description) }
 
@@ -49,12 +45,8 @@ class NoteModelDBAccessTests: XCTestCase {
     }
 
     func testUpdateDrawing() {
-        let access = NoteLevelAccess(using: self.moc)
-        let description = NoteLevelDescription(parent: UUID(),
-                                               id: UUID(),
-                                               preview: CodableImage(wrapping: .checkmark),
-                                               frame: CGRect(x: 0, y: 0, width: 100, height: 200),
-                                               drawing: PKDrawing())
+        let access = NoteLevelAccessImpl(using: self.moc)
+        let description = NoteLevelDescription.stub(parent: UUID())
 
         asynchronously(access: .write, moc: self.moc) { try access.create(from: description) }
 
@@ -70,12 +62,8 @@ class NoteModelDBAccessTests: XCTestCase {
     }
 
     func testUpdateFrame() {
-        let access = NoteLevelAccess(using: self.moc)
-        let description = NoteLevelDescription(parent: UUID(),
-                                               id: UUID(),
-                                               preview: CodableImage(wrapping: .checkmark),
-                                               frame: CGRect(x: 0, y: 0, width: 100, height: 200),
-                                               drawing: PKDrawing())
+        let access = NoteLevelAccessImpl(using: self.moc)
+        let description = NoteLevelDescription.stub(parent: UUID())
 
         asynchronously(access: .write, moc: self.moc) { try access.create(from: description) }
 

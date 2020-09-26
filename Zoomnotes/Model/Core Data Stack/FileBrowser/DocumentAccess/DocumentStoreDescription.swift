@@ -10,9 +10,9 @@ import Foundation
 import UIKit
 
 struct DocumentStoreDescription {
-    let data: String
     let id: UUID
     let lastModified: Date
     let name: String
     let thumbnail: UIImage
+    let root: NoteLevelDescription
 }

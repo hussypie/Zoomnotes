@@ -10,48 +10,7 @@ import Foundation
 import UIKit
 import Combine
 import CoreData
-
-class FileVM: NSObject, ObservableObject, Codable {
-    let id: UUID
-    var preview: CodableImage
-    var name: String
-    var lastModified: Date
-
-    required init(id: UUID, preview: UIImage, name: String, lastModified: Date) {
-        self.id = id
-        self.preview = CodableImage(wrapping: preview)
-        self.name = name
-        self.lastModified = lastModified
-    }
-
-    static func fresh(preview: UIImage, name: String, created on: Date) -> FileVM {
-        return FileVM(id: UUID(),
-                      preview: preview,
-                      name: name,
-                      lastModified: on)
-    }
-
-}
-
-class DirectoryVM: NSObject, ObservableObject, Codable {
-    let id: UUID
-    var name: String
-    var created: Date
-
-    required init(id: UUID, name: String, created: Date) {
-        self.id = id
-        self.name = name
-        self.created = created
-    }
-
-    static func fresh(name: String, created: Date) -> DirectoryVM {
-        return DirectoryVM(id: UUID(), name: name, created: created)
-    }
-
-    static var `default`: DirectoryVM {
-        return DirectoryVM.fresh(name: "Documents", created: Date())
-    }
-}
+import PencilKit
 
 class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
     private let directoryId: UUID
@@ -60,10 +19,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
     private var cdaccess: CoreDataAccess
 
-    static func root(defaults: UserDefaults, using moc: NSManagedObjectContext) -> FolderBrowserViewModel {
-        let access = CoreDataAccess(directory: DirectoryAccessImpl(using: moc),
-                                    file: DocumentAccessImpl(using: moc))
-
+    static func root(defaults: UserDefaults, access: CoreDataAccess) -> FolderBrowserViewModel {
         if let rootDirId: UUID = defaults.uuid(forKey: UserDefaultsKey.rootDirectoryId.rawValue) {
             do {
                 guard let rootDir = try access.directory.read(id: rootDirId) else {
@@ -144,20 +100,17 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
     private func createFile(_ file: FileVM, with preview: UIImage) {
         do {
-            let newNoteData = NoteModel.default(id: UUID(),
-                                                image: preview,
-                                                frame: CGRect(x: 0,
-                                                              y: 0,
-                                                              width: preview.size.width,
-                                                              height: preview.size.height))
-
-            let newNoteDataSerialized = try newNoteData.serialize()
+            let rootData = NoteLevelDescription(parent: nil,
+                                                preview: preview.pngData()!,
+                                                frame: CGRect(x: 0, y: 0, width: 1280, height: 900),
+                                                id: UUID(),
+                                                drawing: PKDrawing())
             let description: DocumentStoreDescription
-                = DocumentStoreDescription(data: newNoteDataSerialized,
-                                           id: file.id,
+                = DocumentStoreDescription(id: file.id,
                                            lastModified: file.lastModified,
                                            name: file.name,
-                                           thumbnail: preview)
+                                           thumbnail: preview,
+                                           root: rootData)
 
             try self.cdaccess.directory.append(document: description, to: directoryId)
             self.nodes.append(.file(file))
