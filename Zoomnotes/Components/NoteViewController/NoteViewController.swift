@@ -9,9 +9,10 @@
 import UIKit
 import PencilKit
 import Combine
+import SwiftUI
 
 struct DragState {
-    let currentlyDraggedLevel: NoteModel.NoteLevel
+    let currentlyDraggedLevel: NoteLevelVM
     let originalFrame: CGRect
 }
 
@@ -37,7 +38,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     private struct EdgePanGestureState {
-        let sublevel: NoteModel.NoteLevel
+        let sublevel: NoteLevelVM
         let currentlyDraggedPreview: NoteLevelPreview
     }
 
@@ -47,7 +48,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 let frame = self.defaultPreviewFrame(from: rec.location(in: self.canvasView))
 
                 let defaultPreviewImage = UIImage.from(size: self.view.frame.size).withBackground(color: UIColor.white)
-                let newLevel = NoteModel.NoteLevel.default(preview: defaultPreviewImage, frame: frame)
+                let newLevel = NoteLevelVM(id: UUID(), preview: defaultPreviewImage, frame: frame)
 
                 let newLevelPreview = self.sublevelPreview(for: newLevel)
                 self.view.addSubview(newLevelPreview)
@@ -130,13 +131,17 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         setup(toolPicker)
 
         for note in viewModel.sublevels.values {
-            subLevelViews[note.id]?.image = note.previewImage.image
+            subLevelViews[note.id]?.image = note.preview
         }
 
         if self.drawerView != nil {
             self.drawerView.removeFromSuperview()
         }
-        self.drawerView = DrawerView(in: self.view, title: .constant("Title"))
+
+        let title: Binding<String> = .init(get: { self.viewModel.title },
+                                           set: { self.viewModel.title = $0 })
+
+        self.drawerView = DrawerView(in: self.view, title: title)
         for level in self.viewModel.drawerContents.values {
             let preview = sublevelPreview(for: level)
             self.drawerView.contents[level.id] = preview
@@ -166,6 +171,15 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         for note in viewModel.sublevels.values {
             let sublevel = sublevelPreview(for: note)
             subLevelViews[note.id] = sublevel
+
+            note.$frame
+                .sink { sublevel.frame = $0 }
+                .store(in: &cancellables)
+
+            note.$preview
+                .sink { sublevel.image = $0 }
+                .store(in: &cancellables)
+
             self.canvasView.addSubview(sublevel)
         }
 

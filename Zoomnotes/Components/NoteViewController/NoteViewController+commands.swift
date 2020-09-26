@@ -11,7 +11,7 @@ import UIKit
 import PencilKit
 
 extension NoteViewController {
-    func addSublevel(_ sublevel: NoteModel.NoteLevel) {
+    func addSublevel(_ sublevel: NoteLevelVM) {
         self.viewModel.process(.create(sublevel))
 
         undoManager?.registerUndo(withTarget: self) {
@@ -20,7 +20,7 @@ extension NoteViewController {
         self.undoManager?.setActionName("AddSublevel")
     }
 
-    func removeSublevel(_ sublevel: NoteModel.NoteLevel) {
+    func removeSublevel(_ sublevel: NoteLevelVM) {
         UIView.animate(withDuration: 0.15, animations: {
             let preview = self.subLevelViews[sublevel.id]!
             preview.frame = CGRect(x: self.canvasView.frame.width,
@@ -36,7 +36,7 @@ extension NoteViewController {
         })
     }
 
-    func moveSublevel(sublevel: NoteModel.NoteLevel, from: CGRect, to: CGRect) {
+    func moveSublevel(sublevel: NoteLevelVM, from: CGRect, to: CGRect) {
         UIView.animate(withDuration: 0.15, animations: {
             self.subLevelViews[sublevel.id]!.frame = to
         }, completion: { _ in
@@ -47,7 +47,7 @@ extension NoteViewController {
         })
     }
 
-    func moveToDrawer(sublevel: NoteModel.NoteLevel, from: CGRect, to: CGRect) {
+    func moveToDrawer(sublevel: NoteLevelVM, from: CGRect, to: CGRect) {
         self.viewModel.process(.moveToDrawer(sublevel, frame: to))
         self.undoManager?.registerUndo(withTarget: self) {
             $0.moveFromDrawer(sublevel: sublevel, from: to, to: from)
@@ -55,7 +55,7 @@ extension NoteViewController {
         self.undoManager?.setActionName("MoveToDrawer")
     }
 
-    func moveFromDrawer(sublevel: NoteModel.NoteLevel, from: CGRect, to: CGRect) {
+    func moveFromDrawer(sublevel: NoteLevelVM, from: CGRect, to: CGRect) {
         self.viewModel.process(.moveFromDrawer(sublevel, frame: to))
         self.undoManager?.registerUndo(withTarget: self) {
             $0.moveToDrawer(sublevel: sublevel, from: to, to: from)
@@ -63,7 +63,7 @@ extension NoteViewController {
         self.undoManager?.setActionName("MoveFromDrawer")
     }
 
-    func resizePreview(sublevel: NoteModel.NoteLevel, from: CGRect, to: CGRect) {
+    func resizePreview(sublevel: NoteLevelVM, from: CGRect, to: CGRect) {
         self.viewModel.process(.resize(sublevel, from: sublevel.frame, to: to))
         self.undoManager?.registerUndo(withTarget: self) { sself in
             UIView.animate(withDuration: 0.1, animations: {
@@ -75,7 +75,7 @@ extension NoteViewController {
 
     func setNewDrawingUndoable(_ newDrawing: PKDrawing) {
         let oldDrawing = canvasView.drawing
-        self.canvasView.drawing = newDrawing
+        self.viewModel.process(.update(newDrawing))
         undoManager?.registerUndo(withTarget: self) {
             $0.setNewDrawingUndoable(oldDrawing)
         }
@@ -120,6 +120,7 @@ extension NoteViewController {
         case .resize(let sublevel, from: _, to: let frame):
             let preview = self.subLevelViews[sublevel.id]!
             preview.setFrame(to: frame)
+
         case .move:
             return
         case .update:

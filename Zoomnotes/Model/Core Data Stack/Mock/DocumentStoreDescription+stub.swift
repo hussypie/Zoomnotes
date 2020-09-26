@@ -20,7 +20,8 @@ extension DocumentStoreDescription {
                                              preview: thumbnail.pngData()!,
                                              frame: CGRect(x: 0, y: 0, width: 1280, height: 800),
                                              id: UUID(),
-                                             drawing: PKDrawing())
+                                             drawing: PKDrawing(),
+                                             sublevels: [])
 
         return DocumentStoreDescription(id: UUID(),
                                         lastModified: Date(),

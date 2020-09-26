@@ -61,22 +61,9 @@ struct DocumentAccessImpl: DocumentAccess {
         return try accessing(to: .read, id: id) { store in
             guard let store = store else { return nil }
 
-            guard let root = store.root else {
-                preconditionFailure("Document must have a root level")
-            }
+            assert(store.root != nil)
 
-            let frame = CGRect(x: CGFloat(root.frame!.x),
-                               y: CGFloat(root.frame!.y),
-                               width: CGFloat(root.frame!.width),
-                               height: CGFloat(root.frame!.height))
-
-            let drawing = try PKDrawing(data: root.drawing!)
-
-            return NoteLevelDescription(parent: root.parent,
-                                        preview: root.preview!,
-                                        frame: frame,
-                                        id: root.id!,
-                                        drawing: drawing)
+            return try NoteLevelDescription.from(store: store.root!)
         }
     }
 

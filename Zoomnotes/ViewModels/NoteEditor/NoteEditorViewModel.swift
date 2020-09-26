@@ -13,53 +13,55 @@ import Combine
 import CoreData
 
 class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
-    let note: NoteModel
-    let level: NoteModel.NoteLevel
-
-    @Published var noteTitle: String
-    @Published var sublevels: [UUID: NoteModel.NoteLevel]
+    @Published var title: String
+    @Published var sublevels: [UUID: NoteLevelVM]
     @Published var drawing: PKDrawing
+    @Published var drawerContents: [UUID: NoteLevelVM]
 
-    @Published var drawerContents: [UUID: NoteModel.NoteLevel]
+    private let id: UUID
+    private let access: NoteLevelAccess
+    private let onUpdateName: (String) -> Void
 
     let eventSubject = PassthroughSubject<NoteEditorCommand, Never>()
-    private let access: NoteLevelAccess
-
     private var cancellables: Set<AnyCancellable> = []
 
-    init(note: NoteModel, level: NoteModel.NoteLevel, access: NoteLevelAccess) {
-        self.note = note
-        self.level = level
+    init(id: UUID,
+         title: String,
+         sublevels: [UUID: NoteLevelVM],
+         drawing: PKDrawing,
+         access: NoteLevelAccess,
+         drawer: [UUID: NoteLevelVM],
+         onUpdateName: @escaping (String) -> Void
+    ) {
+        self.id = id
+        self.title = title
+        self.sublevels = sublevels
+        self.drawing = drawing
 
-        self.noteTitle = note.title
-        self.sublevels = level.children
-        self.drawing = level.data.drawing
-
-        self.drawerContents = [:]
+        self.onUpdateName = onUpdateName
+        self.drawerContents = drawer
 
         self.access = access
 
-        self.$sublevels
-            .sink(receiveValue: { level.children = $0 })
+        self.$title
+            .sink { self.onUpdateName($0) }
             .store(in: &cancellables)
     }
 
-    private convenience init(note: NoteModel,
-                             level: NoteModel.NoteLevel,
-                             drawer: [UUID: NoteModel.NoteLevel],
-                             access: NoteLevelAccess
-    ) {
-        self.init(note: note,
-                  level: level,
-                  access: access)
-        self.drawerContents = drawer
-    }
-
-    func childViewModel(for level: NoteModel.NoteLevel) -> NoteEditorViewModel {
-        return NoteEditorViewModel(note: self.note,
-                                   level: level,
+    func childViewModel(for level: NoteLevelVM) -> NoteEditorViewModel? {
+        guard let subLevel = try? self.access.read(level: level.id) else { return nil }
+        let subSubLevels = subLevel.sublevels
+            .map { NoteLevelVM(id: $0.id,
+                                                                preview: UIImage(data: $0.preview)!,
+                                                                frame: $0.frame) }
+            .map { ($0.id, $0) }
+        return NoteEditorViewModel(id: level.id,
+                                   title: self.title,
+                                   sublevels: Dictionary.init(uniqueKeysWithValues: subSubLevels),
+                                   drawing: subLevel.drawing,
+                                   access: self.access,
                                    drawer: self.drawerContents,
-                                   access: self.access)
+                                   onUpdateName: self.onUpdateName)
     }
 
     func process(_ command: NoteEditorCommand) {
@@ -83,10 +85,11 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
         case .create(let level):
             do {
                 let description = NoteLevelDescription(parent: level.id,
-                                                       preview: level.previewImage.image.pngData()!,
+                                                       preview: level.preview.pngData()!,
                                                        frame: level.frame,
                                                        id: UUID(),
-                                                       drawing: PKDrawing())
+                                                       drawing: PKDrawing(),
+                                                       sublevels: [])
                 try access.create(from: description)
                 sublevels[level.id] = level
             } catch let error {
@@ -95,27 +98,26 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
 
         case .update(let drawing):
             do {
-                try access.update(drawing: drawing, for: level.id)
-                level.data.drawing = drawing
+                try access.update(drawing: drawing, for: self.id)
+                self.drawing = drawing
             } catch let error {
                 fatalError(error.localizedDescription)
             }
 
         case .refresh(let image):
             do {
-                try access.update(preview: image, for: level.id)
-                level.previewImage = image
+                try access.update(preview: image, for: self.id)
             } catch let error {
                 fatalError(error.localizedDescription)
             }
 
         case .moveToDrawer(let sublevel, frame: let frame):
-            self.level.children.removeValue(forKey: sublevel.id)
+            self.sublevels.removeValue(forKey: sublevel.id)
             sublevel.frame = frame
             drawerContents[sublevel.id] = sublevel
 
         case .moveFromDrawer(let sublevel, frame: let frame):
-            self.level.children[sublevel.id] = sublevel
+            self.sublevels[sublevel.id] = sublevel
             sublevel.frame = frame
             drawerContents.removeValue(forKey: sublevel.id)
 

@@ -36,17 +36,13 @@ final class ZNStatefulGestureManager<State, Recognizer: UIGestureRecognizer> {
         }
 
         if recognizer.state == .changed {
-            guard let customState = self.state else {
-                fatalError("ZNPanGestureRecognizer state is nil")
-            }
-            self.state = self.step(recognizer, customState)
+            precondition(self.state != nil)
+            self.state = self.step(recognizer, self.state!)
         }
 
         if recognizer.state == .ended {
-            guard let state = self.state else {
-                fatalError("ZNPanGestureRecognizer state is nil")
-            }
-            self.end(recognizer, state)
+            precondition(self.state != nil)
+            self.end(recognizer, self.state!)
             self.state = nil
         }
     }

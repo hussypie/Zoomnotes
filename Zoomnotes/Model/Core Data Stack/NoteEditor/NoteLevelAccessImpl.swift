@@ -87,18 +87,8 @@ class NoteLevelAccessImpl: NoteLevelAccess {
     func read(level id: UUID) throws -> NoteLevelDescription? {
         return try accessing(to: .read, id: id) { store in
             guard let store = store else { return nil }
-            let frame = CGRect(x: CGFloat(store.frame!.x),
-                               y: CGFloat(store.frame!.y),
-                               width: CGFloat(store.frame!.width),
-                               height: CGFloat(store.frame!.height))
 
-            let drawing = try PKDrawing(data: store.drawing!)
-
-            return NoteLevelDescription(parent: store.parent,
-                                        preview: store.preview!,
-                                        frame: frame,
-                                        id: store.id!,
-                                        drawing: drawing)
+            return try NoteLevelDescription.from(store: store)
         }
     }
 

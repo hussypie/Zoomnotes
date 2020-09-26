@@ -136,7 +136,9 @@ class DocumentCollectionViewController: UICollectionViewController {
     }
 
     private func openNoteEditor(for note: FileVM) {
-        print("Open note view controller")
+        guard let destinationViewController = NoteViewController.from(self.storyboard) else { return }
+        destinationViewController.viewModel = self.folderVM.noteEditorVM(for: note)
+        self.navigationController?.pushViewController(destinationViewController, animated: true)
     }
 }
 

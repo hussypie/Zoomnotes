@@ -75,6 +75,34 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
         }
     }
 
+    func noteEditorVM(for note: FileVM) -> NoteEditorViewModel? {
+        do {
+            guard let noteModel = try self.cdaccess.file.noteModel(of: note.id) else { return nil }
+
+            // swiftlint:disable:next force_cast
+            let moc = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+
+            let subLevels =
+                noteModel.sublevels
+                    .map { NoteLevelVM(id: $0.id,
+                                       preview: UIImage(data: $0.preview)!,
+                                       frame: $0.frame)}
+                    .map { ($0.id, $0) }
+
+            return NoteEditorViewModel(id: noteModel.id,
+                                       title: note.name,
+                                       sublevels: Dictionary.init(uniqueKeysWithValues: subLevels),
+                                        drawing: noteModel.drawing,
+                                       access: NoteLevelAccessImpl(using: moc),
+                                        drawer: [:],
+                                        onUpdateName: { name in
+                                            _ = try? self.cdaccess.file.updateName(of: note.id, to: name)
+            })
+        } catch let error {
+            fatalError(error.localizedDescription)
+        }
+    }
+
     private func newFile() -> FileVM {
         let defaultImage = UIImage.from(size: CGSize(width: 300, height: 200)).withBackground(color: UIColor.white)
         return FileVM.fresh(preview: defaultImage, name: "Untitled", created: Date())
@@ -104,7 +132,8 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                                 preview: preview.pngData()!,
                                                 frame: CGRect(x: 0, y: 0, width: 1280, height: 900),
                                                 id: UUID(),
-                                                drawing: PKDrawing())
+                                                drawing: PKDrawing(),
+                                                sublevels: [])
             let description: DocumentStoreDescription
                 = DocumentStoreDescription(id: file.id,
                                            lastModified: file.lastModified,

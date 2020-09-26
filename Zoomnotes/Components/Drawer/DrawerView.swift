@@ -17,7 +17,7 @@ struct PanGestureState {
 class DrawerView: UIView {
     private let offset: CGFloat = 50
 
-    private let title: Binding<String>
+    var title: Binding<String>
 
     var contents: [UUID: NoteLevelPreview]
 
