@@ -45,8 +45,7 @@ class DocumentCollectionViewController: UICollectionViewController {
             let moc = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
             folderVM =
                 FolderBrowserViewModel.root(defaults: UserDefaults.standard,
-                                            access: CoreDataAccess(directory: DirectoryAccessImpl(using: moc),
-                                                                   file: DocumentAccessImpl(using: moc)))
+                                            access: DirectoryAccessImpl(using: moc))
         }
 
         folderVM.$title

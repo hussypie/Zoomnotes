@@ -22,10 +22,6 @@ extension UserDefaults {
         return self.withDefaultValue(key.rawValue, default: value)
     }
 
-    func set<T>(_ key: UserDefaultsKey, value: T) {
-        self.set(value, forKey: key.rawValue)
-    }
-
     func set(_ value: UUID, forKey: String) {
         self.set(value.uuidString, forKey: forKey)
     }

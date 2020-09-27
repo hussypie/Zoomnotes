@@ -75,3 +75,18 @@ extension FolderBrowserViewModel {
         }
     }
 }
+
+extension FolderBrowserViewModel.Node {
+    static func from(_ description: DirectoryStoreDescription) -> FolderBrowserViewModel.Node {
+        return .directory(DirectoryVM(id: description.id.id,
+                                      name: description.name,
+                                      created: description.created))
+    }
+
+    static func from(_ description: DocumentStoreDescription) -> FolderBrowserViewModel.Node {
+        return .file(FileVM(id: description.id.id,
+                                preview: description.thumbnail,
+                                name: description.name,
+                                lastModified: description.lastModified))
+    }
+}

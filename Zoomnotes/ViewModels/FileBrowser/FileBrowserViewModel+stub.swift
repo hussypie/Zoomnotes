@@ -10,22 +10,19 @@ import Foundation
 
 extension FolderBrowserViewModel {
     static var stub: FolderBrowserViewModel {
-        let access = CoreDataAccess(directory: DirectoryAccessMock(),
-                                    file: DocumentAccessMock())
-
         return FolderBrowserViewModel(directoryId: UUID(),
                                       name: "Documents",
                                       nodes: [],
-                                      access: access)
+                                      access: DirectoryAccessMock(documents: [:],
+                                                                  directories: [:]))
     }
 
     static func stub(nodes: [FolderBrowserViewModel.Node]) -> FolderBrowserViewModel {
-        let access = CoreDataAccess(directory: DirectoryAccessMock(),
-                                    file: DocumentAccessMock())
 
         return FolderBrowserViewModel(directoryId: UUID(),
                                       name: "Documents",
                                       nodes: nodes,
-                                      access: access)
+                                      access: DirectoryAccessMock(documents: [:],
+                                                                  directories: [:]))
     }
 }

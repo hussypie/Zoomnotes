@@ -17,8 +17,8 @@ extension DirectoryStoreDescription {
         return DirectoryStoreDescription(id: UUID(),
                                          created: someTimeInThePast,
                                          name: stubNames.randomElement()!,
-                                         documentChildren: [],
-                                         directoryChildren: [])
+                                         documents: [],
+                                         directories: [])
     }
 
     static func stub(documents: [DocumentStoreDescription],
@@ -28,7 +28,7 @@ extension DirectoryStoreDescription {
         return DirectoryStoreDescription(id: UUID(),
                                          created: someTimeInThePast,
                                          name: stubNames.randomElement()!,
-                                         documentChildren: documents,
-                                         directoryChildren: directories)
+                                         documents: documents,
+                                         directories: directories)
     }
 }

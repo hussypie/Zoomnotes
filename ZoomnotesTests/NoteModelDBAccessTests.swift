@@ -20,7 +20,8 @@ class NoteModelDBAccessTests: XCTestCase {
                                                preview: UIImage.checkmark.pngData()!,
                                                frame: CGRect(x: 0, y: 0, width: 100, height: 200),
                                                id: UUID(),
-                                               drawing: PKDrawing())
+                                               drawing: PKDrawing(),
+                                               sublevels: [])
 
         asynchronously(access: .write, moc: self.moc) { try access.create(from: description) }
 

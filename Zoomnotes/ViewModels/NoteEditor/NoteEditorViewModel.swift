@@ -84,10 +84,10 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
 
         case .create(let level):
             do {
-                let description = NoteLevelDescription(parent: level.id,
+                let description = NoteLevelDescription(parent: self.id,
                                                        preview: level.preview.pngData()!,
                                                        frame: level.frame,
-                                                       id: UUID(),
+                                                       id: level.id,
                                                        drawing: PKDrawing(),
                                                        sublevels: [])
                 try access.create(from: description)

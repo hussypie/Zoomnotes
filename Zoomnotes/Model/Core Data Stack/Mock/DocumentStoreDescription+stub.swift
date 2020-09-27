@@ -14,7 +14,7 @@ extension DocumentStoreDescription {
     private static let stubImages: [UIImage] = [.actions, .checkmark, .remove, .add]
     private static let stubNames: [String] = ["Cats", "Dogs", "Unit tests"]
 
-    static func stub(data: String) -> DocumentStoreDescription {
+    static var stub: DocumentStoreDescription {
         let thumbnail = stubImages.randomElement()!
         let rootLevel = NoteLevelDescription(parent: nil,
                                              preview: thumbnail.pngData()!,

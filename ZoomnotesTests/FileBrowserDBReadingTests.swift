@@ -148,4 +148,73 @@ class FileBrowserVMTests: XCTestCase {
         XCTAssert(vm.nodes.count == originalNodeCount - 1)
         XCTAssert(vm.nodes.filter { $0.id == node.id }.isEmpty)
     }
+
+    func testProduceCorrectSubfolderVM() {
+        let dir = DirectoryStoreDescription(id: UUID(),
+                                            created: Date(),
+                                            name: "Horror",
+                                            documents: [],
+                                            directories: [])
+
+        let rootDir = DirectoryStoreDescription(id: UUID(),
+                                                created: Date(),
+                                                name: "Movies",
+                                                documents: [],
+                                                directories: [dir])
+
+        let access = DirectoryAccessMock(documents: [:],
+                                         directories: [
+                                            rootDir.id.id: rootDir,
+                                            dir.id.id: dir ])
+
+        let dirVM = DirectoryVM(id: dir.id.id,
+                                name: dir.name,
+                                created: dir.created)
+
+        let vm = FolderBrowserViewModel(directoryId: rootDir.id.id,
+                                        name: rootDir.name,
+                                        nodes: [ .directory(dirVM) ],
+                                        access: access)
+
+        let childVM = vm.subFolderBrowserVM(for: dirVM)
+
+        XCTAssertNotNil(childVM)
+        XCTAssertEqual(childVM!.title, dirVM.name)
+        XCTAssertEqual(childVM!.nodes.count, dir.directoryChildren.count + dir.documentChildren.count)
+    }
+
+    func testProduceCorrectNoteEditorVM() {
+        let doc = DocumentStoreDescription(id: UUID(),
+                                           lastModified: Date(),
+                                           name: "Best Schwarzenegger movies",
+                                           thumbnail: .actions,
+                                           root: NoteLevelDescription.stub(parent: nil))
+
+        let rootDir = DirectoryStoreDescription(id: UUID(),
+                                                created: Date(),
+                                                name: "Movies",
+                                                documents: [doc],
+                                                directories: [])
+
+        let access = DirectoryAccessMock(documents: [doc.id.id: doc],
+                                         directories: [rootDir.id.id: rootDir])
+
+        let file = FileVM(id: doc.id.id,
+                          preview: doc.thumbnail,
+                          name: doc.name,
+                          lastModified: doc.lastModified)
+
+        let vm = FolderBrowserViewModel(directoryId: rootDir.id.id,
+                                        name: rootDir.name,
+                                        nodes: [ .file(file) ],
+                                        access: access)
+
+        let noteVM = vm.noteEditorVM(for: file)
+
+        XCTAssertNotNil(noteVM)
+        XCTAssertEqual(noteVM!.drawerContents.count, 0)
+        XCTAssertEqual(noteVM!.drawing, doc.root.drawing)
+        XCTAssertEqual(noteVM!.sublevels.count, doc.root.sublevels.count)
+        XCTAssertEqual(noteVM!.title, doc.name)
+    }
 }

@@ -17,17 +17,17 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
     @Published private(set) var nodes: [Node]
     @Published private(set) var title: String
 
-    private var cdaccess: CoreDataAccess
+    private var cdaccess: DirectoryAccess
 
-    static func root(defaults: UserDefaults, access: CoreDataAccess) -> FolderBrowserViewModel {
+    static func root(defaults: UserDefaults, access: DirectoryAccess) -> FolderBrowserViewModel {
         if let rootDirId: UUID = defaults.uuid(forKey: UserDefaultsKey.rootDirectoryId.rawValue) {
             do {
-                guard let rootDir = try access.directory.read(id: rootDirId) else {
+                guard let rootDir: DirectoryStoreLookupResult = try access.read(id: DirectoryStoreId(id: rootDirId)) else {
                     fatalError("Cannot find root dir, although id is noted")
                 }
-                let children = try access.directory.children(of: rootDirId)
+                let children = try access.children(of: rootDir.id)
 
-                return FolderBrowserViewModel(directoryId: rootDir.id,
+                return FolderBrowserViewModel(directoryId: rootDir.id.id,
                                               name: rootDir.name,
                                               nodes: children,
                                               access: access)
@@ -39,22 +39,22 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
         let defaultRootDir = DirectoryStoreDescription(id: UUID(),
                                                        created: Date(),
                                                        name: "Documents",
-                                                       documentChildren: [],
-                                                       directoryChildren: [])
+                                                       documents: [],
+                                                       directories: [])
         do {
-            try access.directory.create(from: defaultRootDir)
-            defaults.set(defaultRootDir.id, forKey: UserDefaultsKey.rootDirectoryId.rawValue)
+            try access.create(from: defaultRootDir)
+            defaults.set(defaultRootDir.id.id, forKey: UserDefaultsKey.rootDirectoryId.rawValue)
         } catch let error {
             fatalError(error.localizedDescription)
         }
 
-        return FolderBrowserViewModel(directoryId: defaultRootDir.id,
+        return FolderBrowserViewModel(directoryId: defaultRootDir.id.id,
                                       name: defaultRootDir.name,
                                       nodes: [],
                                       access: access)
     }
 
-    init(directoryId: UUID, name: String, nodes: [Node], access: CoreDataAccess) {
+    init(directoryId: UUID, name: String, nodes: [Node], access: DirectoryAccess) {
         self.directoryId = directoryId
         self.nodes = nodes
         self.title = name
@@ -64,7 +64,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
     func subFolderBrowserVM(for directory: DirectoryVM) -> FolderBrowserViewModel? {
         do {
-            let children = try self.cdaccess.directory.children(of: directory.id)
+            let children = try self.cdaccess.children(of: DirectoryStoreId(id: directory.id))
 
             return FolderBrowserViewModel(directoryId: directory.id,
                                           name: directory.name,
@@ -77,7 +77,8 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
     func noteEditorVM(for note: FileVM) -> NoteEditorViewModel? {
         do {
-            guard let noteModel = try self.cdaccess.file.noteModel(of: note.id) else { return nil }
+            guard let noteModel =
+                try self.cdaccess.noteModel(of: DocumentStoreId(id: note.id)) else { return nil }
 
             // swiftlint:disable:next force_cast
             let moc = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -96,7 +97,8 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                        access: NoteLevelAccessImpl(using: moc),
                                         drawer: [:],
                                         onUpdateName: { name in
-                                            _ = try? self.cdaccess.file.updateName(of: note.id, to: name)
+                                            _ = try? self.cdaccess.updateName(of: DocumentStoreId(id: note.id),
+                                                                              to: name)
             })
         } catch let error {
             fatalError(error.localizedDescription)
@@ -116,9 +118,9 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
         do {
             switch node {
             case .directory(let dir):
-                try self.cdaccess.directory.delete(child: .directory(dir.id), of: directoryId)
+                try self.cdaccess.delete(child: DirectoryStoreId(id: dir.id), of: DirectoryStoreId(id: directoryId))
             case .file(let file):
-                try self.cdaccess.directory.delete(child: .document(file.id), of: directoryId)
+                try self.cdaccess.delete(child: DocumentStoreId(id: file.id), of: DirectoryStoreId(id: directoryId))
             }
             self.nodes = self.nodes.filter { $0.id != node.id }
         } catch let error {
@@ -141,7 +143,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                            thumbnail: preview,
                                            root: rootData)
 
-            try self.cdaccess.directory.append(document: description, to: directoryId)
+            try self.cdaccess.append(document: description, to: DirectoryStoreId(id: directoryId))
             self.nodes.append(.file(file))
         } catch let error {
             fatalError(error.localizedDescription)
@@ -153,9 +155,9 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
             let description = DirectoryStoreDescription(id: folder.id,
                                                         created: folder.created,
                                                         name: folder.name,
-                                                        documentChildren: [],
-                                                        directoryChildren: [])
-            try self.cdaccess.directory.create(from: description)
+                                                        documents: [],
+                                                        directories: [])
+            try self.cdaccess.create(from: description)
             self.nodes.append(.directory(folder))
         } catch let error {
             fatalError(error.localizedDescription)
@@ -164,16 +166,16 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
     private func move(_ node: Node, to dest: DirectoryVM) {
         do {
-            let taggedId: DirectoryAccessNode
             switch node {
             case .directory(let dir):
-                taggedId = .directory(dir.id)
+                try self.cdaccess.reparent(from: DirectoryStoreId(id: self.directoryId),
+                                           node: DirectoryStoreId(id: dir.id),
+                                           to: DirectoryStoreId(id: dest.id))
             case .file(let file):
-                taggedId = .document(file.id)
+                try self.cdaccess.reparent(from: DirectoryStoreId(id: self.directoryId),
+                                           node: DocumentStoreId(id: file.id),
+                                           to: DirectoryStoreId(id: dest.id))
             }
-
-            try self.cdaccess.directory.reparent(from: self.directoryId, node: taggedId, to: dest.id)
-
             self.nodes = self.nodes.filter { $0.id != node.id }
         } catch let error {
             fatalError(error.localizedDescription)
@@ -184,9 +186,9 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
         do {
             switch node {
             case .directory(let dir):
-                try self.cdaccess.directory.updateName(id: dir.id, to: name)
+                try self.cdaccess.updateName(of: DirectoryStoreId(id: dir.id), to: name)
             case .file(let file):
-                try self.cdaccess.file.updateName(of: file.id, to: name)
+                try self.cdaccess.updateName(of: DocumentStoreId(id: file.id), to: name)
             }
 
             self.nodes = self.nodes.map {
