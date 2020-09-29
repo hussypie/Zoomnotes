@@ -9,11 +9,16 @@
 import Foundation
 import PencilKit
 import UIKit
+import Combine
 
 class NoteLevelAccessMock: NoteLevelAccess {
     var db: [UUID: NoteLevelDescription]
+    private(set) var previewSubject: PassthroughSubject<(UUID, UIImage), Never>
 
-    init(db: [UUID: NoteLevelDescription]) { self.db = db }
+    init(db: [UUID: NoteLevelDescription]) {
+        self.db = db
+        self.previewSubject = PassthroughSubject<(UUID, UIImage), Never>()
+    }
 
     func create(from description: NoteLevelDescription) throws {
         db[description.id] = description
@@ -46,14 +51,15 @@ class NoteLevelAccessMock: NoteLevelAccess {
                                       sublevels: desc.sublevels)
     }
 
-    func update(preview: CodableImage, for id: UUID) throws {
+    func update(preview: UIImage, for id: UUID) throws {
         guard let desc = db[id] else { return }
         db[id] = NoteLevelDescription(parent: desc.parent,
-                                      preview: preview.image.pngData()!,
+                                      preview: preview,
                                       frame: desc.frame,
                                       id: desc.id,
                                       drawing: desc.drawing,
                                       sublevels: desc.sublevels)
+        previewSubject.send((id, preview))
     }
 
     func update(frame: CGRect, for id: UUID) throws {

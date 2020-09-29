@@ -11,7 +11,7 @@ import Foundation
 extension DirectoryAccessImpl {
     func stub(root: DirectoryStoreDescription) -> DirectoryAccessImpl {
         // swiftlint:disable:next force_try
-        try! self.create(from: root)
+        try! self.root(from: root)
         return self
     }
 }

@@ -42,7 +42,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                                        documents: [],
                                                        directories: [])
         do {
-            try access.create(from: defaultRootDir)
+            try access.root(from: defaultRootDir)
             defaults.set(defaultRootDir.id.id, forKey: UserDefaultsKey.rootDirectoryId.rawValue)
         } catch let error {
             fatalError(error.localizedDescription)
@@ -81,24 +81,25 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                 try self.cdaccess.noteModel(of: DocumentStoreId(id: note.id)) else { return nil }
 
             // swiftlint:disable:next force_cast
-            let moc = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+            let noteLevelAccess = (UIApplication.shared.delegate as! AppDelegate).noteLevelAccess
 
             let subLevels =
                 noteModel.sublevels
                     .map { NoteLevelVM(id: $0.id,
-                                       preview: UIImage(data: $0.preview)!,
+                                       preview: $0.preview,
                                        frame: $0.frame)}
                     .map { ($0.id, $0) }
 
-            return NoteEditorViewModel(id: noteModel.id,
-                                       title: note.name,
-                                       sublevels: Dictionary.init(uniqueKeysWithValues: subLevels),
-                                        drawing: noteModel.drawing,
-                                       access: NoteLevelAccessImpl(using: moc),
-                                        drawer: [:],
-                                        onUpdateName: { name in
-                                            _ = try? self.cdaccess.updateName(of: DocumentStoreId(id: note.id),
-                                                                              to: name)
+            return NoteEditorViewModel(
+                id: noteModel.id,
+                title: note.name,
+                sublevels: Dictionary.init(uniqueKeysWithValues: subLevels),
+                drawing: noteModel.drawing,
+                access: noteLevelAccess,
+                drawer: [:],
+                onUpdateName: { name in
+                    _ = try? self.cdaccess.updateName(of: DocumentStoreId(id: note.id),
+                                                      to: name)
             })
         } catch let error {
             fatalError(error.localizedDescription)
@@ -131,7 +132,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
     private func createFile(_ file: FileVM, with preview: UIImage) {
         do {
             let rootData = NoteLevelDescription(parent: nil,
-                                                preview: preview.pngData()!,
+                                                preview: preview,
                                                 frame: CGRect(x: 0, y: 0, width: 1280, height: 900),
                                                 id: UUID(),
                                                 drawing: PKDrawing(),
@@ -157,7 +158,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                                         name: folder.name,
                                                         documents: [],
                                                         directories: [])
-            try self.cdaccess.create(from: description)
+            try self.cdaccess.append(directory: description, to: DirectoryStoreId(id: directoryId))
             self.nodes.append(.directory(folder))
         } catch let error {
             fatalError(error.localizedDescription)

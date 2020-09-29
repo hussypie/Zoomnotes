@@ -23,8 +23,10 @@ struct DirectoryAccessImpl: DirectoryAccess {
         case write
     }
 
-    enum AccessError: Error {
+    enum DirectoryAccessError: Error {
         case moreThanOneEntryFound
+        case cannotCreateFolder
+        case cannotCreateDocument
     }
 
     private func accessing<Store: NSManagedObject, T>(to mode: AccessMode,
@@ -39,7 +41,7 @@ struct DirectoryAccessImpl: DirectoryAccess {
             fatalError("Cannot cast to result type")
         }
 
-        guard entries.count < 2 else { throw AccessError.moreThanOneEntryFound }
+        guard entries.count < 2 else { throw DirectoryAccessError.moreThanOneEntryFound }
 
         let result = try action(entries.first)
 
@@ -90,8 +92,8 @@ struct DirectoryAccessImpl: DirectoryAccess {
         }
     }
 
-    func create(from description: DirectoryStoreDescription) throws {
-        _ = try StoreBuilder<DirectoryStore> { store in
+    func root(from description: DirectoryStoreDescription) throws {
+        let store = try StoreBuilder<DirectoryStore>(prepare: { store in
             store.id = description.id.id
             store.created = description.created
             store.name = description.name
@@ -99,7 +101,11 @@ struct DirectoryAccessImpl: DirectoryAccess {
             store.documentChildren = NSSet()
 
             return store
-        }.build(using: self.moc)
+        }).build(using: self.moc)
+
+        if store == nil {
+            throw DirectoryAccessError.cannotCreateFolder
+        }
 
         for document in description.documentChildren {
             try self.append(document: document, to: description.id)
@@ -198,8 +204,8 @@ struct DirectoryAccessImpl: DirectoryAccess {
         }
     }
 
-    func append(document description: DocumentStoreDescription, to id: DirectoryStoreId) throws {
-        try accessing(to: .write, id: id.id) { (store: DirectoryStore?) in
+    func append(document description: DocumentStoreDescription, to parent: DirectoryStoreId) throws {
+        try accessing(to: .write, id: parent.id) { (store: DirectoryStore?) in
             guard let store = store else { return }
 
             guard let rootRect = try StoreBuilder<RectStore>(prepare: { store in
@@ -209,19 +215,19 @@ struct DirectoryAccessImpl: DirectoryAccess {
                 store.height = Float(description.root.frame.height)
 
                 return store
-            }).build(using: self.moc) else { return }
+            }).build(using: self.moc) else { throw DirectoryAccessError.cannotCreateDocument }
 
             guard let rootLevel = try StoreBuilder<NoteLevelStore>(prepare: { level in
                 level.id = description.root.id
                 level.drawing = description.root.drawing.dataRepresentation()
-                level.preview = description.root.preview
+                level.preview = description.root.preview.pngData()!
                 level.frame = rootRect
                 level.parent = description.root.parent
                 level.sublevels = NSSet()
 
                 return level
 
-            }).build(using: self.moc) else { return }
+            }).build(using: self.moc) else { throw DirectoryAccessError.cannotCreateDocument }
 
             guard let document = try StoreBuilder<NoteStore>(prepare: { document in
                 document.id = description.id.id
@@ -232,14 +238,14 @@ struct DirectoryAccessImpl: DirectoryAccess {
                 document.root = rootLevel
 
                 return document
-            }).build(using: self.moc) else { return }
+            }).build(using: self.moc) else { throw DirectoryAccessError.cannotCreateDocument }
 
             store.addToDocumentChildren(document)
         }
     }
 
-    func append(directory description: DirectoryStoreDescription, to id: DirectoryStoreId) throws {
-        try accessing(to: .write, id: id.id) { (store: DirectoryStore?) in
+    func append(directory description: DirectoryStoreDescription, to parent: DirectoryStoreId) throws {
+        try accessing(to: .write, id: parent.id) { (store: DirectoryStore?) in
             guard let store = store else { return }
 
             guard let subFolder = try? StoreBuilder<DirectoryStore>(prepare: { subFolder in
@@ -250,7 +256,7 @@ struct DirectoryAccessImpl: DirectoryAccess {
                 subFolder.documentChildren = NSSet()
 
                 return subFolder
-            }).build(using: self.moc) else { return }
+            }).build(using: self.moc) else { throw DirectoryAccessError.cannotCreateFolder }
 
             store.addToDirectoryChildren(subFolder)
         }
@@ -280,7 +286,7 @@ struct DirectoryAccessImpl: DirectoryAccess {
             let subLevelDescs = try sublevels.compactMap { try noteLevelAccess.read(level: $0.id!) }
 
             return NoteLevelDescription(parent: nil,
-                                        preview: root.preview!,
+                                        preview: UIImage(data: root.preview!)!,
                                         frame: frame,
                                         id: root.id!,
                                         drawing: try PKDrawing(data: root.drawing!),

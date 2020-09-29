@@ -216,7 +216,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
     @objc private func updateDrawingMeta() {
         let screen = captureCurrentScreen()
-        self.viewModel.process(.refresh(CodableImage(wrapping: screen)))
+        self.viewModel.process(.refresh(screen))
     }
 
     func onPreviewZoomUp(_ rec: ZNPinchGestureRecognizer) {

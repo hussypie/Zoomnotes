@@ -8,10 +8,11 @@
 
 import Foundation
 import PencilKit
+import UIKit
 
 struct NoteLevelDescription {
     let parent: UUID?
-    let preview: Data
+    let preview: UIImage
     let frame: CGRect
     let id: UUID
     let drawing: PKDrawing
@@ -30,7 +31,7 @@ extension NoteLevelDescription {
         guard let sublevels = store.sublevels as? Set<NoteLevelStore> else { return nil }
 
         return NoteLevelDescription(parent: store.parent,
-                                    preview: store.preview!,
+                                    preview: UIImage(data: store.preview!)!,
                                     frame: frame,
                                     id: store.id!,
                                     drawing: drawing,

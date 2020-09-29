@@ -42,10 +42,10 @@ class DocumentCollectionViewController: UICollectionViewController {
 
         if folderVM == nil {
             // swiftlint:disable:next force_cast
-            let moc = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+            let access = (UIApplication.shared.delegate as! AppDelegate).fileBrowserAccess
             folderVM =
                 FolderBrowserViewModel.root(defaults: UserDefaults.standard,
-                                            access: DirectoryAccessImpl(using: moc))
+                                            access: access)
         }
 
         folderVM.$title
@@ -55,6 +55,11 @@ class DocumentCollectionViewController: UICollectionViewController {
         folderVM.$nodes
             .sink { [unowned self] _ in self.collectionView.reloadData() }
             .store(in: &cancellables)
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
 
     // MARK: UICollectionViewDataSource

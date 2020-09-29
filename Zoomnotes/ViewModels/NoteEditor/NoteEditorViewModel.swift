@@ -52,8 +52,8 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
         guard let subLevel = try? self.access.read(level: level.id) else { return nil }
         let subSubLevels = subLevel.sublevels
             .map { NoteLevelVM(id: $0.id,
-                                                                preview: UIImage(data: $0.preview)!,
-                                                                frame: $0.frame) }
+                               preview: $0.preview,
+                               frame: $0.frame) }
             .map { ($0.id, $0) }
         return NoteEditorViewModel(id: level.id,
                                    title: self.title,
@@ -85,7 +85,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
         case .create(let level):
             do {
                 let description = NoteLevelDescription(parent: self.id,
-                                                       preview: level.preview.pngData()!,
+                                                       preview: level.preview,
                                                        frame: level.frame,
                                                        id: level.id,
                                                        drawing: PKDrawing(),

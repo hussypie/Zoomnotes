@@ -55,27 +55,27 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="pkt-IU-WRT">
-                            <size key="itemSize" width="168" height="168"/>
+                            <size key="itemSize" width="168" height="192"/>
                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
                             <size key="footerReferenceSize" width="0.0" height="0.0"/>
                             <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                         </collectionViewFlowLayout>
                         <cells>
                             <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" reuseIdentifier="DocumentNodeCell" id="TVR-e8-VoF" customClass="DocumentNodeCell" customModule="Zoomnotes" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="168" height="168"/>
+                                <rect key="frame" x="0.0" y="0.0" width="168" height="192"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="WaE-6P-TIR">
-                                    <rect key="frame" x="0.0" y="0.0" width="168" height="168"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="168" height="192"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <subviews>
                                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="1QU-T6-3tv">
-                                            <rect key="frame" x="10" y="10" width="148" height="148"/>
+                                            <rect key="frame" x="10" y="10" width="148" height="172"/>
                                             <subviews>
                                                 <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="0Ta-Tx-HHq">
-                                                    <rect key="frame" x="0.0" y="0.0" width="148" height="71"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="148" height="125"/>
                                                 </imageView>
                                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="7" translatesAutoresizingMaskIntoConstraints="NO" id="3Ad-c0-pdt">
-                                                    <rect key="frame" x="0.0" y="71" width="148" height="77"/>
+                                                    <rect key="frame" x="0.0" y="125" width="148" height="47"/>
                                                     <subviews>
                                                         <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4dG-Hn-Beb">
                                                             <rect key="frame" x="0.0" y="0.0" width="148" height="20"/>
@@ -96,7 +96,7 @@
                                                             </subviews>
                                                         </stackView>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ogz-by-6dy">
-                                                            <rect key="frame" x="0.0" y="27" width="148" height="50"/>
+                                                            <rect key="frame" x="0.0" y="27" width="148" height="20"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
@@ -144,7 +144,7 @@
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0Ya-rM-Atg" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1033" y="141"/>
+            <point key="canvasLocation" x="1032.7777777777778" y="140.74074074074073"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="jkf-Rf-Dua">

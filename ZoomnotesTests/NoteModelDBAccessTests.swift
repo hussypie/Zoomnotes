@@ -17,7 +17,7 @@ class NoteModelDBAccessTests: XCTestCase {
     func testNoteLevelCreation() {
         let access = NoteLevelAccessImpl(using: self.moc)
         let description = NoteLevelDescription(parent: UUID(),
-                                               preview: UIImage.checkmark.pngData()!,
+                                               preview: .checkmark,
                                                frame: CGRect(x: 0, y: 0, width: 100, height: 200),
                                                id: UUID(),
                                                drawing: PKDrawing(),

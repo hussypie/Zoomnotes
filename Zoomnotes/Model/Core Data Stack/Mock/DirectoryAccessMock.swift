@@ -74,7 +74,7 @@ class DirectoryAccessMock: DirectoryAccess {
                                                     root: desc.root)
     }
 
-    func create(from description: DirectoryStoreDescription) throws {
+    func root(from description: DirectoryStoreDescription) throws {
         directories[description.id.id] = description
 
         for document in description.documentChildren {

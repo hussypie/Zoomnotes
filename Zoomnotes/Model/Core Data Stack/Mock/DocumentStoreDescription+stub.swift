@@ -17,7 +17,7 @@ extension DocumentStoreDescription {
     static var stub: DocumentStoreDescription {
         let thumbnail = stubImages.randomElement()!
         let rootLevel = NoteLevelDescription(parent: nil,
-                                             preview: thumbnail.pngData()!,
+                                             preview: thumbnail,
                                              frame: CGRect(x: 0, y: 0, width: 1280, height: 800),
                                              id: UUID(),
                                              drawing: PKDrawing(),

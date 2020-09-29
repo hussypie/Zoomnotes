@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 struct DirectoryStoreId: Equatable {
-    let id: UUID
+    var id: UUID
 }
 
 struct DirectoryStoreDescription {

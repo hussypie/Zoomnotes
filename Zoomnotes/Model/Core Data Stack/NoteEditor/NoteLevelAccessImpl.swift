@@ -9,13 +9,16 @@
 import Foundation
 import CoreData
 import PencilKit
+import Combine
 import UIKit
 
 class NoteLevelAccessImpl: NoteLevelAccess {
     let moc: NSManagedObjectContext
+    private(set) var previewSubject: PassthroughSubject<(UUID, UIImage), Never>
 
     init(using moc: NSManagedObjectContext) {
         self.moc = moc
+        self.previewSubject = PassthroughSubject<(UUID, UIImage), Never>()
     }
 
     enum AccessMode {
@@ -60,12 +63,14 @@ class NoteLevelAccessImpl: NoteLevelAccess {
         _ = try StoreBuilder<NoteLevelStore>(prepare: { entity in
             entity.parent = description.parent
             entity.id = description.id
-            entity.preview = description.preview
+            entity.preview = description.preview.pngData()!
             entity.frame = rect
             entity.drawing = description.drawing.dataRepresentation()
 
             return entity
         }).build(using: self.moc)
+
+        
     }
 
     func delete(level id: UUID) throws {
@@ -90,10 +95,10 @@ class NoteLevelAccessImpl: NoteLevelAccess {
         }
     }
 
-    func update(preview: CodableImage, for id: UUID) throws {
+    func update(preview: UIImage, for id: UUID) throws {
         try accessing(to: .write, id: id) { store in
             guard let store = store else { return }
-            store.preview = preview.image.pngData()!
+            store.preview = preview.pngData()!
         }
     }
 

@@ -163,7 +163,7 @@ class FileBrowserDBAccessTests: XCTestCase {
     func testCreateDirectory() {
         let access = DirectoryAccessImpl(using: self.moc)
         let dirToBeCreated = DirectoryStoreDescription.stub
-        asynchronously(access: .write, moc: self.moc) { return try access.create(from: dirToBeCreated) }
+        asynchronously(access: .write, moc: self.moc) { return try access.root(from: dirToBeCreated) }
 
         let result = asynchronously(access: .read, moc: self.moc) { return try access.read(id: dirToBeCreated.id) }
 

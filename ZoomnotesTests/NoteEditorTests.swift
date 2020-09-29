@@ -70,7 +70,7 @@ class NoteEditorTests: XCTestCase {
                                             frame: CGRect(x: 0, y: 0, width: 200, height: 200))
 
         let mockDB = NoteLevelAccessMock(db: [noteLevelToRemove.id: NoteLevelDescription(parent: currentNoteId,
-                                                                                         preview: UIImage.checkmark.pngData()!,
+                                                                                         preview: .checkmark,
                                                                                          frame: CGRect(x: 0, y: 0, width: 200, height: 200),
                                                                                          id: noteLevelToRemove.id,
                                                                                          drawing: PKDrawing(),
@@ -91,7 +91,7 @@ class NoteEditorTests: XCTestCase {
 
     func testMove() {
         let note = NoteLevelDescription(parent: UUID(),
-                                        preview: UIImage.checkmark.pngData()!,
+                                        preview: .checkmark,
                                         frame: CGRect(x: 0, y: 0, width: 200, height: 200),
                                         id: UUID(),
                                         drawing: PKDrawing(),
@@ -123,7 +123,7 @@ class NoteEditorTests: XCTestCase {
 
     func testResize() {
         let note = NoteLevelDescription(parent: UUID(),
-                                        preview: UIImage.checkmark.pngData()!,
+                                        preview: .checkmark,
                                         frame: CGRect(x: 0, y: 0, width: 200, height: 200),
                                         id: UUID(),
                                         drawing: PKDrawing(),
