@@ -90,7 +90,6 @@ class FileBrowserDBIntegrationTests: XCTestCase {
         XCTAssertNotNil(data)
         XCTAssertEqual(data!.id, rootLevel.id)
         XCTAssertEqual(data!.drawing, rootLevel.drawing)
-        XCTAssertEqual(data!.parent, rootLevel.parent)
         XCTAssertEqual(data!.frame, rootLevel.frame)
     }
 

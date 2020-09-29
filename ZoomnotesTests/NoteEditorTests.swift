@@ -41,15 +41,27 @@ class NoteEditorTests: XCTestCase {
     }
 
     func testCreate() {
-        let mockDB = NoteLevelAccessMock(db: [:])
-        let vm = NoteEditorViewModel.stub(sublevels: [:],
-                                          drawer: [:],
-                                          access: mockDB,
-                                          onUpdateName: { _ in })
+        let root = NoteLevelDescription(preview: .checkmark,
+                                        frame: CGRect(x: 0, y: 0, width: 100, height: 100),
+                                        id: UUID(),
+                                        drawing: PKDrawing(),
+                                        sublevels: [])
+
+        let mockDB = NoteLevelAccessMock(db: [root.id: root])
+
+        let vm = NoteEditorViewModel(id: root.id,
+                                     title: "Note",
+                                     sublevels: [:],
+                                     drawing: root.drawing,
+                                     access: mockDB,
+                                     drawer: [:],
+                                     onUpdateName: { _ in })
 
         let newNode = NoteLevelVM(id: UUID(),
                                   preview: .checkmark,
                                   frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+
+        let originalNumberOfLevelsInDB = mockDB.db.count
 
         vm.process(.create(newNode))
 
@@ -58,40 +70,52 @@ class NoteEditorTests: XCTestCase {
         XCTAssert(vm.sublevels[newNode.id]!.id == newNode.id)
         XCTAssert(vm.drawerContents.isEmpty)
 
-        XCTAssertEqual(mockDB.db.count, 1)
+        XCTAssertEqual(mockDB.db.count, originalNumberOfLevelsInDB + 1)
         XCTAssertNotNil(mockDB.db[newNode.id])
         XCTAssertEqual(mockDB.db[newNode.id]!.id, newNode.id)
     }
 
     func testRemove() {
-        let currentNoteId = UUID()
-        let noteLevelToRemove = NoteLevelVM(id: currentNoteId,
-                                            preview: .checkmark,
-                                            frame: CGRect(x: 0, y: 0, width: 200, height: 200))
+        let sublevel = NoteLevelDescription(preview: .actions,
+                                            frame: CGRect(x: 0, y: 0, width: 200, height: 200),
+                                            id: UUID(),
+                                            drawing: PKDrawing(),
+                                            sublevels: [])
 
-        let mockDB = NoteLevelAccessMock(db: [noteLevelToRemove.id: NoteLevelDescription(parent: currentNoteId,
-                                                                                         preview: .checkmark,
-                                                                                         frame: CGRect(x: 0, y: 0, width: 200, height: 200),
-                                                                                         id: noteLevelToRemove.id,
-                                                                                         drawing: PKDrawing(),
-                                                                                         sublevels: [])])
+        let root = NoteLevelDescription(preview: .checkmark,
+                                        frame: CGRect(x: 0, y: 0, width: 100, height: 100),
+                                        id: UUID(),
+                                        drawing: PKDrawing(),
+                                        sublevels: [sublevel])
 
-        let vm = NoteEditorViewModel.stub(sublevels: [noteLevelToRemove.id: noteLevelToRemove],
-                                          drawer: [:],
-                                          access: mockDB,
-                                          onUpdateName: { _ in })
+        let mockDB = NoteLevelAccessMock(db: [
+            sublevel.id: sublevel,
+            root.id: root
+        ])
 
-        vm.process(.remove(noteLevelToRemove))
+        let sublevelVM = NoteLevelVM(id: sublevel.id,
+                                     preview: sublevel.preview,
+                                     frame: sublevel.frame)
+
+        let vm = NoteEditorViewModel(id: root.id,
+                                     title: "Notes",
+                                     sublevels: [sublevel.id: sublevelVM],
+                                     drawing: root.drawing,
+                                     access: mockDB,
+                                     drawer: [:],
+                                     onUpdateName: { _ in })
+
+        let numberOfLevelsInDBBeforeCommand = mockDB.db.count
+        vm.process(.remove(sublevelVM))
 
         XCTAssert(vm.sublevels.isEmpty)
         XCTAssert(vm.drawerContents.isEmpty)
 
-        XCTAssert(mockDB.db.isEmpty)
+        XCTAssertEqual(mockDB.db.count, numberOfLevelsInDBBeforeCommand - 1)
     }
 
     func testMove() {
-        let note = NoteLevelDescription(parent: UUID(),
-                                        preview: .checkmark,
+        let note = NoteLevelDescription(preview: .checkmark,
                                         frame: CGRect(x: 0, y: 0, width: 200, height: 200),
                                         id: UUID(),
                                         drawing: PKDrawing(),
@@ -122,8 +146,7 @@ class NoteEditorTests: XCTestCase {
     }
 
     func testResize() {
-        let note = NoteLevelDescription(parent: UUID(),
-                                        preview: .checkmark,
+        let note = NoteLevelDescription(preview: .checkmark,
                                         frame: CGRect(x: 0, y: 0, width: 200, height: 200),
                                         id: UUID(),
                                         drawing: PKDrawing(),

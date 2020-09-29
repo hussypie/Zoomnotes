@@ -12,8 +12,7 @@ import UIKit
 
 extension NoteLevelDescription {
     static func stub(parent: UUID?) -> NoteLevelDescription {
-        return NoteLevelDescription(parent: parent,
-                                    preview: UIImage.checkmark,
+        return NoteLevelDescription(preview: UIImage.checkmark,
                                     frame: CGRect(x: 0, y: 0, width: 1280, height: 800),
                                     id: UUID(),
                                     drawing: PKDrawing(),

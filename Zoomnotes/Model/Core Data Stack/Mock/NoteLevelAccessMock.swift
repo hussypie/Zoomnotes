@@ -20,12 +20,36 @@ class NoteLevelAccessMock: NoteLevelAccess {
         self.previewSubject = PassthroughSubject<(UUID, UIImage), Never>()
     }
 
-    func create(from description: NoteLevelDescription) throws {
+    func append(level description: NoteLevelDescription, to parent: UUID) throws {
+        guard let desc = db[parent] else { return }
+        db[desc.id] = NoteLevelDescription(preview: desc.preview,
+                                           frame: desc.frame,
+                                           id: desc.id,
+                                           drawing: desc.drawing,
+                                           sublevels: desc.sublevels + [description])
         db[description.id] = description
+
         for sublevel in description.sublevels {
-            // swiftlint:disable:next force_try
-            try! self.create(from: sublevel)
+            try self.append(level: sublevel, to: description.id)
         }
+
+    }
+
+    func remove(level id: UUID, from parent: UUID) throws {
+        guard let desc = db[parent] else { return }
+        guard let subject = db[id] else { return }
+
+        for sublevel in subject.sublevels {
+            try self.remove(level: sublevel.id, from: subject.id)
+        }
+
+        db[desc.id] = NoteLevelDescription(preview: desc.preview,
+                                           frame: desc.frame,
+                                           id: desc.id,
+                                           drawing: desc.drawing,
+                                           sublevels: desc.sublevels.filter { $0.id != id })
+
+        db.removeValue(forKey: id)
     }
 
     func delete(level id: UUID) throws {
@@ -43,8 +67,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
 
     func update(drawing: PKDrawing, for id: UUID) throws {
         guard let desc = db[id] else { return }
-        db[id] = NoteLevelDescription(parent: desc.parent,
-                                      preview: desc.preview,
+        db[id] = NoteLevelDescription(preview: desc.preview,
                                       frame: desc.frame,
                                       id: desc.id,
                                       drawing: drawing,
@@ -53,8 +76,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
 
     func update(preview: UIImage, for id: UUID) throws {
         guard let desc = db[id] else { return }
-        db[id] = NoteLevelDescription(parent: desc.parent,
-                                      preview: preview,
+        db[id] = NoteLevelDescription(preview: preview,
                                       frame: desc.frame,
                                       id: desc.id,
                                       drawing: desc.drawing,
@@ -64,8 +86,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
 
     func update(frame: CGRect, for id: UUID) throws {
         guard let desc = db[id] else { return }
-        db[id] = NoteLevelDescription(parent: desc.parent,
-                                      preview: desc.preview,
+        db[id] = NoteLevelDescription(preview: desc.preview,
                                       frame: frame,
                                       id: desc.id,
                                       drawing: desc.drawing,

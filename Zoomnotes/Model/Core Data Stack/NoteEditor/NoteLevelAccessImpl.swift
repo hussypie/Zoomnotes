@@ -28,6 +28,8 @@ class NoteLevelAccessImpl: NoteLevelAccess {
 
     enum AccessError: Error {
         case moreThanOneEntryFound
+        case cannotCreateRectStore
+        case cannotCreateLevelStore
     }
 
     private func accessing<T>(to mode: AccessMode,
@@ -50,33 +52,43 @@ class NoteLevelAccessImpl: NoteLevelAccess {
         return result
     }
 
-    func create(from description: NoteLevelDescription) throws {
-        let rect = try StoreBuilder<RectStore>(prepare: { store in
+    func append(level description: NoteLevelDescription, to parent: UUID) throws {
+        guard let rect = try StoreBuilder<RectStore>(prepare: { store in
             store.x = Float(description.frame.minX)
             store.y = Float(description.frame.minY)
             store.width = Float(description.frame.width)
             store.height = Float(description.frame.height)
 
             return store
-        }).build(using: self.moc)
+        }).build(using: self.moc) else { throw AccessError.cannotCreateRectStore }
 
-        _ = try StoreBuilder<NoteLevelStore>(prepare: { entity in
-            entity.parent = description.parent
+        guard let sublevel = try StoreBuilder<NoteLevelStore>(prepare: { entity in
             entity.id = description.id
             entity.preview = description.preview.pngData()!
             entity.frame = rect
             entity.drawing = description.drawing.dataRepresentation()
 
             return entity
-        }).build(using: self.moc)
+        }).build(using: self.moc) else { throw AccessError.cannotCreateLevelStore }
 
-        
+        try accessing(to: .write, id: parent) { store in
+            guard let store = store else { return }
+            store.addToSublevels(sublevel)
+        }
+
+        for sublevel in description.sublevels {
+            try self.append(level: sublevel, to: description.id)
+        }
     }
 
-    func delete(level id: UUID) throws {
-        try accessing(to: .write, id: id) { store in
+    func remove(level id: UUID, from parent: UUID) throws {
+        try accessing(to: .write, id: parent) { store in
             guard let store = store else { return }
-            self.moc.delete(store)
+            guard let sublevels = store.sublevels as? Set<NoteLevelStore> else { return }
+            guard let child = sublevels.first(where: { subl in subl.id == id }) else { return }
+
+            store.removeFromSublevels(child)
+            self.moc.delete(child)
         }
     }
 

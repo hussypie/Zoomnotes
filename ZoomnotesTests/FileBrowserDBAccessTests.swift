@@ -56,7 +56,6 @@ class FileBrowserDBAccessTests: XCTestCase {
 
         XCTAssertNotNil(rootLevel2)
         XCTAssertEqual(rootLevel2!.id, rootLevel.id)
-        XCTAssertEqual(rootLevel2!.parent, rootLevel.parent)
     }
 
     func testUpdateFileLastModified() {

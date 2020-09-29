@@ -35,6 +35,7 @@
 		312820CF24F69A2700338E28 /* Graphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820CE24F69A2700338E28 /* Graphics.swift */; };
 		312820D224F6B76200338E28 /* ZoomTransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820D124F6B76200338E28 /* ZoomTransitionAnimator.swift */; };
 		312820D624F826EF00338E28 /* DrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820D524F826EF00338E28 /* DrawerView.swift */; };
+		312B3A082523C97D0020E1CF /* DirectoryAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312B3A072523C97D0020E1CF /* DirectoryAccess.swift */; };
 		313414C42517F2E2005B49D1 /* NoteEditorCommandable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313414C32517F2E2005B49D1 /* NoteEditorCommandable.swift */; };
 		313414C62517F32D005B49D1 /* FileBrowserCommandable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313414C52517F32D005B49D1 /* FileBrowserCommandable.swift */; };
 		31362A5724F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */; };
@@ -48,7 +49,6 @@
 		313BFDEC251E6CD200EBF70F /* NoteLevelDescription+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDEB251E6CD200EBF70F /* NoteLevelDescription+stub.swift */; };
 		313BFDEE251FA40F00EBF70F /* NoteEditorVMNoteModelDBAccessIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDED251FA40F00EBF70F /* NoteEditorVMNoteModelDBAccessIntegration.swift */; };
 		313BFDF0251FA66200EBF70F /* NoteEditorViewModel+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDEF251FA66200EBF70F /* NoteEditorViewModel+stub.swift */; };
-		313BFDF22520BB6400EBF70F /* DirectoryAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDF12520BB6400EBF70F /* DirectoryAccess.swift */; };
 		313BFDF42520BC5500EBF70F /* NoteLevelAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDF32520BC5500EBF70F /* NoteLevelAccess.swift */; };
 		313BFDF62520E4F100EBF70F /* DirectoryAccess+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDF52520E4F100EBF70F /* DirectoryAccess+stub.swift */; };
 		3142FE83250A81D800002DD8 /* ExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE82250A81D800002DD8 /* ExtensionsTests.swift */; };
@@ -74,6 +74,8 @@
 		31B1AA3824FD5DC7007DAF4D /* UserDefaults+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1AA3724FD5DC7007DAF4D /* UserDefaults+ext.swift */; };
 		31B1B1CF251E58F100DEEE68 /* FileVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1B1CE251E58F100DEEE68 /* FileVM.swift */; };
 		31B1B1D1251E591800DEEE68 /* DirectoryVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1B1D0251E591800DEEE68 /* DirectoryVM.swift */; };
+		31BA8F7F2523D54D0016B78C /* DirectoryStoreLookupResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BA8F7E2523D54D0016B78C /* DirectoryStoreLookupResult.swift */; };
+		31BA8F812523D7030016B78C /* NoteLevelAccessImpl+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BA8F802523D7030016B78C /* NoteLevelAccessImpl+stub.swift */; };
 		31BF9E2C24E5906100142EBF /* NoteLevelVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BF9E2B24E5906100142EBF /* NoteLevelVM.swift */; };
 		31CD520D251CF7B700561D27 /* DocumentStoreDescription+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31CD520C251CF7B700561D27 /* DocumentStoreDescription+stub.swift */; };
 		31CD520F251CF80600561D27 /* DocumentStoreDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31CD520E251CF80600561D27 /* DocumentStoreDescription.swift */; };
@@ -136,6 +138,7 @@
 		312820CE24F69A2700338E28 /* Graphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graphics.swift; sourceTree = "<group>"; };
 		312820D124F6B76200338E28 /* ZoomTransitionAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomTransitionAnimator.swift; sourceTree = "<group>"; };
 		312820D524F826EF00338E28 /* DrawerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawerView.swift; sourceTree = "<group>"; };
+		312B3A072523C97D0020E1CF /* DirectoryAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryAccess.swift; sourceTree = "<group>"; };
 		313414C32517F2E2005B49D1 /* NoteEditorCommandable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorCommandable.swift; sourceTree = "<group>"; };
 		313414C52517F32D005B49D1 /* FileBrowserCommandable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserCommandable.swift; sourceTree = "<group>"; };
 		31362A5624F832050002FD98 /* NoteViewController+UINavigationControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+UINavigationControllerDelegate.swift"; sourceTree = "<group>"; };
@@ -149,7 +152,6 @@
 		313BFDEB251E6CD200EBF70F /* NoteLevelDescription+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteLevelDescription+stub.swift"; sourceTree = "<group>"; };
 		313BFDED251FA40F00EBF70F /* NoteEditorVMNoteModelDBAccessIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorVMNoteModelDBAccessIntegration.swift; sourceTree = "<group>"; };
 		313BFDEF251FA66200EBF70F /* NoteEditorViewModel+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteEditorViewModel+stub.swift"; sourceTree = "<group>"; };
-		313BFDF12520BB6400EBF70F /* DirectoryAccess.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DirectoryAccess.swift; path = ../../../../../../Desktop/DirectoryAccess.swift; sourceTree = "<group>"; };
 		313BFDF32520BC5500EBF70F /* NoteLevelAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteLevelAccess.swift; sourceTree = "<group>"; };
 		313BFDF52520E4F100EBF70F /* DirectoryAccess+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DirectoryAccess+stub.swift"; sourceTree = "<group>"; };
 		3142FE82250A81D800002DD8 /* ExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionsTests.swift; sourceTree = "<group>"; };
@@ -175,6 +177,8 @@
 		31B1AA3724FD5DC7007DAF4D /* UserDefaults+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+ext.swift"; sourceTree = "<group>"; };
 		31B1B1CE251E58F100DEEE68 /* FileVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileVM.swift; sourceTree = "<group>"; };
 		31B1B1D0251E591800DEEE68 /* DirectoryVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryVM.swift; sourceTree = "<group>"; };
+		31BA8F7E2523D54D0016B78C /* DirectoryStoreLookupResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryStoreLookupResult.swift; sourceTree = "<group>"; };
+		31BA8F802523D7030016B78C /* NoteLevelAccessImpl+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteLevelAccessImpl+stub.swift"; sourceTree = "<group>"; };
 		31BF9E2B24E5906100142EBF /* NoteLevelVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteLevelVM.swift; sourceTree = "<group>"; };
 		31CD520C251CF7B700561D27 /* DocumentStoreDescription+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DocumentStoreDescription+stub.swift"; sourceTree = "<group>"; };
 		31CD520E251CF80600561D27 /* DocumentStoreDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentStoreDescription.swift; sourceTree = "<group>"; };
@@ -325,8 +329,8 @@
 		31074D77251E2B8300F8A11D /* Protocol */ = {
 			isa = PBXGroup;
 			children = (
-				313BFDF12520BB6400EBF70F /* DirectoryAccess.swift */,
 				313BFDF32520BC5500EBF70F /* NoteLevelAccess.swift */,
+				312B3A072523C97D0020E1CF /* DirectoryAccess.swift */,
 			);
 			path = Protocol;
 			sourceTree = "<group>";
@@ -340,6 +344,7 @@
 				313BFDE5251E601500EBF70F /* NoteLevelAccessMock.swift */,
 				313BFDEB251E6CD200EBF70F /* NoteLevelDescription+stub.swift */,
 				313BFDF52520E4F100EBF70F /* DirectoryAccess+stub.swift */,
+				31BA8F802523D7030016B78C /* NoteLevelAccessImpl+stub.swift */,
 			);
 			path = Mock;
 			sourceTree = "<group>";
@@ -488,6 +493,7 @@
 				31AD9BE02509499100C193CF /* DirectoryAccessImpl.swift */,
 				31CD5210251CF8D400561D27 /* DirectoryStoreDescription.swift */,
 				31CD520E251CF80600561D27 /* DocumentStoreDescription.swift */,
+				31BA8F7E2523D54D0016B78C /* DirectoryStoreLookupResult.swift */,
 			);
 			path = DirectoryAccess;
 			sourceTree = "<group>";
@@ -810,8 +816,8 @@
 				312820CB24F6926B00338E28 /* ZNPinchGestureRecognizer.swift in Sources */,
 				313BFDE6251E601500EBF70F /* NoteLevelAccessMock.swift in Sources */,
 				313B6CEE2515629100789595 /* OkayableTextfield.swift in Sources */,
-				313BFDF22520BB6400EBF70F /* DirectoryAccess.swift in Sources */,
 				31074D72251E293F00F8A11D /* FileBrowserViewModel+stub.swift in Sources */,
+				312B3A082523C97D0020E1CF /* DirectoryAccess.swift in Sources */,
 				313414C62517F32D005B49D1 /* FileBrowserCommandable.swift in Sources */,
 				310F03D32510DF1D000CF0F0 /* ManagedContext+inMemory.swift in Sources */,
 				310A5C6D24F40A44006394A0 /* ZNPanGestureRecognizer.swift in Sources */,
@@ -821,6 +827,7 @@
 				31AD9BD52507B3BB00C193CF /* Catapult.swift in Sources */,
 				313414C42517F2E2005B49D1 /* NoteEditorCommandable.swift in Sources */,
 				31AD9BDE25093EA600C193CF /* DocumentCollectionViewController.swift in Sources */,
+				31BA8F7F2523D54D0016B78C /* DirectoryStoreLookupResult.swift in Sources */,
 				313BFDF0251FA66200EBF70F /* NoteEditorViewModel+stub.swift in Sources */,
 				3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */,
 				31CD520F251CF80600561D27 /* DocumentStoreDescription.swift in Sources */,
@@ -832,6 +839,7 @@
 				31AD9BC925077FBB00C193CF /* NoteViewController+sublevel.swift in Sources */,
 				3101752E24E5211D007D3589 /* AppDelegate.swift in Sources */,
 				3101753024E5211D007D3589 /* SceneDelegate.swift in Sources */,
+				31BA8F812523D7030016B78C /* NoteLevelAccessImpl+stub.swift in Sources */,
 				31AD9BD1250793A300C193CF /* ZNScreenEdgePanGesture.swift in Sources */,
 				3121A83425160E7A00D8AD37 /* NoteLevelAccessImpl.swift in Sources */,
 				312820D224F6B76200338E28 /* ZoomTransitionAnimator.swift in Sources */,

@@ -131,8 +131,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
     private func createFile(_ file: FileVM, with preview: UIImage) {
         do {
-            let rootData = NoteLevelDescription(parent: nil,
-                                                preview: preview,
+            let rootData = NoteLevelDescription(preview: preview,
                                                 frame: CGRect(x: 0, y: 0, width: 1280, height: 900),
                                                 id: UUID(),
                                                 drawing: PKDrawing(),

@@ -27,6 +27,8 @@ struct DirectoryAccessImpl: DirectoryAccess {
         case moreThanOneEntryFound
         case cannotCreateFolder
         case cannotCreateDocument
+        case reparentTargetNotAmongChildren
+        case reparentSubjectNotFound
     }
 
     private func accessing<Store: NSManagedObject, T>(to mode: AccessMode,
@@ -55,7 +57,7 @@ struct DirectoryAccessImpl: DirectoryAccess {
     func read(id dir: DirectoryStoreId) throws -> DirectoryStoreLookupResult? {
         return try accessing(to: .read, id: dir.id) { (store: DirectoryStore?) in
             guard let store = store else { return nil }
-            return DirectoryStoreLookupResult(id: store.id!,
+            return DirectoryStoreLookupResult(id: DirectoryStoreId(id: store.id!),
                                              created: store.created!,
                                              name: store.name!)
         }
@@ -145,14 +147,16 @@ struct DirectoryAccessImpl: DirectoryAccess {
             assert(node.id != dest.id, "Cannot move a folder to itself")
 
             guard let store = store else { return }
-            guard let directoryChildren = store.directoryChildren as? Set<DirectoryStore> else { return }
-
-            guard let destinationFolder: DirectoryStore = directoryChildren.first(where: { $0.id == dest.id }) else {
+            guard let directoryChildren = store.directoryChildren as? Set<DirectoryStore> else {
                 return
             }
 
+            guard let destinationFolder: DirectoryStore = directoryChildren.first(where: { $0.id == dest.id }) else {
+                throw DirectoryAccessError.reparentTargetNotAmongChildren
+            }
+
             guard let child: DirectoryStore = directoryChildren.first(where: { $0.id == node.id }) else {
-                return
+                throw DirectoryAccessError.reparentSubjectNotFound
             }
 
             store.removeFromDirectoryChildren(child)
@@ -164,15 +168,17 @@ struct DirectoryAccessImpl: DirectoryAccess {
     func reparent(from id: DirectoryStoreId, node: DocumentStoreId, to dest: DirectoryStoreId) throws {
         try accessing(to: .write, id: id.id) { (store: DirectoryStore?) in
             guard let store = store else { return }
-            guard let directoryChildren = store.directoryChildren as? Set<DirectoryStore> else { return }
+            guard let directoryChildren = store.directoryChildren as? Set<DirectoryStore> else {
+                return
+            }
 
             guard let destinationFolder: DirectoryStore = directoryChildren.first(where: { $0.id == dest.id }) else {
-                return
+                throw DirectoryAccessError.reparentTargetNotAmongChildren
             }
 
             guard let children = store.documentChildren as? Set<NoteStore> else { return }
             guard let child: NoteStore = children.first(where: { $0.id == node.id }) else {
-                return
+                throw DirectoryAccessError.reparentSubjectNotFound
             }
 
             store.removeFromDocumentChildren(child)
@@ -222,7 +228,6 @@ struct DirectoryAccessImpl: DirectoryAccess {
                 level.drawing = description.root.drawing.dataRepresentation()
                 level.preview = description.root.preview.pngData()!
                 level.frame = rootRect
-                level.parent = description.root.parent
                 level.sublevels = NSSet()
 
                 return level
@@ -285,8 +290,7 @@ struct DirectoryAccessImpl: DirectoryAccess {
 
             let subLevelDescs = try sublevels.compactMap { try noteLevelAccess.read(level: $0.id!) }
 
-            return NoteLevelDescription(parent: nil,
-                                        preview: UIImage(data: root.preview!)!,
+            return NoteLevelDescription(preview: UIImage(data: root.preview!)!,
                                         frame: frame,
                                         id: root.id!,
                                         drawing: try PKDrawing(data: root.drawing!),

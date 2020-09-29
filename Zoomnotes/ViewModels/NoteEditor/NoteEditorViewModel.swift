@@ -76,7 +76,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
 
         case .remove(let level):
             do {
-                try access.delete(level: level.id)
+                try access.remove(level: level.id, from: id)
                 sublevels.removeValue(forKey: level.id)
             } catch let error {
                 fatalError(error.localizedDescription)
@@ -84,13 +84,12 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
 
         case .create(let level):
             do {
-                let description = NoteLevelDescription(parent: self.id,
-                                                       preview: level.preview,
+                let description = NoteLevelDescription(preview: level.preview,
                                                        frame: level.frame,
                                                        id: level.id,
                                                        drawing: PKDrawing(),
                                                        sublevels: [])
-                try access.create(from: description)
+                try access.append(level: description, to: id)
                 sublevels[level.id] = level
             } catch let error {
                 fatalError(error.localizedDescription)

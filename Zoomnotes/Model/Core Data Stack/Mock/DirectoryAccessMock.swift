@@ -27,7 +27,7 @@ class DirectoryAccessMock: DirectoryAccess {
 
     func read(id: DirectoryStoreId) throws -> DirectoryStoreLookupResult? {
         guard let desc = directories[id.id] else { return nil }
-        return DirectoryStoreLookupResult(id: desc.id.id,
+        return DirectoryStoreLookupResult(id: desc.id,
                                           created: desc.created,
                                           name: desc.name)
     }
@@ -176,6 +176,8 @@ class DirectoryAccessMock: DirectoryAccess {
             documents: desc.documentChildren,
             directories: desc.directoryChildren + [description]
         )
+
+        directories[description.id.id] = description
 
         for document in description.documentChildren {
             try self.append(document: document, to: description.id)

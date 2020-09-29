@@ -10,7 +10,6 @@
     <entity name="NoteLevelStore" representedClassName="NoteLevelStore" syncable="YES" codeGenerationType="class">
         <attribute name="drawing" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="parent" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="preview" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
         <relationship name="frame" maxCount="1" deletionRule="Cascade" destinationEntity="RectStore"/>
         <relationship name="sublevels" toMany="YES" deletionRule="Cascade" destinationEntity="NoteLevelStore"/>
@@ -30,7 +29,7 @@
     </entity>
     <elements>
         <element name="DirectoryStore" positionX="-54" positionY="18" width="128" height="118"/>
-        <element name="NoteLevelStore" positionX="-54" positionY="27" width="128" height="133"/>
+        <element name="NoteLevelStore" positionX="-54" positionY="27" width="128" height="118"/>
         <element name="NoteStore" positionX="-63" positionY="-18" width="128" height="118"/>
         <element name="RectStore" positionX="-45" positionY="36" width="128" height="103"/>
     </elements>
