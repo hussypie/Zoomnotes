@@ -142,6 +142,16 @@ class DocumentCollectionViewController: UICollectionViewController {
     private func openNoteEditor(for note: FileVM) {
         guard let destinationViewController = NoteViewController.from(self.storyboard) else { return }
         destinationViewController.viewModel = self.folderVM.noteEditorVM(for: note)
+
+        destinationViewController
+            .previewChangedSubject
+            .sink(receiveValue: { image in
+                self.folderVM.process(command: .update(note, preview: image))
+                note.preview = CodableImage(wrapping: image)
+                self.collectionView.reloadData()
+            })
+            .store(in: &cancellables)
+
         self.navigationController?.pushViewController(destinationViewController, animated: true)
     }
 }

@@ -59,7 +59,6 @@
 		31AD9BC32506A59D00C193CF /* CGRect+half.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BC22506A59D00C193CF /* CGRect+half.swift */; };
 		31AD9BC52507700900C193CF /* NoteViewController+commands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BC42507700900C193CF /* NoteViewController+commands.swift */; };
 		31AD9BC72507759400C193CF /* NoteViewController+utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BC62507759400C193CF /* NoteViewController+utils.swift */; };
-		31AD9BC925077FBB00C193CF /* NoteViewController+sublevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BC825077FBB00C193CF /* NoteViewController+sublevel.swift */; };
 		31AD9BCF2507937300C193CF /* ZNStatefulGestureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BCE2507937300C193CF /* ZNStatefulGestureManager.swift */; };
 		31AD9BD1250793A300C193CF /* ZNScreenEdgePanGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BD0250793A300C193CF /* ZNScreenEdgePanGesture.swift */; };
 		31AD9BD52507B3BB00C193CF /* Catapult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BD42507B3BB00C193CF /* Catapult.swift */; };
@@ -162,7 +161,6 @@
 		31AD9BC22506A59D00C193CF /* CGRect+half.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+half.swift"; sourceTree = "<group>"; };
 		31AD9BC42507700900C193CF /* NoteViewController+commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+commands.swift"; sourceTree = "<group>"; };
 		31AD9BC62507759400C193CF /* NoteViewController+utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+utils.swift"; sourceTree = "<group>"; };
-		31AD9BC825077FBB00C193CF /* NoteViewController+sublevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+sublevel.swift"; sourceTree = "<group>"; };
 		31AD9BCE2507937300C193CF /* ZNStatefulGestureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNStatefulGestureManager.swift; sourceTree = "<group>"; };
 		31AD9BD0250793A300C193CF /* ZNScreenEdgePanGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNScreenEdgePanGesture.swift; sourceTree = "<group>"; };
 		31AD9BD42507B3BB00C193CF /* Catapult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Catapult.swift; sourceTree = "<group>"; };
@@ -429,7 +427,6 @@
 				31AD9BC02506849400C193CF /* NoteViewController+Preferences.swift */,
 				31AD9BC42507700900C193CF /* NoteViewController+commands.swift */,
 				31AD9BC62507759400C193CF /* NoteViewController+utils.swift */,
-				31AD9BC825077FBB00C193CF /* NoteViewController+sublevel.swift */,
 			);
 			path = NoteViewController;
 			sourceTree = "<group>";
@@ -836,7 +833,6 @@
 				31CD5213251D118E00561D27 /* DirectoryStoreDescription+stub.swift in Sources */,
 				31BF9E2C24E5906100142EBF /* NoteLevelVM.swift in Sources */,
 				31B1AA3824FD5DC7007DAF4D /* UserDefaults+ext.swift in Sources */,
-				31AD9BC925077FBB00C193CF /* NoteViewController+sublevel.swift in Sources */,
 				3101752E24E5211D007D3589 /* AppDelegate.swift in Sources */,
 				3101753024E5211D007D3589 /* SceneDelegate.swift in Sources */,
 				31BA8F812523D7030016B78C /* NoteLevelAccessImpl+stub.swift in Sources */,

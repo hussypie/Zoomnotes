@@ -13,11 +13,9 @@ import Combine
 
 class NoteLevelAccessMock: NoteLevelAccess {
     var db: [UUID: NoteLevelDescription]
-    private(set) var previewSubject: PassthroughSubject<(UUID, UIImage), Never>
 
     init(db: [UUID: NoteLevelDescription]) {
         self.db = db
-        self.previewSubject = PassthroughSubject<(UUID, UIImage), Never>()
     }
 
     func append(level description: NoteLevelDescription, to parent: UUID) throws {
@@ -81,7 +79,6 @@ class NoteLevelAccessMock: NoteLevelAccess {
                                       id: desc.id,
                                       drawing: desc.drawing,
                                       sublevels: desc.sublevels)
-        previewSubject.send((id, preview))
     }
 
     func update(frame: CGRect, for id: UUID) throws {

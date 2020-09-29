@@ -15,6 +15,7 @@ enum FileBrowserCommand {
     case delete(FolderBrowserViewModel.Node)
     case move(FolderBrowserViewModel.Node, to: DirectoryVM)
     case rename(FolderBrowserViewModel.Node, to: String)
+    case update(FileVM, preview: UIImage)
 }
 
 protocol FileBrowserCommandable {

@@ -225,6 +225,13 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
         case .rename(let node, to: let name):
             self.rename(node, to: name)
+
+        case .update(let file, preview: let image):
+            do {
+                try self.cdaccess.updatePreviewImage(of: DocumentStoreId(id: file.id), with: image)
+            } catch let error {
+                fatalError(error.localizedDescription)
+            }
         }
     }
 }

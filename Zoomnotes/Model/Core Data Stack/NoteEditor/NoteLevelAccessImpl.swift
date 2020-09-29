@@ -14,11 +14,9 @@ import UIKit
 
 class NoteLevelAccessImpl: NoteLevelAccess {
     let moc: NSManagedObjectContext
-    private(set) var previewSubject: PassthroughSubject<(UUID, UIImage), Never>
 
     init(using moc: NSManagedObjectContext) {
         self.moc = moc
-        self.previewSubject = PassthroughSubject<(UUID, UIImage), Never>()
     }
 
     enum AccessMode {
