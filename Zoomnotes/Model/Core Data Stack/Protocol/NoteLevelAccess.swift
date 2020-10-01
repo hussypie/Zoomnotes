@@ -12,9 +12,13 @@ import UIKit
 
 protocol NoteLevelAccess {
     func append(level description: NoteLevelDescription, to parent: UUID) throws
+    func append(image description: NoteImageDescription, to parent: UUID) throws
     func remove(level id: UUID, from parent: UUID) throws
+    func remove(image id: UUID, from parent: UUID) throws
     func read(level id: UUID) throws -> NoteLevelDescription?
     func update(drawing: PKDrawing, for id: UUID) throws
     func update(preview: UIImage, for id: UUID) throws
     func update(frame: CGRect, for id: UUID) throws
+    func update(frame: CGRect, image: UUID) throws
+    func update(annotation: PKDrawing, image: UUID) throws
 }

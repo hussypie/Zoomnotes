@@ -14,12 +14,18 @@ import PencilKit
 class NoteModelDBAccessTests: XCTestCase {
     let moc: NSManagedObjectContext = NSPersistentContainer.inMemory(name: "Zoomnotes").viewContext
 
+    override func setUp() {
+        super.setUp()
+        self.continueAfterFailure = false
+    }
+
     func testNoteLevelCreation() {
         let rootLevel = NoteLevelDescription(preview: .checkmark,
                                              frame: CGRect(x: 0, y: 0, width: 100, height: 100),
                                              id: UUID(),
                                              drawing: PKDrawing(),
-                                             sublevels: [])
+                                             sublevels: [],
+                                             images: [])
 
         let access = NoteLevelAccessImpl(using: self.moc).stub(with: rootLevel)
 
@@ -27,7 +33,8 @@ class NoteModelDBAccessTests: XCTestCase {
                                                frame: CGRect(x: 0, y: 0, width: 100, height: 200),
                                                id: UUID(),
                                                drawing: PKDrawing(),
-                                               sublevels: [])
+                                               sublevels: [],
+                                               images: [])
 
         asynchronously(access: .write, moc: self.moc) {
             try access.append(level: description, to: rootLevel.id)
@@ -51,18 +58,142 @@ class NoteModelDBAccessTests: XCTestCase {
         XCTAssertEqual(parentFromDb!.sublevels.first!.id, description.id)
     }
 
-    func testNoteLevelDeletion() {
+    func testCreateSubImage() {
         let description = NoteLevelDescription(preview: .checkmark,
                                                frame: CGRect(x: 0, y: 0, width: 100, height: 200),
                                                id: UUID(),
                                                drawing: PKDrawing(),
-                                               sublevels: [])
+                                               sublevels: [],
+                                               images: [])
 
         let rootLevel = NoteLevelDescription(preview: .checkmark,
                                              frame: CGRect(x: 0, y: 0, width: 100, height: 100),
                                              id: UUID(),
                                              drawing: PKDrawing(),
-                                             sublevels: [description])
+                                             sublevels: [description],
+                                             images: [])
+
+        let access = NoteLevelAccessImpl(using: self.moc).stub(with: rootLevel)
+
+        let image = NoteImageDescription(id: UUID(),
+                                         preview: .checkmark,
+                                         drawing: PKDrawing(),
+                                         image: .checkmark,
+                                         frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+
+        asynchronously(access: .read, moc: self.moc) {
+            try access.append(image: image, to: rootLevel.id)
+        }
+
+        let imageFromDB = asynchronously(access: .read, moc: self.moc) {
+            return try access.read(level: rootLevel.id)
+        }
+
+        XCTAssertEqual(imageFromDB!.images.count, 1)
+        XCTAssertEqual(imageFromDB!.images.first!.id, image.id)
+        XCTAssertEqual(imageFromDB!.images.first!.frame, image.frame)
+        XCTAssertEqual(imageFromDB!.images.first!.drawing, image.drawing)
+    }
+
+    func testRemoveSubImage() {
+        let image = NoteImageDescription(id: UUID(),
+                                         preview: .checkmark,
+                                         drawing: PKDrawing(),
+                                         image: .checkmark,
+                                         frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+
+        let rootLevel = NoteLevelDescription(preview: .checkmark,
+                                             frame: CGRect(x: 0, y: 0, width: 100, height: 100),
+                                             id: UUID(),
+                                             drawing: PKDrawing(),
+                                             sublevels: [],
+                                             images: [image])
+
+        let access = NoteLevelAccessImpl(using: self.moc).stub(with: rootLevel)
+
+        asynchronously(access: .write, moc: self.moc) {
+            try access.remove(image: image.id, from: rootLevel.id)
+        }
+
+        let rootFromDB = asynchronously(access: .read, moc: self.moc) {
+            try access.read(level: rootLevel.id)
+        }
+
+        XCTAssert(rootFromDB!.images.isEmpty)
+    }
+
+    func testUpdateSubImageAnnotation() {
+        let image = NoteImageDescription(id: UUID(),
+                                         preview: .checkmark,
+                                         drawing: PKDrawing(),
+                                         image: .checkmark,
+                                         frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+
+        let rootLevel = NoteLevelDescription(preview: .checkmark,
+                                             frame: CGRect(x: 0, y: 0, width: 100, height: 100),
+                                             id: UUID(),
+                                             drawing: PKDrawing(),
+                                             sublevels: [],
+                                             images: [image])
+
+        let access = NoteLevelAccessImpl(using: self.moc).stub(with: rootLevel)
+
+        let newAnnotation = PKDrawing()
+        asynchronously(access: .write, moc: self.moc) {
+            try access.update(annotation: newAnnotation, image: image.id)
+        }
+
+        let rootFromDB = asynchronously(access: .read, moc: self.moc) {
+            try access.read(level: rootLevel.id)
+        }
+
+        XCTAssertNotNil(rootFromDB!.images.first)
+        XCTAssertEqual(rootFromDB!.images.first!.drawing, newAnnotation)
+    }
+
+    func testMoveSubImage() {
+        let image = NoteImageDescription(id: UUID(),
+                                         preview: .checkmark,
+                                         drawing: PKDrawing(),
+                                         image: .checkmark,
+                                         frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+
+        let rootLevel = NoteLevelDescription(preview: .checkmark,
+                                             frame: CGRect(x: 0, y: 0, width: 100, height: 100),
+                                             id: UUID(),
+                                             drawing: PKDrawing(),
+                                             sublevels: [],
+                                             images: [image])
+
+        let access = NoteLevelAccessImpl(using: self.moc).stub(with: rootLevel)
+
+        let newFrame = CGRect(x: 100, y: 100, width: 1000, height: 1000)
+        asynchronously(access: .write, moc: self.moc) {
+            try access.update(frame: newFrame, image: image.id)
+        }
+
+        let rootFromDB = asynchronously(access: .read, moc: self.moc) {
+            try access.read(level: rootLevel.id)
+        }
+
+        XCTAssertNotNil(rootFromDB!.images.first)
+        XCTAssertEqual(rootFromDB!.images.first!.frame, newFrame)
+    }
+
+    func testNoteLevelDeletion() {
+        let description = NoteLevelDescription(preview: .checkmark,
+                                               frame: CGRect(x: 0, y: 0, width: 100, height: 200),
+                                               id: UUID(),
+                                               drawing: PKDrawing(),
+                                               sublevels: [],
+                                               images: [])
+
+        let rootLevel = NoteLevelDescription(preview: .checkmark,
+                                             frame: CGRect(x: 0, y: 0, width: 100, height: 100),
+                                             id: UUID(),
+                                             drawing: PKDrawing(),
+                                             sublevels: [description],
+                                             images: [])
 
         let access = NoteLevelAccessImpl(using: self.moc).stub(with: rootLevel)
 
@@ -86,7 +217,8 @@ class NoteModelDBAccessTests: XCTestCase {
                                              frame: CGRect(x: 0, y: 0, width: 100, height: 100),
                                              id: UUID(),
                                              drawing: PKDrawing(),
-                                             sublevels: [])
+                                             sublevels: [],
+                                             images: [])
 
         let access = NoteLevelAccessImpl(using: self.moc).stub(with: rootLevel)
 
@@ -109,7 +241,8 @@ class NoteModelDBAccessTests: XCTestCase {
                                              frame: CGRect(x: 0, y: 0, width: 100, height: 100),
                                              id: UUID(),
                                              drawing: PKDrawing(),
-                                             sublevels: [])
+                                             sublevels: [],
+                                             images: [])
 
         let access = NoteLevelAccessImpl(using: self.moc).stub(with: description)
 

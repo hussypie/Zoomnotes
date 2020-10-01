@@ -14,7 +14,7 @@ func clamp<T: Comparable>(_ value: T, lower: T, upper: T) -> T {
     return max(lower, min(value, upper))
 }
 
-func zoomOffset(in view: UIView, for note: NoteLevelVM) -> CGPoint {
+func zoomOffset(in view: UIView, for note: NoteChildVM) -> CGPoint {
     CGPoint(x: view.frame.midX - note.frame.midX,
             y: view.frame.midY - note.frame.midY)
 }

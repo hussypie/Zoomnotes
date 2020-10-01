@@ -7,11 +7,19 @@
         <relationship name="directoryChildren" toMany="YES" deletionRule="Cascade" destinationEntity="DirectoryStore"/>
         <relationship name="documentChildren" toMany="YES" deletionRule="Cascade" destinationEntity="NoteStore"/>
     </entity>
+    <entity name="ImageStore" representedClassName="ImageStore" syncable="YES" codeGenerationType="class">
+        <attribute name="drawingAnnotation" optional="YES" attributeType="Binary"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="image" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <attribute name="preview" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <relationship name="frame" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="RectStore"/>
+    </entity>
     <entity name="NoteLevelStore" representedClassName="NoteLevelStore" syncable="YES" codeGenerationType="class">
         <attribute name="drawing" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="preview" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
         <relationship name="frame" maxCount="1" deletionRule="Cascade" destinationEntity="RectStore"/>
+        <relationship name="images" toMany="YES" deletionRule="Nullify" destinationEntity="ImageStore"/>
         <relationship name="sublevels" toMany="YES" deletionRule="Cascade" destinationEntity="NoteLevelStore"/>
     </entity>
     <entity name="NoteStore" representedClassName="NoteStore" syncable="YES" codeGenerationType="class">
@@ -29,7 +37,8 @@
     </entity>
     <elements>
         <element name="DirectoryStore" positionX="-54" positionY="18" width="128" height="118"/>
-        <element name="NoteLevelStore" positionX="-54" positionY="27" width="128" height="118"/>
+        <element name="ImageStore" positionX="-54" positionY="54" width="128" height="118"/>
+        <element name="NoteLevelStore" positionX="-54" positionY="27" width="128" height="133"/>
         <element name="NoteStore" positionX="-63" positionY="-18" width="128" height="118"/>
         <element name="RectStore" positionX="-45" positionY="36" width="128" height="103"/>
     </elements>

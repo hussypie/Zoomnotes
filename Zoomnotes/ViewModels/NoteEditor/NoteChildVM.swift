@@ -10,7 +10,7 @@ import UIKit
 import PencilKit
 import Combine
 
-class NoteLevelVM: ObservableObject {
+class NoteChildVM: ObservableObject {
     let id: UUID
     @Published var preview: UIImage
     @Published var frame: CGRect

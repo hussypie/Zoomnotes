@@ -85,7 +85,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
             let subLevels =
                 noteModel.sublevels
-                    .map { NoteLevelVM(id: $0.id,
+                    .map { NoteChildVM(id: $0.id,
                                        preview: $0.preview,
                                        frame: $0.frame)}
                     .map { ($0.id, $0) }
@@ -135,7 +135,8 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                                 frame: CGRect(x: 0, y: 0, width: 1280, height: 900),
                                                 id: UUID(),
                                                 drawing: PKDrawing(),
-                                                sublevels: [])
+                                                sublevels: [],
+                                                images: [])
             let description: DocumentStoreDescription
                 = DocumentStoreDescription(id: file.id,
                                            lastModified: file.lastModified,

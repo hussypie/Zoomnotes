@@ -54,6 +54,7 @@
 		3142FE83250A81D800002DD8 /* ExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE82250A81D800002DD8 /* ExtensionsTests.swift */; };
 		3142FE86250B59AF00002DD8 /* NoteEditorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE85250B59AF00002DD8 /* NoteEditorTests.swift */; };
 		3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */; };
+		318EEA6525247BCE00CDB95C /* NoteImageDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 318EEA6425247BCE00CDB95C /* NoteImageDescription.swift */; };
 		31AD9BBF25052EB200C193CF /* NoteEditorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BBE25052EB200C193CF /* NoteEditorViewModel.swift */; };
 		31AD9BC12506849400C193CF /* NoteViewController+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BC02506849400C193CF /* NoteViewController+Preferences.swift */; };
 		31AD9BC32506A59D00C193CF /* CGRect+half.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31AD9BC22506A59D00C193CF /* CGRect+half.swift */; };
@@ -75,7 +76,7 @@
 		31B1B1D1251E591800DEEE68 /* DirectoryVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B1B1D0251E591800DEEE68 /* DirectoryVM.swift */; };
 		31BA8F7F2523D54D0016B78C /* DirectoryStoreLookupResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BA8F7E2523D54D0016B78C /* DirectoryStoreLookupResult.swift */; };
 		31BA8F812523D7030016B78C /* NoteLevelAccessImpl+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BA8F802523D7030016B78C /* NoteLevelAccessImpl+stub.swift */; };
-		31BF9E2C24E5906100142EBF /* NoteLevelVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BF9E2B24E5906100142EBF /* NoteLevelVM.swift */; };
+		31BF9E2C24E5906100142EBF /* NoteChildVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BF9E2B24E5906100142EBF /* NoteChildVM.swift */; };
 		31CD520D251CF7B700561D27 /* DocumentStoreDescription+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31CD520C251CF7B700561D27 /* DocumentStoreDescription+stub.swift */; };
 		31CD520F251CF80600561D27 /* DocumentStoreDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31CD520E251CF80600561D27 /* DocumentStoreDescription.swift */; };
 		31CD5211251CF8D400561D27 /* DirectoryStoreDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31CD5210251CF8D400561D27 /* DirectoryStoreDescription.swift */; };
@@ -156,6 +157,7 @@
 		3142FE82250A81D800002DD8 /* ExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionsTests.swift; sourceTree = "<group>"; };
 		3142FE85250B59AF00002DD8 /* NoteEditorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorTests.swift; sourceTree = "<group>"; };
 		3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNTapGestureRecognizer.swift; sourceTree = "<group>"; };
+		318EEA6425247BCE00CDB95C /* NoteImageDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteImageDescription.swift; sourceTree = "<group>"; };
 		31AD9BBE25052EB200C193CF /* NoteEditorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorViewModel.swift; sourceTree = "<group>"; };
 		31AD9BC02506849400C193CF /* NoteViewController+Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteViewController+Preferences.swift"; sourceTree = "<group>"; };
 		31AD9BC22506A59D00C193CF /* CGRect+half.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+half.swift"; sourceTree = "<group>"; };
@@ -177,7 +179,7 @@
 		31B1B1D0251E591800DEEE68 /* DirectoryVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryVM.swift; sourceTree = "<group>"; };
 		31BA8F7E2523D54D0016B78C /* DirectoryStoreLookupResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryStoreLookupResult.swift; sourceTree = "<group>"; };
 		31BA8F802523D7030016B78C /* NoteLevelAccessImpl+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteLevelAccessImpl+stub.swift"; sourceTree = "<group>"; };
-		31BF9E2B24E5906100142EBF /* NoteLevelVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteLevelVM.swift; sourceTree = "<group>"; };
+		31BF9E2B24E5906100142EBF /* NoteChildVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteChildVM.swift; sourceTree = "<group>"; };
 		31CD520C251CF7B700561D27 /* DocumentStoreDescription+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DocumentStoreDescription+stub.swift"; sourceTree = "<group>"; };
 		31CD520E251CF80600561D27 /* DocumentStoreDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentStoreDescription.swift; sourceTree = "<group>"; };
 		31CD5210251CF8D400561D27 /* DirectoryStoreDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryStoreDescription.swift; sourceTree = "<group>"; };
@@ -329,6 +331,11 @@
 			children = (
 				313BFDF32520BC5500EBF70F /* NoteLevelAccess.swift */,
 				312B3A072523C97D0020E1CF /* DirectoryAccess.swift */,
+				313BFDE7251E638100EBF70F /* NoteLevelDescription.swift */,
+				318EEA6425247BCE00CDB95C /* NoteImageDescription.swift */,
+				31CD5210251CF8D400561D27 /* DirectoryStoreDescription.swift */,
+				31CD520E251CF80600561D27 /* DocumentStoreDescription.swift */,
+				31BA8F7E2523D54D0016B78C /* DirectoryStoreLookupResult.swift */,
 			);
 			path = Protocol;
 			sourceTree = "<group>";
@@ -367,7 +374,6 @@
 			isa = PBXGroup;
 			children = (
 				3121A83325160E7A00D8AD37 /* NoteLevelAccessImpl.swift */,
-				313BFDE7251E638100EBF70F /* NoteLevelDescription.swift */,
 			);
 			path = NoteEditor;
 			sourceTree = "<group>";
@@ -396,7 +402,7 @@
 		313414C12517F2C3005B49D1 /* NoteEditor */ = {
 			isa = PBXGroup;
 			children = (
-				31BF9E2B24E5906100142EBF /* NoteLevelVM.swift */,
+				31BF9E2B24E5906100142EBF /* NoteChildVM.swift */,
 				31AD9BBE25052EB200C193CF /* NoteEditorViewModel.swift */,
 				313414C32517F2E2005B49D1 /* NoteEditorCommandable.swift */,
 				313BFDEF251FA66200EBF70F /* NoteEditorViewModel+stub.swift */,
@@ -488,9 +494,6 @@
 			isa = PBXGroup;
 			children = (
 				31AD9BE02509499100C193CF /* DirectoryAccessImpl.swift */,
-				31CD5210251CF8D400561D27 /* DirectoryStoreDescription.swift */,
-				31CD520E251CF80600561D27 /* DocumentStoreDescription.swift */,
-				31BA8F7E2523D54D0016B78C /* DirectoryStoreLookupResult.swift */,
 			);
 			path = DirectoryAccess;
 			sourceTree = "<group>";
@@ -795,6 +798,7 @@
 				31AD9BE325094CB900C193CF /* FileBrowserVM+dragdrop.swift in Sources */,
 				313BFDE8251E638100EBF70F /* NoteLevelDescription.swift in Sources */,
 				312820CD24F6963B00338E28 /* CGRect+center.swift in Sources */,
+				318EEA6525247BCE00CDB95C /* NoteImageDescription.swift in Sources */,
 				31AD9BC52507700900C193CF /* NoteViewController+commands.swift in Sources */,
 				31AD9BE525094D9C00C193CF /* AlertController+closure.swift in Sources */,
 				3101753824E5211D007D3589 /* Zoomnotes.xcdatamodeld in Sources */,
@@ -831,7 +835,7 @@
 				313B6CE62511612B00789595 /* XCTestCase+asynch.swift in Sources */,
 				31AD9BD72507CA9700C193CF /* FileBrowserViewModel.swift in Sources */,
 				31CD5213251D118E00561D27 /* DirectoryStoreDescription+stub.swift in Sources */,
-				31BF9E2C24E5906100142EBF /* NoteLevelVM.swift in Sources */,
+				31BF9E2C24E5906100142EBF /* NoteChildVM.swift in Sources */,
 				31B1AA3824FD5DC7007DAF4D /* UserDefaults+ext.swift in Sources */,
 				3101752E24E5211D007D3589 /* AppDelegate.swift in Sources */,
 				3101753024E5211D007D3589 /* SceneDelegate.swift in Sources */,

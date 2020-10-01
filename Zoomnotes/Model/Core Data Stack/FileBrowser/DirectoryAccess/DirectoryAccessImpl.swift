@@ -280,21 +280,25 @@ struct DirectoryAccessImpl: DirectoryAccess {
             guard let store = store else { return nil }
             guard let root = store.root else { return nil }
             guard let sublevels = root.sublevels as? Set<NoteLevelStore> else { return nil }
+            guard let images = root.images as? Set<ImageStore> else { return nil }
 
             let frame = CGRect(x: CGFloat(root.frame!.x),
                                y: CGFloat(root.frame!.y),
                                width: CGFloat(root.frame!.width),
                                height: CGFloat(root.frame!.height))
 
-            let noteLevelAccess = NoteLevelAccessImpl(using: self.moc)
+            let subLevelDescs = sublevels.compactMap {
+                try? NoteLevelDescription.from(store: $0)
+            }
 
-            let subLevelDescs = try sublevels.compactMap { try noteLevelAccess.read(level: $0.id!) }
+            let imageDescs = images.map { NoteImageDescription.from($0) }
 
             return NoteLevelDescription(preview: UIImage(data: root.preview!)!,
                                         frame: frame,
                                         id: root.id!,
                                         drawing: try PKDrawing(data: root.drawing!),
-                                        sublevels: subLevelDescs)
+                                        sublevels: subLevelDescs,
+                                        images: imageDescs)
         }
     }
 

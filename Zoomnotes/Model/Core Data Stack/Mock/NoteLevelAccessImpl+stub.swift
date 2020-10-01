@@ -35,6 +35,11 @@ extension NoteLevelAccessImpl {
             try! self.append(level: sublevel, to: description.id)
         }
 
+        for image in description.images {
+            // swiftlint:disable:next force_try
+            try! self.append(image: image, to: description.id)
+        }
+
         return self
     }
 }

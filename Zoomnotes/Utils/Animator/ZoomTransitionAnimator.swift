@@ -10,10 +10,10 @@ import Foundation
 import UIKit
 
 class ZoomTransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning {
-    let note: NoteLevelVM
+    let note: NoteChildVM
     private let duration: TimeInterval = 0.2
 
-    init(with note: NoteLevelVM) {
+    init(with note: NoteChildVM) {
         self.note = note
         super.init()
     }

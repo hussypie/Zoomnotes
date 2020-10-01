@@ -12,7 +12,7 @@ import SwiftCheck
 
 class ZoomnotesUtilsTests: XCTestCase {
     func testUserDefaultsWithDefaultsMissingKey() {
-        let mockUserDefaults = UserDefaults()
+        let mockUserDefaults = UserDefaults.mock(name: #file)
         property("For any key not set in defaults, the default value is returned") <- forAll { (key: String, defaultValue: Int) in
             return mockUserDefaults.withDefaultValue(key, default: defaultValue) == defaultValue
         }

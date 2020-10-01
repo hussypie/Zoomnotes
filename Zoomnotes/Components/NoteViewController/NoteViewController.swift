@@ -12,7 +12,7 @@ import Combine
 import SwiftUI
 
 struct DragState {
-    let currentlyDraggedLevel: NoteLevelVM
+    let currentlyDraggedLevel: NoteChildVM
     let originalFrame: CGRect
 }
 
@@ -40,7 +40,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     private struct EdgePanGestureState {
-        let sublevel: NoteLevelVM
+        let sublevel: NoteChildVM
         let currentlyDraggedPreview: NoteLevelPreview
     }
 
@@ -50,7 +50,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 let frame = self.defaultPreviewFrame(from: rec.location(in: self.canvasView))
 
                 let defaultPreviewImage = UIImage.from(size: self.view.frame.size).withBackground(color: UIColor.white)
-                let newLevel = NoteLevelVM(id: UUID(), preview: defaultPreviewImage, frame: frame)
+                let newLevel = NoteChildVM(id: UUID(), preview: defaultPreviewImage, frame: frame)
 
                 let newLevelPreview = self.sublevelPreview(for: newLevel)
                 self.view.addSubview(newLevelPreview)
@@ -132,7 +132,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         toolPicker = PKToolPicker.shared(for: window!)
         setup(toolPicker)
 
-        for note in viewModel.sublevels.values {
+        for note in viewModel.nodes.values {
             subLevelViews[note.id]?.image = note.preview
         }
 
@@ -170,7 +170,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         edges.forEach { self.view.addGestureRecognizer(edgeGestureRecognizer(edge: $0)) }
 
-        for note in viewModel.sublevels.values {
+        for note in viewModel.nodes.values {
             let sublevel = sublevelPreview(for: note)
             subLevelViews[note.id] = sublevel
 
@@ -260,7 +260,7 @@ extension NoteViewController: PKCanvasViewDelegate {
 }
 
 extension NoteViewController {
-    func onPreviewZoomDown(_ rec: ZNPinchGestureRecognizer, _ note: NoteLevelVM) {
+    func onPreviewZoomDown(_ rec: ZNPinchGestureRecognizer, _ note: NoteChildVM) {
         let frameInView = CGRect(x: note.frame.minX,
                                  y: note.frame.minY - self.canvasView.contentOffset.y,
                                  width: note.frame.width,
@@ -344,7 +344,7 @@ extension NoteViewController {
         return state
     }
 
-    private func panGestureEnded(_ rec: UIPanGestureRecognizer, state: PanGestureState, sublevel: NoteLevelVM) {
+    private func panGestureEnded(_ rec: UIPanGestureRecognizer, state: PanGestureState, sublevel: NoteChildVM) {
         // MARK: begin snippet
         /// https://www.raywenderlich.com/1860-uikit-dynamics-and-swift-tutorial-tossing-views
 
@@ -390,7 +390,7 @@ extension NoteViewController {
         }
     }
 
-    private func panGesture(for sublevel: NoteLevelVM, _ preview: NoteLevelPreview) -> ZNPanGestureRecognizer<PanGestureState> {
+    private func panGesture(for sublevel: NoteChildVM, _ preview: NoteLevelPreview) -> ZNPanGestureRecognizer<PanGestureState> {
         return ZNPanGestureRecognizer<PanGestureState>(
             begin: { rec in return self.panGestureBegin(rec, preview) },
             step: self.panGestureStep(_:state:),
@@ -403,7 +403,7 @@ extension NoteViewController {
         let dragging: NoteLevelPreview
     }
 
-    private func cloneGesture(for sublevel: NoteLevelVM) -> ZNPanGestureRecognizer<CloneGestureState> {
+    private func cloneGesture(for sublevel: NoteChildVM) -> ZNPanGestureRecognizer<CloneGestureState> {
         ZNPanGestureRecognizer<CloneGestureState>(
             begin: { rec in
                 let newPreview = self.sublevelPreview(for: sublevel)
@@ -424,7 +424,7 @@ extension NoteViewController {
                 return state
         },
             end: { _, state in
-                let copiedSublevel = NoteLevelVM(id: UUID(),
+                let copiedSublevel = NoteChildVM(id: UUID(),
                                                  preview: sublevel.preview,
                                                  frame: sublevel.frame)
 
@@ -434,7 +434,7 @@ extension NoteViewController {
         })
     }
 
-    func sublevelPreview(for sublevel: NoteLevelVM) -> NoteLevelPreview {
+    func sublevelPreview(for sublevel: NoteChildVM) -> NoteLevelPreview {
         let preview = NoteLevelPreview(
             frame: sublevel.frame,
             preview: sublevel.preview,

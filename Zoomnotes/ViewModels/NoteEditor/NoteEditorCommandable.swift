@@ -11,14 +11,18 @@ import UIKit
 import PencilKit
 
 enum NoteEditorCommand {
-    case move(NoteLevelVM, from: CGRect, to: CGRect)
-    case remove(NoteLevelVM)
-    case create(NoteLevelVM)
-    case resize(NoteLevelVM, from: CGRect, to: CGRect)
+    case createLevel(NoteChildVM)
+    case createImage(NoteChildVM)
+    case moveLevel(NoteChildVM, from: CGRect, to: CGRect)
+    case moveImage(NoteChildVM, from: CGRect, to: CGRect)
+    case removeLevel(NoteChildVM)
+    case removeImage(NoteChildVM)
+    case resizeLevel(NoteChildVM, from: CGRect, to: CGRect)
+    case resizeImage(NoteChildVM, from: CGRect, to: CGRect)
     case update(PKDrawing)
     case refresh(UIImage)
-    case moveToDrawer(NoteLevelVM, frame: CGRect)
-    case moveFromDrawer(NoteLevelVM, frame: CGRect)
+    case moveToDrawer(NoteChildVM, frame: CGRect)
+    case moveFromDrawer(NoteChildVM, frame: CGRect)
 }
 
 protocol NoteEditorCommandable {

@@ -11,8 +11,8 @@ import UIKit
 import PencilKit
 
 extension NoteViewController {
-    func addSublevel(_ sublevel: NoteLevelVM) {
-        self.viewModel.process(.create(sublevel))
+    func addSublevel(_ sublevel: NoteChildVM) {
+        self.viewModel.process(.createLevel(sublevel))
 
         undoManager?.registerUndo(withTarget: self) {
             $0.removeSublevel(sublevel)
@@ -20,7 +20,7 @@ extension NoteViewController {
         self.undoManager?.setActionName("AddSublevel")
     }
 
-    func removeSublevel(_ sublevel: NoteLevelVM) {
+    func removeSublevel(_ sublevel: NoteChildVM) {
         UIView.animate(withDuration: 0.15, animations: {
             let preview = self.subLevelViews[sublevel.id]!
             preview.frame = CGRect(x: self.canvasView.frame.width,
@@ -28,7 +28,7 @@ extension NoteViewController {
                                    width: 0,
                                    height: 0)
         }, completion: { _ in
-            self.viewModel.process(.remove(sublevel))
+            self.viewModel.process(.removeLevel(sublevel))
             self.undoManager?.registerUndo(withTarget: self) {
                 $0.addSublevel(sublevel)
             }
@@ -36,7 +36,7 @@ extension NoteViewController {
         })
     }
 
-    func moveSublevel(sublevel: NoteLevelVM, from: CGRect, to: CGRect) {
+    func moveSublevel(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
         UIView.animate(withDuration: 0.15, animations: {
             self.subLevelViews[sublevel.id]!.frame = to
         }, completion: { _ in
@@ -47,7 +47,7 @@ extension NoteViewController {
         })
     }
 
-    func moveToDrawer(sublevel: NoteLevelVM, from: CGRect, to: CGRect) {
+    func moveToDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
         self.viewModel.process(.moveToDrawer(sublevel, frame: to))
         self.undoManager?.registerUndo(withTarget: self) {
             $0.moveFromDrawer(sublevel: sublevel, from: to, to: from)
@@ -55,7 +55,7 @@ extension NoteViewController {
         self.undoManager?.setActionName("MoveToDrawer")
     }
 
-    func moveFromDrawer(sublevel: NoteLevelVM, from: CGRect, to: CGRect) {
+    func moveFromDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
         self.viewModel.process(.moveFromDrawer(sublevel, frame: to))
         self.undoManager?.registerUndo(withTarget: self) {
             $0.moveToDrawer(sublevel: sublevel, from: to, to: from)
@@ -63,8 +63,8 @@ extension NoteViewController {
         self.undoManager?.setActionName("MoveFromDrawer")
     }
 
-    func resizePreview(sublevel: NoteLevelVM, from: CGRect, to: CGRect) {
-        self.viewModel.process(.resize(sublevel, from: sublevel.frame, to: to))
+    func resizePreview(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
+        self.viewModel.process(.resizeLevel(sublevel, from: sublevel.frame, to: to))
         self.undoManager?.registerUndo(withTarget: self) { sself in
             UIView.animate(withDuration: 0.1, animations: {
                 sself.resizePreview(sublevel: sublevel, from: to, to: from)
@@ -86,7 +86,7 @@ extension NoteViewController {
         self.hasModifiedDrawing = true
 
         switch command {
-        case .create(let sublevel):
+        case .createLevel(let sublevel):
             let noteLevelPreview = sublevelPreview(for: sublevel)
             noteLevelPreview.alpha = 0.0
             self.subLevelViews[sublevel.id] = noteLevelPreview
@@ -96,7 +96,7 @@ extension NoteViewController {
                 self.view.bringSubviewToFront(noteLevelPreview)
             }
 
-        case .remove(let sublevel):
+        case .removeLevel(let sublevel):
             self.subLevelViews[sublevel.id]!.removeFromSuperview()
             self.subLevelViews.removeValue(forKey: sublevel.id)
 
@@ -117,11 +117,23 @@ extension NoteViewController {
             self.view.addSubview(preview)
             self.subLevelViews[sublevel.id] = preview
             preview.frame = frame
-        case .resize(let sublevel, from: _, to: let frame):
+        case .resizeLevel(let sublevel, from: _, to: let frame):
             let preview = self.subLevelViews[sublevel.id]!
             preview.setFrame(to: frame)
 
-        case .move:
+        case .createImage:
+            return
+
+        case .moveImage:
+            return
+
+        case .resizeImage:
+            return
+
+        case .removeImage:
+            return
+
+        case .moveLevel:
             return
         case .update:
             return

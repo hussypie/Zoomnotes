@@ -214,7 +214,7 @@ class FileBrowserVMTests: XCTestCase {
         XCTAssertNotNil(noteVM)
         XCTAssertEqual(noteVM!.drawerContents.count, 0)
         XCTAssertEqual(noteVM!.drawing, doc.root.drawing)
-        XCTAssertEqual(noteVM!.sublevels.count, doc.root.sublevels.count)
+        XCTAssertEqual(noteVM!.nodes.count, doc.root.sublevels.count)
         XCTAssertEqual(noteVM!.title, doc.name)
     }
 }

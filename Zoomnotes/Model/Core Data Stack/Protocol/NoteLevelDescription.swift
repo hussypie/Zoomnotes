@@ -16,6 +16,7 @@ struct NoteLevelDescription {
     let id: UUID
     let drawing: PKDrawing
     let sublevels: [NoteLevelDescription]
+    let images: [NoteImageDescription]
 }
 
 extension NoteLevelDescription {
@@ -28,11 +29,15 @@ extension NoteLevelDescription {
         let drawing = try PKDrawing(data: store.drawing!)
 
         guard let sublevels = store.sublevels as? Set<NoteLevelStore> else { return nil }
+        guard let images = store.images as? Set<ImageStore> else { return nil }
 
-        return NoteLevelDescription(preview: UIImage(data: store.preview!)!,
-                                    frame: frame,
-                                    id: store.id!,
-                                    drawing: drawing,
-                                    sublevels: sublevels.compactMap { try? NoteLevelDescription.from(store: $0) })
+        return NoteLevelDescription(
+            preview: UIImage(data: store.preview!)!,
+            frame: frame,
+            id: store.id!,
+            drawing: drawing,
+            sublevels: sublevels.compactMap { try? NoteLevelDescription.from(store: $0) },
+            images: images.map { NoteImageDescription.from($0) }
+        )
     }
 }
