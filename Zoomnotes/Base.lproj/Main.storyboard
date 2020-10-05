@@ -164,6 +164,44 @@
             </objects>
             <point key="canvasLocation" x="228" y="141"/>
         </scene>
+        <!--Image Detail View Controller-->
+        <scene sceneID="hY2-Mh-6F4">
+            <objects>
+                <viewController id="NWu-Sx-owd" customClass="ImageDetailViewController" customModule="Zoomnotes" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="ryx-3c-wmD">
+                        <rect key="frame" x="0.0" y="0.0" width="1080" height="810"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="x4z-NI-Nx3">
+                                <rect key="frame" x="0.0" y="0.0" width="1080" height="810"/>
+                            </imageView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uRy-CX-xNh" customClass="PKCanvasView">
+                                <rect key="frame" x="0.0" y="0.0" width="1080" height="810"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="mjW-d7-7lg" firstAttribute="bottom" secondItem="uRy-CX-xNh" secondAttribute="bottom" id="2vh-ZT-Byx"/>
+                            <constraint firstItem="mjW-d7-7lg" firstAttribute="bottom" secondItem="x4z-NI-Nx3" secondAttribute="bottom" id="Bu6-IM-3VI"/>
+                            <constraint firstItem="x4z-NI-Nx3" firstAttribute="leading" secondItem="mjW-d7-7lg" secondAttribute="leading" id="LSo-U1-eja"/>
+                            <constraint firstItem="mjW-d7-7lg" firstAttribute="trailing" secondItem="x4z-NI-Nx3" secondAttribute="trailing" id="V8r-Bj-Sgw"/>
+                            <constraint firstItem="uRy-CX-xNh" firstAttribute="top" secondItem="mjW-d7-7lg" secondAttribute="top" id="ZLE-hd-n6Q"/>
+                            <constraint firstItem="x4z-NI-Nx3" firstAttribute="top" secondItem="mjW-d7-7lg" secondAttribute="top" id="hVo-4V-dvd"/>
+                            <constraint firstItem="uRy-CX-xNh" firstAttribute="leading" secondItem="mjW-d7-7lg" secondAttribute="leading" id="ixP-oG-xJG"/>
+                            <constraint firstAttribute="trailing" secondItem="uRy-CX-xNh" secondAttribute="trailing" id="qhh-uC-MWM"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="mjW-d7-7lg"/>
+                    </view>
+                    <connections>
+                        <outlet property="canva" destination="uRy-CX-xNh" id="S9r-r9-LFH"/>
+                        <outlet property="image" destination="x4z-NI-Nx3" id="rfY-AU-2z4"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dXm-rj-0cm" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="242" y="1049"/>
+        </scene>
     </scenes>
     <resources>
         <image name="arrow.uturn.left" catalog="system" width="128" height="112"/>

@@ -33,7 +33,7 @@
 		312820CB24F6926B00338E28 /* ZNPinchGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820CA24F6926B00338E28 /* ZNPinchGestureRecognizer.swift */; };
 		312820CD24F6963B00338E28 /* CGRect+center.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820CC24F6963B00338E28 /* CGRect+center.swift */; };
 		312820CF24F69A2700338E28 /* Graphics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820CE24F69A2700338E28 /* Graphics.swift */; };
-		312820D224F6B76200338E28 /* ZoomTransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820D124F6B76200338E28 /* ZoomTransitionAnimator.swift */; };
+		312820D224F6B76200338E28 /* ZoomUpTransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820D124F6B76200338E28 /* ZoomUpTransitionAnimator.swift */; };
 		312820D624F826EF00338E28 /* DrawerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312820D524F826EF00338E28 /* DrawerView.swift */; };
 		312B3A082523C97D0020E1CF /* DirectoryAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312B3A072523C97D0020E1CF /* DirectoryAccess.swift */; };
 		313414C42517F2E2005B49D1 /* NoteEditorCommandable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313414C32517F2E2005B49D1 /* NoteEditorCommandable.swift */; };
@@ -53,6 +53,9 @@
 		3142FE83250A81D800002DD8 /* ExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE82250A81D800002DD8 /* ExtensionsTests.swift */; };
 		3142FE86250B59AF00002DD8 /* NoteEditorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE85250B59AF00002DD8 /* NoteEditorTests.swift */; };
 		314CA94F252B811F00FE9B73 /* NoteEditorDropDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 314CA94E252B811F00FE9B73 /* NoteEditorDropDelegate.swift */; };
+		314CA951252BB2FA00FE9B73 /* ImageDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 314CA950252BB2FA00FE9B73 /* ImageDetailViewController.swift */; };
+		314CA953252BB4D300FE9B73 /* NoteTransitionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 314CA952252BB4D300FE9B73 /* NoteTransitionDelegate.swift */; };
+		314CA955252BB86800FE9B73 /* ZoomDownTransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 314CA954252BB86800FE9B73 /* ZoomDownTransitionAnimator.swift */; };
 		3168B034252609740092B817 /* ImagePickerDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3168B033252609740092B817 /* ImagePickerDrawer.swift */; };
 		3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */; };
 		318EEA6525247BCE00CDB95C /* NoteImageDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 318EEA6425247BCE00CDB95C /* NoteImageDescription.swift */; };
@@ -137,7 +140,7 @@
 		312820CA24F6926B00338E28 /* ZNPinchGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNPinchGestureRecognizer.swift; sourceTree = "<group>"; };
 		312820CC24F6963B00338E28 /* CGRect+center.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+center.swift"; sourceTree = "<group>"; };
 		312820CE24F69A2700338E28 /* Graphics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graphics.swift; sourceTree = "<group>"; };
-		312820D124F6B76200338E28 /* ZoomTransitionAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomTransitionAnimator.swift; sourceTree = "<group>"; };
+		312820D124F6B76200338E28 /* ZoomUpTransitionAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomUpTransitionAnimator.swift; sourceTree = "<group>"; };
 		312820D524F826EF00338E28 /* DrawerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawerView.swift; sourceTree = "<group>"; };
 		312B3A072523C97D0020E1CF /* DirectoryAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryAccess.swift; sourceTree = "<group>"; };
 		313414C32517F2E2005B49D1 /* NoteEditorCommandable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorCommandable.swift; sourceTree = "<group>"; };
@@ -157,6 +160,9 @@
 		3142FE82250A81D800002DD8 /* ExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionsTests.swift; sourceTree = "<group>"; };
 		3142FE85250B59AF00002DD8 /* NoteEditorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorTests.swift; sourceTree = "<group>"; };
 		314CA94E252B811F00FE9B73 /* NoteEditorDropDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorDropDelegate.swift; sourceTree = "<group>"; };
+		314CA950252BB2FA00FE9B73 /* ImageDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailViewController.swift; sourceTree = "<group>"; };
+		314CA952252BB4D300FE9B73 /* NoteTransitionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTransitionDelegate.swift; sourceTree = "<group>"; };
+		314CA954252BB86800FE9B73 /* ZoomDownTransitionAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomDownTransitionAnimator.swift; sourceTree = "<group>"; };
 		3168B033252609740092B817 /* ImagePickerDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePickerDrawer.swift; sourceTree = "<group>"; };
 		3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNTapGestureRecognizer.swift; sourceTree = "<group>"; };
 		318EEA6425247BCE00CDB95C /* NoteImageDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteImageDescription.swift; sourceTree = "<group>"; };
@@ -324,6 +330,7 @@
 				310A5C7024F42338006394A0 /* NotePreview */,
 				3101756424E52FED007D3589 /* ZoomNotesNavigationController.swift */,
 				31B1AA3524FD3AE4007DAF4D /* SettingsView.swift */,
+				314CA950252BB2FA00FE9B73 /* ImageDetailViewController.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -383,7 +390,8 @@
 		312820D024F6B75300338E28 /* Animator */ = {
 			isa = PBXGroup;
 			children = (
-				312820D124F6B76200338E28 /* ZoomTransitionAnimator.swift */,
+				312820D124F6B76200338E28 /* ZoomUpTransitionAnimator.swift */,
+				314CA954252BB86800FE9B73 /* ZoomDownTransitionAnimator.swift */,
 			);
 			path = Animator;
 			sourceTree = "<group>";
@@ -436,6 +444,7 @@
 				31AD9BC42507700900C193CF /* NoteViewController+commands.swift */,
 				31AD9BC62507759400C193CF /* NoteViewController+utils.swift */,
 				314CA94E252B811F00FE9B73 /* NoteEditorDropDelegate.swift */,
+				314CA952252BB4D300FE9B73 /* NoteTransitionDelegate.swift */,
 			);
 			path = NoteViewController;
 			sourceTree = "<group>";
@@ -822,6 +831,7 @@
 				318EEA6525247BCE00CDB95C /* NoteImageDescription.swift in Sources */,
 				31AD9BC52507700900C193CF /* NoteViewController+commands.swift in Sources */,
 				31AD9BE525094D9C00C193CF /* AlertController+closure.swift in Sources */,
+				314CA951252BB2FA00FE9B73 /* ImageDetailViewController.swift in Sources */,
 				3101753824E5211D007D3589 /* Zoomnotes.xcdatamodeld in Sources */,
 				31074D6E251D1B4A00F8A11D /* FileBrowserViewModel+Node.swift in Sources */,
 				31AD9BC72507759400C193CF /* NoteViewController+utils.swift in Sources */,
@@ -838,6 +848,7 @@
 				3101756524E52FED007D3589 /* ZoomNotesNavigationController.swift in Sources */,
 				312820CB24F6926B00338E28 /* ZNPinchGestureRecognizer.swift in Sources */,
 				313BFDE6251E601500EBF70F /* NoteLevelAccessMock.swift in Sources */,
+				314CA955252BB86800FE9B73 /* ZoomDownTransitionAnimator.swift in Sources */,
 				313B6CEE2515629100789595 /* OkayableTextfield.swift in Sources */,
 				31074D72251E293F00F8A11D /* FileBrowserViewModel+stub.swift in Sources */,
 				312B3A082523C97D0020E1CF /* DirectoryAccess.swift in Sources */,
@@ -858,12 +869,13 @@
 				31CD5213251D118E00561D27 /* DirectoryStoreDescription+stub.swift in Sources */,
 				31BF9E2C24E5906100142EBF /* NoteChildVM.swift in Sources */,
 				31B1AA3824FD5DC7007DAF4D /* UserDefaults+ext.swift in Sources */,
+				314CA953252BB4D300FE9B73 /* NoteTransitionDelegate.swift in Sources */,
 				3101752E24E5211D007D3589 /* AppDelegate.swift in Sources */,
 				3101753024E5211D007D3589 /* SceneDelegate.swift in Sources */,
 				31BA8F812523D7030016B78C /* NoteLevelAccessImpl+stub.swift in Sources */,
 				31AD9BD1250793A300C193CF /* ZNScreenEdgePanGesture.swift in Sources */,
 				3121A83425160E7A00D8AD37 /* NoteLevelAccessImpl.swift in Sources */,
-				312820D224F6B76200338E28 /* ZoomTransitionAnimator.swift in Sources */,
+				312820D224F6B76200338E28 /* ZoomUpTransitionAnimator.swift in Sources */,
 				314CA94F252B811F00FE9B73 /* NoteEditorDropDelegate.swift in Sources */,
 				313BFDEC251E6CD200EBF70F /* NoteLevelDescription+stub.swift in Sources */,
 				31CD5211251CF8D400561D27 /* DirectoryStoreDescription.swift in Sources */,
