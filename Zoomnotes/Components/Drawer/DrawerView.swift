@@ -9,87 +9,14 @@
 import Foundation
 import UIKit
 import SwiftUI
-
-struct PanGestureState {
-    let baseFrame: CGRect
-}
+import SnapKit
 
 class DrawerView: UIView {
-    private let offset: CGFloat = 50
+    let title: Binding<String>
 
-    var title: Binding<String>
+    var contents: [UUID: NoteLevelPreview] = [:]
 
-    var contents: [UUID: NoteLevelPreview]
-
-    private func panGestureStep(_ rec: UIPanGestureRecognizer,
-                                state: PanGestureState,
-                                view: UIView) -> PanGestureState {
-        let pos = rec.location(in: view)
-
-        let min = view.frame.height - self.offset
-        let max = view.frame.height - view.frame.height / 2 + self.offset
-
-        guard pos.y > max else { return state }
-
-        guard pos.y < min else {
-            UIView.animate(withDuration: 0.1) {
-                self.frame = state.baseFrame
-            }
-            return state
-        }
-
-        let loc = rec.translation(in: view)
-
-        let newY = clamp(self.frame.minY + loc.y, lower: max, upper: min)
-
-        self.frame = CGRect(x: 0,
-                            y: newY,
-                            width: self.frame.width,
-                            height: self.frame.height)
-
-        rec.setTranslation(CGPoint.zero, in: view)
-
-        return state
-    }
-
-    private func panGesture(with view: UIView) -> ZNPanGestureRecognizer<PanGestureState> {
-        return ZNPanGestureRecognizer(
-            begin: { _ in
-                return PanGestureState(baseFrame: CGRect(x: 0,
-                                                         y: view.frame.height - self.offset,
-                                                         width: view.frame.width,
-                                                         height: view.frame.height / 2))
-
-        },
-            step: { return self.panGestureStep($0, state: $1, view: view) },
-            end: { _, _ in })
-    }
-
-    private func swipeUpGesture(with view: UIView) -> ZNSwipeGestureRecognizer {
-        let targetFrame = CGRect(x: 0,
-                                 y: view.frame.height - view.frame.height / 2 + self.offset,
-                                 width: view.frame.width,
-                                 height: view.frame.height / 2)
-
-        return ZNSwipeGestureRecognizer(direction: .up) { _ in
-            UIView.animate(withDuration: 0.1) {
-                self.frame = targetFrame
-            }
-        }
-    }
-
-    private func swipeDownGesture(with view: UIView) -> ZNSwipeGestureRecognizer {
-        let targetFrame = CGRect(x: 0,
-                                 y: view.frame.height - offset,
-                                 width: view.frame.width,
-                                 height: view.frame.height / 2)
-
-        return ZNSwipeGestureRecognizer(direction: .down) { _ in
-            UIView.animate(withDuration: 0.1) {
-                self.frame = targetFrame
-            }
-        }
-    }
+    private var onCameraButtonTapped: () -> Void
 
     lazy var titleTextField: UITextField = {
         let textField = UITextField()
@@ -113,36 +40,44 @@ class DrawerView: UIView {
         return textField
     }()
 
-    init(in view: UIView, title: Binding<String>) {
-        let baseFrame = CGRect(x: 0,
-                               y: view.frame.height - offset,
-                               width: view.frame.width,
-                               height: view.frame.height / 2)
+    lazy var imagePickerButton: UIButton = {
+        let button = UIButton(type: .roundedRect)
+        button.setImage(UIImage(systemName: "camera"), for: .normal)
+        button.addTarget(self, action: #selector(cameraButtonTapped), for: .touchUpInside)
+        return button
+    }()
 
+    init(title: Binding<String>, onCameraButtonTapped: @escaping () -> Void) {
         self.title = title
-        self.contents = [:]
-
-        super.init(frame: baseFrame)
-
-        self.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-
-        self.layer.cornerRadius = 30
+        self.onCameraButtonTapped = onCameraButtonTapped
+        super.init(frame: CGRect.zero)
 
         let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .prominent))
-        blurView.frame = self.bounds
         self.addSubview(blurView)
 
-        self.addSubview(titleTextField)
-        NSLayoutConstraint.activate([
-            titleTextField.leadingAnchor.constraint(equalTo: self.leadingAnchor,
-                                                    constant: self.safeAreaInsets.left),
-            titleTextField.topAnchor.constraint(equalTo: self.topAnchor,
-                                                constant: self.safeAreaInsets.top)
-        ])
+        blurView.snp.makeConstraints { make in
+            make.width.equalTo(self.snp.width)
+            make.height.equalTo(self.snp.height)
+            make.center.equalTo(self)
+        }
 
-        self.addGestureRecognizer(panGesture(with: view))
-        self.addGestureRecognizer(swipeUpGesture(with: view))
-        self.addGestureRecognizer(swipeDownGesture(with: view))
+        self.addSubview(titleTextField)
+        self.bringSubviewToFront(titleTextField)
+
+        titleTextField.snp.makeConstraints { make in
+            make.top.equalTo(self).offset(10)
+            make.left.equalTo(self).offset(20)
+            make.width.equalTo(200)
+            make.height.equalTo(30)
+        }
+
+        self.addSubview(imagePickerButton)
+        self.bringSubviewToFront(imagePickerButton)
+
+        imagePickerButton.snp.makeConstraints { make in
+            make.leading.equalTo(titleTextField.snp.trailing)
+            make.top.equalTo(self).offset(10)
+        }
 
         let nc = NotificationCenter.default
         nc.addObserver(self,
@@ -166,18 +101,22 @@ class DrawerView: UIView {
         UIView.animate(withDuration: 0.1) {
             if notification.name == UIResponder.keyboardWillHideNotification {
                 self.frame = CGRect(x: 0,
-                                    y: view.frame.height - self.offset,
+                                    y: view.frame.height - 50,
                                     width: view.frame.width,
                                     height: view.frame.height / 2)
             } else {
                 let keyboardScreenEndFrame = keyboardValue.cgRectValue
                 let kbHeight = view.frame.height - keyboardScreenEndFrame.height
                 self.frame = CGRect(x: 0,
-                                    y: kbHeight - self.offset,
+                                    y: kbHeight - 50,
                                     width: view.frame.width,
                                     height: view.frame.height / 2)
             }
         }
+    }
+
+    @objc func cameraButtonTapped(_ sender: UIButton) {
+        self.onCameraButtonTapped()
     }
 
     required init?(coder: NSCoder) {

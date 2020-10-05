@@ -10,6 +10,7 @@ import UIKit
 import PencilKit
 import Combine
 import SwiftUI
+import SnapKit
 
 struct DragState {
     let currentlyDraggedLevel: NoteChildVM
@@ -20,12 +21,16 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var canvasView: PKCanvasView!
     @IBOutlet weak var undoButton: UIBarButtonItem!
     @IBOutlet weak var redoButton: UIBarButtonItem!
-    var drawerView: DrawerView!
+
+    var drawerView: DrawerView? = nil
+    var imagePicker: UIHostingController<ImagePickerDrawer>? = nil
+
     var toolPicker: PKToolPicker!
+    var dropDelegate: UIDropInteractionDelegate!
 
     var viewModel: NoteEditorViewModel!
 
-    var hasModifiedDrawing = false
+    var drawerViewTopOffset: Constraint!
 
     var subLevelViews: [UUID: NoteLevelPreview] = [:]
 
@@ -38,6 +43,20 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     var statusBarHeight: CGFloat {
         self.view.window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
     }
+
+    lazy var drawerViewPanGesture: ZNPanGestureRecognizer<Void> = {
+        return ZNPanGestureRecognizer(
+            begin: { _ in },
+            step: { [unowned self] rec, _ in
+                let touchHeight = rec.location(in: self.view).y
+                let offset = clamp(self.view.frame.height - touchHeight,
+                                   lower: 50,
+                                   upper: self.view.frame.height / 3)
+                self.drawerViewTopOffset.update(offset: -offset)
+            },
+            end: { _, _ in }
+        )
+    }()
 
     private struct EdgePanGestureState {
         let sublevel: NoteChildVM
@@ -137,34 +156,49 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         }
 
         if self.drawerView != nil {
-            self.drawerView.removeFromSuperview()
+            self.drawerView!.removeFromSuperview()
         }
 
         let title: Binding<String> = .init(get: { self.viewModel.title },
                                            set: { self.viewModel.title = $0 })
 
-        self.drawerView = DrawerView(in: self.view, title: title)
+        self.drawerView = DrawerView(title: title, onCameraButtonTapped: self.showImagePicker)
         for level in self.viewModel.drawerContents.values {
             let preview = sublevelPreview(for: level)
-            self.drawerView.contents[level.id] = preview
-            self.drawerView.addSubview(preview)
-            self.drawerView.bringSubviewToFront(preview)
+            self.drawerView!.contents[level.id] = preview
+            self.drawerView!.addSubview(preview)
+            self.drawerView!.bringSubviewToFront(preview)
         }
 
         self.view.addSubview(drawerView!)
         self.view.bringSubviewToFront(drawerView!)
+        drawerView!.addGestureRecognizer(drawerViewPanGesture)
 
-        NSLayoutConstraint.activate([
-            self.drawerView!.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            self.drawerView!.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            self.drawerView!.heightAnchor.constraint(equalToConstant: -2 * self.view.frame.height / 3)
-        ])
+        drawerView!.snp.makeConstraints { make in
+            make.leading.equalTo(self.view)
+            make.trailing.equalTo(self.view)
+            make.width.equalTo(self.view.snp.width)
+            make.height.equalTo(self.view.frame.height / 3)
+            self.drawerViewTopOffset = make.top.equalTo(self.view.snp.bottom).offset(-50).constraint
+        }
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+
+        self.dropDelegate = NoteEditorDropDelegate(
+            locationProvider: { session in session.location(in: self.view)},
+            onDrop: { location, image in
+                let frame = self.defaultPreviewFrame(from: location)
+                let vm = NoteChildVM(id: UUID(), preview: image, frame: frame)
+                self.viewModel.process(.createImage(vm))
+        })
+
+        let interaction = UIDropInteraction(delegate: dropDelegate)
+        interaction.allowsSimultaneousDropSessions = true
+        self.view.subviews.first!.addInteraction(interaction)
 
         let edges: [UIRectEdge] = [.left, .right]
 
@@ -202,13 +236,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                                                object: nil)
     }
 
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        if hasModifiedDrawing {
-            self.updateDrawingMeta()
-        }
-    }
-
     override func viewDidLayoutSubviews() {
         updateContentSizeForDrawing()
         canvasView.contentOffset = CGPoint(x: 0, y: -canvasView.adjustedContentInset.top)
@@ -241,6 +268,40 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
             }
             interactionController = nil
         }
+    }
+
+    private func showImagePicker() {
+        self.drawerViewTopOffset.update(offset: 0)
+        self.drawerView!.layoutIfNeeded()
+
+        self.imagePicker = UIHostingController(rootView: ImagePickerDrawer(onDismiss: self.hideImagePicker))
+
+        self.view.addSubview(imagePicker!.view)
+
+        imagePicker!.view.snp.makeConstraints { make in
+            make.leading.equalTo(self.view)
+            make.trailing.equalTo(self.view)
+            make.width.equalTo(self.view.snp.width)
+            make.height.equalTo(self.view.frame.height / 3)
+            make.bottom.equalTo(self.view.snp.bottom)
+        }
+    }
+
+    private func hideImagePicker() {
+        guard let view = self.imagePicker?.view else { return }
+        view.removeFromSuperview()
+
+        self.view.addSubview(drawerView!)
+        self.view.bringSubviewToFront(drawerView!)
+
+        drawerView!.snp.makeConstraints { make in
+            make.leading.equalTo(self.view)
+            make.trailing.equalTo(self.view)
+            make.width.equalTo(self.view.snp.width)
+            make.height.equalTo(self.view.frame.height / 3)
+            self.drawerViewTopOffset = make.top.equalTo(self.view.snp.bottom).offset(-50).constraint
+        }
+
     }
 }
 
@@ -357,7 +418,7 @@ extension NoteViewController {
 
         if catapult.tryFling(velocity, magnitude, state.dragging) { return }
 
-        if self.drawerView.frame.contains(state.dragging.frame) {
+        if self.drawerView!.frame.contains(state.dragging.frame) {
             let locInDrawer = rec.location(in: self.drawerView)
             let locInPreview = rec.location(in: state.dragging)
             let frameInDrawer = CGRect(x: locInDrawer.x - locInPreview.x,

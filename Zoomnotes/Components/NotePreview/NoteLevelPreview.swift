@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import PencilKit
+import SnapKit
 
 class NoteLevelPreview: UIImageView {
     typealias OnResizeEndedCallback = (CGRect) -> Void
@@ -87,13 +88,6 @@ class NoteLevelPreview: UIImageView {
         self.layer.shadowOffset = CGSize(width: 0, height: 3)
     }
 
-    private func indicatorFrame(offset: CGPoint) -> CGRect {
-        return CGRect(x: offset.x - 15,
-                      y: offset.y - 15,
-                      width: 30,
-                      height: 30)
-    }
-
     func setEdited(in half: Half) {
         if self.isEdited {
             self.removeEditingChrome()
@@ -125,11 +119,21 @@ class NoteLevelPreview: UIImageView {
             xOffset = self.frame.width
         }
 
-        self.copyIndicator.frame = indicatorFrame(offset: CGPoint(x: xOffset, y: 0))
-        self.resizeIndicator.frame = indicatorFrame(offset: CGPoint(x: xOffset, y: self.frame.height))
-
         self.addSubview(copyIndicator)
         self.addSubview(resizeIndicator)
+
+        self.copyIndicator.snp.makeConstraints { make in
+            make.width.equalTo(10)
+            make.height.equalTo(10)
+            make.centerX.equalTo(xOffset)
+            make.centerY.equalTo(0)
+        }
+        self.resizeIndicator.snp.makeConstraints { make in
+            make.centerX.equalTo(xOffset)
+            make.centerY.equalTo(self.frame.height)
+            make.width.equalTo(10)
+            make.height.equalTo(10)
+        }
     }
 
     required init?(coder: NSCoder) {

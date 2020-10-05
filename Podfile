@@ -9,11 +9,12 @@ target 'Zoomnotes' do
   
   pod 'SwiftLint'
   pod 'PrediKit'
-  pod 'SwiftCheck'
   pod 'Introspect'
+  pod 'SnapKit', '~> 5.0.0'
 
   target 'ZoomnotesTests' do
     inherit! :search_paths
+    pod 'SwiftCheck'
     # Pods for testing
   end
 

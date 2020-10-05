@@ -83,8 +83,6 @@ extension NoteViewController {
     }
 
     func onCommand(_ command: NoteEditorCommand) {
-        self.hasModifiedDrawing = true
-
         switch command {
         case .createLevel(let sublevel):
             let noteLevelPreview = sublevelPreview(for: sublevel)
@@ -105,21 +103,20 @@ extension NoteViewController {
             preview.removeFromSuperview()
 
             subLevelViews.removeValue(forKey: sublevel.id)
-            self.drawerView.contents[sublevel.id] = preview
-            self.drawerView.addSubview(preview)
+            self.drawerView!.contents[sublevel.id] = preview
+            self.drawerView!.addSubview(preview)
             preview.frame = frame
 
         case .moveFromDrawer(let sublevel, frame: let frame):
-            let preview = self.drawerView.contents[sublevel.id]!
+            let preview = self.drawerView!.contents[sublevel.id]!
             preview.removeFromSuperview()
 
-            self.drawerView.contents.removeValue(forKey: sublevel.id)
+            self.drawerView!.contents.removeValue(forKey: sublevel.id)
             self.view.addSubview(preview)
             self.subLevelViews[sublevel.id] = preview
             preview.frame = frame
-        case .resizeLevel(let sublevel, from: _, to: let frame):
-            let preview = self.subLevelViews[sublevel.id]!
-            preview.setFrame(to: frame)
+        case .resizeLevel:
+            return
 
         case .createImage:
             return

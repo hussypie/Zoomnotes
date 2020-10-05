@@ -16,6 +16,37 @@ class FileBrowserDBIntegrationTests: XCTestCase {
 
     let moc = NSPersistentContainer.inMemory(name: "Zoomnotes").viewContext
 
+    enum AccessType {
+        case read
+        case write
+    }
+
+     func asynchronously<T>(access: AccessType,
+                            moc: NSManagedObjectContext,
+                            _ action: () throws -> T
+     ) -> T {
+        let expectation: XCTestExpectation
+
+        switch access {
+        case .read:
+            expectation = self.expectation(description: "Do it!")
+        case .write:
+            expectation = self.expectation(forNotification: .NSManagedObjectContextDidSave, object: moc) { _ in return true }
+        }
+
+        do {
+            let result = try action()
+            if access == .read {
+                expectation.fulfill()
+            }
+            self.waitForExpectations(timeout: 2.0) { error in XCTAssertNil(error)}
+            return result
+        } catch let error {
+            XCTFail(error.localizedDescription)
+            fatalError(error.localizedDescription)
+        }
+    }
+
     override func setUp() {
         super.setUp()
         self.continueAfterFailure = false

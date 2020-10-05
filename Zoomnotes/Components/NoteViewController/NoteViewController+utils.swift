@@ -24,9 +24,9 @@ extension NoteViewController {
     }
 
     func captureCurrentScreen() -> UIImage {
-        drawerView.alpha = 0.0
+        drawerView!.alpha = 0.0
         defer {
-            drawerView.alpha = 1.0
+            drawerView!.alpha = 1.0
         }
         UIGraphicsBeginImageContext(view.frame.size)
         let context = UIGraphicsGetCurrentContext()!
