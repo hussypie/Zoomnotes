@@ -17,12 +17,22 @@ struct SettingsView: View {
         })
     }
 
+    private var zoomAnimatonDisabled: Binding<Bool> {
+        .init(
+            get: { UserDefaults.standard.withDefault(.zoomAnimationDisabled, default: false) },
+            set: {
+                UserDefaults.standard.set($0, forKey: UserDefaultsKey.zoomAnimationDisabled.rawValue)
+        })
+    }
+
     var body: some View {
         Form {
             Section {
                 Toggle(isOn: self.statusBarPreference) {
                     Text("Hide status bar")
                 }
+                Toggle(isOn: self.zoomAnimatonDisabled,
+                       label: { Text("Disable zooming")})
             }
         }
     }

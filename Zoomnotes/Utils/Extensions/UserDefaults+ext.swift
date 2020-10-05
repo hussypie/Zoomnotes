@@ -10,6 +10,7 @@ import Foundation
 
 enum UserDefaultsKey: String {
     case statusBarVisible = "statusBarPreferenceKey"
+    case zoomAnimationDisabled = "zoomAnimationDisabledKey"
     case rootDirectoryId = "rootDirectoryIdKey"
 }
 
