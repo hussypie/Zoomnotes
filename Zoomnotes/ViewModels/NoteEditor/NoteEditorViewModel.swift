@@ -53,11 +53,20 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
         let subSubLevels = subLevel.sublevels
             .map { NoteChildVM(id: $0.id,
                                preview: $0.preview,
-                               frame: $0.frame) }
+                               frame: $0.frame,
+                               commander: NoteLevelCommander()) }
             .map { ($0.id, $0) }
+
+        let subSubImages = subLevel.images
+            .map { NoteChildVM(id: $0.id,
+                               preview: $0.preview,
+                               frame: $0.frame,
+                               commander: NoteImageCommander()) }
+            .map { ($0.id, $0) }
+
         return NoteEditorViewModel(id: level.id,
                                    title: self.title,
-                                   sublevels: Dictionary.init(uniqueKeysWithValues: subSubLevels),
+                                   sublevels: Dictionary.init(uniqueKeysWithValues: subSubLevels + subSubImages),
                                    drawing: subLevel.drawing,
                                    access: self.access,
                                    drawer: self.drawerContents,

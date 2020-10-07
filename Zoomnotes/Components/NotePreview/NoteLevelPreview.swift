@@ -74,9 +74,11 @@ class NoteLevelPreview: UIImageView {
 
         super.init(frame: frame)
 
+        self.contentMode = .scaleAspectFit
+
         self.image = preview
 
-        self.backgroundColor = UIColor.white
+        self.backgroundColor = UIColor(white: 1, alpha: 0.0)
         self.isUserInteractionEnabled = true
 
         self.addSubview(darklayer)

@@ -23,14 +23,14 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var redoButton: UIBarButtonItem!
 
     var drawerView: DrawerView? = nil
-    var imagePicker: UIHostingController<ImagePickerDrawer>? = nil
+    private var imagePicker: UIHostingController<ImagePickerDrawer>? = nil
 
-    var toolPicker: PKToolPicker!
-    var dropDelegate: UIDropInteractionDelegate!
+    fileprivate var toolPicker: PKToolPicker!
+    private var transitionManager: NoteTransitionDelegate!
 
     var viewModel: NoteEditorViewModel!
 
-    var drawerViewTopOffset: Constraint!
+    private var drawerViewTopOffset: Constraint!
 
     var subLevelViews: [UUID: NoteLevelPreview] = [:]
 
@@ -44,7 +44,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         self.view.window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
     }
 
-    lazy var drawerViewPanGesture: ZNPanGestureRecognizer<Void> = {
+    private lazy var drawerViewPanGesture: ZNPanGestureRecognizer<Void> = {
         return ZNPanGestureRecognizer(
             begin: { _ in },
             step: { [unowned self] rec, _ in
@@ -58,6 +58,19 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         )
     }()
 
+    lazy var dropManager: NoteEditorDropDelegate = {
+        return NoteEditorDropDelegate(
+            locationProvider: { session in session.location(in: self.view)},
+            onDrop: { location, image in
+                let frame = self.defaultPreviewFrame(from: location)
+                let vm = NoteChildVM(id: UUID(),
+                                     preview: image,
+                                     frame: frame,
+                                     commander: NoteImageCommander())
+                self.addChild(vm)
+        })
+    }()
+
     private struct EdgePanGestureState {
         let sublevel: NoteChildVM
         let currentlyDraggedPreview: NoteLevelPreview
@@ -69,7 +82,10 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 let frame = self.defaultPreviewFrame(from: rec.location(in: self.canvasView))
 
                 let defaultPreviewImage = UIImage.from(size: self.view.frame.size).withBackground(color: UIColor.white)
-                let newLevel = NoteChildVM(id: UUID(), preview: defaultPreviewImage, frame: frame)
+                let newLevel = NoteChildVM(id: UUID(),
+                                           preview: defaultPreviewImage,
+                                           frame: frame,
+                                           commander: NoteLevelCommander())
 
                 let newLevelPreview = self.sublevelPreview(for: newLevel)
                 self.view.addSubview(newLevelPreview)
@@ -96,7 +112,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 if catapult.tryFling(velocity, magnitude, state.currentlyDraggedPreview) { return }
                 state.sublevel.frame = state.currentlyDraggedPreview.frame
                 state.currentlyDraggedPreview.removeFromSuperview()
-                self.addSublevel(state.sublevel)
+                self.addChild(state.sublevel)
         })
 
         edgeGestureRecognizer.edges = edge
@@ -188,31 +204,24 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
 
-        self.dropDelegate = NoteEditorDropDelegate(
-            locationProvider: { session in session.location(in: self.view)},
-            onDrop: { location, image in
-                let frame = self.defaultPreviewFrame(from: location)
-                let vm = NoteChildVM(id: UUID(), preview: image, frame: frame)
-                self.viewModel.process(.createImage(vm))
-        })
+        let interaction = UIDropInteraction(delegate: dropManager)
+        self.view.addInteraction(interaction)
 
-        let interaction = UIDropInteraction(delegate: dropDelegate)
-        interaction.allowsSimultaneousDropSessions = true
-        self.view.subviews.first!.addInteraction(interaction)
+        self.transitionManager = NoteTransitionDelegate()
 
         let edges: [UIRectEdge] = [.left, .right]
 
         edges.forEach { self.view.addGestureRecognizer(edgeGestureRecognizer(edge: $0)) }
 
-        for note in viewModel.nodes.values {
-            let sublevel = sublevelPreview(for: note)
-            subLevelViews[note.id] = sublevel
+        for child in viewModel.nodes.values {
+            let sublevel = sublevelPreview(for: child)
+            subLevelViews[child.id] = sublevel
 
-            note.$frame
+            child.$frame
                 .sink { sublevel.frame = $0 }
                 .store(in: &cancellables)
 
-            note.$preview
+            child.$preview
                 .sink { sublevel.image = $0 }
                 .store(in: &cancellables)
 
@@ -234,6 +243,10 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                                                selector: #selector(updateDrawingMeta),
                                                name: UIApplication.willResignActiveNotification,
                                                object: nil)
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        self.updateDrawingMeta()
     }
 
     override func viewDidLayoutSubviews() {
@@ -344,8 +357,7 @@ extension NoteViewController {
                 return
             }
 
-            guard let noteViewController = storyboard?.instantiateViewController(withIdentifier: String(describing: NoteViewController.self)) as? NoteViewController,
-                let navigationController = navigationController else {
+            guard let noteViewController = NoteViewController.from(self.storyboard) else {
                     return
             }
 
@@ -354,7 +366,7 @@ extension NoteViewController {
                 .previewChangedSubject
                 .sink { note.preview = $0 }
                 .store(in: &cancellables)
-            navigationController.pushViewController(noteViewController, animated: false)
+            navigationController?.pushViewController(noteViewController, animated: false)
             self.view.transform = .identity
         }
     }
@@ -388,12 +400,12 @@ extension NoteViewController {
                                width: preview.frame.width,
                                height: preview.frame.height)
 
-        self.canvasView.bringSubviewToFront(preview)
+        self.view.bringSubviewToFront(preview)
         return PanGestureState(originalFrame: preview.frame, dragging: preview, origin: origin)
     }
 
     private func panGestureStep(_ rec: UIPanGestureRecognizer, state: PanGestureState) -> PanGestureState {
-        let tran = rec.translation(in: self.canvasView)
+        let tran = rec.translation(in: self.view)
         let frame = CGRect(x: max(0, state.dragging.frame.minX + tran.x),
                            y: max(0, state.dragging.frame.minY + tran.y),
                            width: state.dragging.frame.width,
@@ -401,7 +413,7 @@ extension NoteViewController {
 
         state.dragging.frame = frame
 
-        rec.setTranslation(CGPoint.zero, in: self.canvasView)
+        rec.setTranslation(CGPoint.zero, in: self.view)
         return state
     }
 
@@ -413,7 +425,7 @@ extension NoteViewController {
         let magnitude: CGFloat = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
 
         let catapult = Catapult(threshold: 4000, in: self.view) {
-            self.removeSublevel(sublevel)
+            self.removeChild(sublevel)
         }
 
         if catapult.tryFling(velocity, magnitude, state.dragging) { return }
@@ -432,7 +444,7 @@ extension NoteViewController {
                                   from: originalFrame,
                                   to: frameInDrawer)
             } else {
-                self.moveSublevel(sublevel: sublevel, from: originalFrame, to: frameInDrawer)
+                self.moveChild(sublevel: sublevel, from: originalFrame, to: frameInDrawer)
             }
         } else {
             let canvasViewOffset = self.canvasView.contentOffset.y
@@ -446,7 +458,7 @@ extension NoteViewController {
             if state.origin == .drawer {
                 self.moveFromDrawer(sublevel: sublevel, from: originalFrame, to: newFrame)
             } else {
-                self.moveSublevel(sublevel: sublevel, from: originalFrame, to: newFrame)
+                self.moveChild(sublevel: sublevel, from: originalFrame, to: newFrame)
             }
         }
     }
@@ -487,9 +499,10 @@ extension NoteViewController {
             end: { _, state in
                 let copiedSublevel = NoteChildVM(id: UUID(),
                                                  preview: sublevel.preview,
-                                                 frame: sublevel.frame)
+                                                 frame: sublevel.frame,
+                                                 commander: NoteLevelCommander())
 
-                self.addSublevel(copiedSublevel)
+                self.addChild(copiedSublevel)
                 state.dragging.removeFromSuperview()
 
         })

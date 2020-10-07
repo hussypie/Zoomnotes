@@ -9,12 +9,12 @@
 import Foundation
 import UIKit
 
-class ZoomTransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning {
-    let note: NoteChildVM
+class ZoomUpTransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+    let targetFrame: CGRect
     private let duration: TimeInterval = 0.2
 
-    init(with note: NoteChildVM) {
-        self.note = note
+    init(with target: CGRect) {
+        self.targetFrame = target
         super.init()
     }
 
@@ -30,7 +30,7 @@ class ZoomTransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 
         toVC.view.frame = transitionContext.finalFrame(for: toVC)
         toVC.view.layoutIfNeeded()
-        toVC.view.transform = zoomDownTransform(at: 4, for: distance(from: toVC.view.bounds, to: note.frame))
+        toVC.view.transform = zoomDownTransform(at: 4, for: distance(from: toVC.view.bounds, to: targetFrame))
 
         UIView.animate(withDuration: self.duration, animations: {
             toVC.view.transform = .identity

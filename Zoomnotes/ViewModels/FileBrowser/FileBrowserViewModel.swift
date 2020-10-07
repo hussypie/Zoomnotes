@@ -87,13 +87,23 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                 noteModel.sublevels
                     .map { NoteChildVM(id: $0.id,
                                        preview: $0.preview,
-                                       frame: $0.frame)}
+                                       frame: $0.frame,
+                                       commander: NoteLevelCommander()) }
                     .map { ($0.id, $0) }
 
+            let images =
+                noteModel.images
+                    .map { NoteChildVM(id: $0.id,
+                                       preview: $0.preview,
+                                       frame: $0.frame,
+                                       commander: NoteImageCommander()) }
+                    .map { ($0.id, $0) }
+
+            let children = subLevels + images
             return NoteEditorViewModel(
                 id: noteModel.id,
                 title: note.name,
-                sublevels: Dictionary.init(uniqueKeysWithValues: subLevels),
+                sublevels: Dictionary.init(uniqueKeysWithValues: children),
                 drawing: noteModel.drawing,
                 access: noteLevelAccess,
                 drawer: [:],
