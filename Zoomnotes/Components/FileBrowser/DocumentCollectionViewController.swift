@@ -142,7 +142,7 @@ class DocumentCollectionViewController: UICollectionViewController {
     private func openNoteEditor(for note: FileVM) {
         guard let destinationViewController = NoteViewController.from(self.storyboard) else { return }
         destinationViewController.viewModel = self.folderVM.noteEditorVM(for: note)
-
+        destinationViewController.transitionManager = NoteTransitionDelegate(source: nil)
         destinationViewController
             .previewChangedSubject
             .sink(receiveValue: { image in

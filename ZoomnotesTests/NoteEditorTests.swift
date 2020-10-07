@@ -38,7 +38,8 @@ class NoteEditorTests: XCTestCase {
 
         let newNode = NoteChildVM(id: UUID(),
                                   preview: .checkmark,
-                                  frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+                                  frame: CGRect(x: 0, y: 0, width: 100, height: 100),
+                                  commander: NoteLevelCommander())
 
         let originalNumberOfLevelsInDB = mockDB.levels.count
 
@@ -76,7 +77,8 @@ class NoteEditorTests: XCTestCase {
 
         let sublevelVM = NoteChildVM(id: sublevel.id,
                                      preview: sublevel.preview,
-                                     frame: sublevel.frame)
+                                     frame: sublevel.frame,
+                                     commander: NoteLevelCommander())
 
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Notes",
@@ -105,7 +107,8 @@ class NoteEditorTests: XCTestCase {
 
         let noteLevelToMove = NoteChildVM(id: note.id,
                                             preview: .checkmark,
-                                            frame: note.frame)
+                                            frame: note.frame,
+                                            commander: NoteLevelCommander())
 
         let mockDB = NoteLevelAccessMock(levels: [note.id: note],
                                          images: [:])
@@ -138,7 +141,8 @@ class NoteEditorTests: XCTestCase {
 
         let noteLevelToResize = NoteChildVM(id: note.id,
                                             preview: .checkmark,
-                                            frame: note.frame)
+                                            frame: note.frame,
+                                            commander: NoteLevelCommander())
 
         let mockDB = NoteLevelAccessMock(levels: [note.id: note],
                                          images: [:])
@@ -179,7 +183,8 @@ class NoteEditorTests: XCTestCase {
     func testMoveToDrawer() {
         let noteLevelToMove = NoteChildVM(id: UUID(),
                                             preview: .checkmark,
-                                            frame: CGRect(x: 0, y: 0, width: 200, height: 200))
+                                            frame: CGRect(x: 0, y: 0, width: 200, height: 200),
+                                            commander: NoteLevelCommander())
 
         let access = NoteLevelAccessMock(levels: [:],
                                          images: [:])
@@ -202,7 +207,8 @@ class NoteEditorTests: XCTestCase {
     func testMoveFromDrawer() {
         let noteLevelToMove = NoteChildVM(id: UUID(),
                                             preview: .checkmark,
-                                            frame: CGRect(x: 0, y: 0, width: 200, height: 200))
+                                            frame: CGRect(x: 0, y: 0, width: 200, height: 200),
+                                            commander: NoteLevelCommander())
 
         let access = NoteLevelAccessMock(levels: [:],
                                          images: [:])
@@ -243,7 +249,8 @@ class NoteEditorTests: XCTestCase {
 
         let newImage = NoteChildVM(id: UUID(),
                                    preview: .checkmark,
-                                   frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+                                   frame: CGRect(x: 0, y: 0, width: 100, height: 100),
+                                   commander: NoteImageCommander())
 
         vm.process(.createImage(newImage))
 
@@ -276,7 +283,8 @@ class NoteEditorTests: XCTestCase {
 
         let imageVM = NoteChildVM(id: image.id,
                                   preview: image.preview,
-                                  frame: image.frame)
+                                  frame: image.frame,
+                                  commander: NoteImageCommander())
 
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note",
@@ -317,7 +325,8 @@ class NoteEditorTests: XCTestCase {
 
         let imageVM = NoteChildVM(id: image.id,
                                   preview: image.preview,
-                                  frame: image.frame)
+                                  frame: image.frame,
+                                  commander: NoteImageCommander())
 
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note",
@@ -358,7 +367,8 @@ class NoteEditorTests: XCTestCase {
 
         let imageVM = NoteChildVM(id: image.id,
                                   preview: image.preview,
-                                  frame: image.frame)
+                                  frame: image.frame,
+                                  commander: NoteImageCommander())
 
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note",

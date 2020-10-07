@@ -10,24 +10,50 @@ import Foundation
 import UIKit
 
 class NoteTransitionDelegate: NSObject, UINavigationControllerDelegate {
-    let interactionController: UIPercentDrivenInteractiveTransition
+    let sourceRect: CGRect?
+    var destinationRect: CGRect?
+    private let interactionController: UIPercentDrivenInteractiveTransition
 
-    override init() {
+    init(source: CGRect?) {
         self.interactionController = UIPercentDrivenInteractiveTransition()
+        self.sourceRect = source
+        self.destinationRect = nil
         super.init()
     }
 
     func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         switch operation {
         case .pop:
-            return nil // ZoomTransitionAnimator(with: viewModel)
+            guard let source = self.sourceRect else {
+                return nil
+            }
+            self.interactionController.update(0)
+            return ZoomUpTransitionAnimator(with: source)
         case .push:
-            return nil // ZoomDownTransition
+            guard let dest = destinationRect else { return nil }
+            self.interactionController.update(0)
+            return ZoomDownTransitionAnimator(destinationRect: dest)
         case .none:
             return nil
         @unknown default:
             return nil
         }
+    }
+
+    func set(destination: CGRect) {
+        self.destinationRect = destination
+    }
+
+    func step(percent: CGFloat) {
+        self.interactionController.update(percent)
+    }
+
+    func finish() {
+        self.interactionController.finish()
+    }
+
+    func cancel() {
+        self.interactionController.cancel()
     }
 
     func navigationController(_ navigationController: UINavigationController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {

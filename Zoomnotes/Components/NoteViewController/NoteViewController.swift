@@ -26,7 +26,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     private var imagePicker: UIHostingController<ImagePickerDrawer>? = nil
 
     fileprivate var toolPicker: PKToolPicker!
-    private var transitionManager: NoteTransitionDelegate!
+    var transitionManager: NoteTransitionDelegate!
 
     var viewModel: NoteEditorViewModel!
 
@@ -159,7 +159,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         super.viewWillAppear(animated)
 
         navigationController?.setNavigationBarHidden(true, animated: true)
-        navigationController?.delegate = self
+        navigationController?.delegate = transitionManager
 
         setup(canvasView)
 
@@ -206,8 +206,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         let interaction = UIDropInteraction(delegate: dropManager)
         self.view.addInteraction(interaction)
-
-        self.transitionManager = NoteTransitionDelegate()
 
         let edges: [UIRectEdge] = [.left, .right]
 
@@ -264,22 +262,61 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
     func onPreviewZoomUp(_ rec: ZNPinchGestureRecognizer) {
         if rec.state == .began {
-            self.interactionController = UIPercentDrivenInteractiveTransition()
             navigationController?.popViewController(animated: true)
         }
 
         if rec.state == .changed {
             let percent = clamp(1 - rec.scale, lower: 0, upper: 1)
-            interactionController?.update(percent)
+            transitionManager.step(percent: percent)
         }
 
         if rec.state == .ended {
             if rec.scale < 0.5 && rec.state != .cancelled {
-                interactionController?.finish()
+                transitionManager.finish()
             } else {
-                interactionController?.cancel()
+                transitionManager.cancel()
             }
-            interactionController = nil
+        }
+    }
+
+    func onPreviewZoomDown(_ rec: ZNPinchGestureRecognizer, _ note: NoteChildVM) {
+        let frameInView = CGRect(x: note.frame.minX,
+                                 y: note.frame.minY - self.canvasView.contentOffset.y,
+                                 width: note.frame.width,
+                                 height: note.frame.height)
+
+        let ratio = view.bounds.width / note.frame.width
+
+        if rec.state == .began {
+            transitionManager.set(destination: frameInView)
+            guard let noteViewController = NoteViewController.from(self.storyboard) else {
+                    return
+            }
+            noteViewController.transitionManager = NoteTransitionDelegate(source: note.frame)
+            noteViewController.viewModel = self.viewModel.childViewModel(for: note)
+            noteViewController
+                .previewChangedSubject
+                .sink { note.preview = $0 }
+                .store(in: &cancellables)
+            navigationController?.pushViewController(noteViewController, animated: true)
+        }
+
+        if rec.state == .changed {
+            let scale = clamp(rec.scale, lower: 1, upper: ratio)
+            let percent = (scale - 1) / (ratio - 1)
+            transitionManager.step(percent: percent)
+        }
+
+        if rec.state == .ended {
+            guard rec.scale > 2 || rec.state == .cancelled else {
+                UIView.animate(withDuration: 0.1) {
+                    self.view.transform = .identity
+                }
+                transitionManager.cancel()
+                return
+            }
+            transitionManager.finish()
+            self.view.transform = .identity
         }
     }
 
@@ -334,43 +371,6 @@ extension NoteViewController: PKCanvasViewDelegate {
 }
 
 extension NoteViewController {
-    func onPreviewZoomDown(_ rec: ZNPinchGestureRecognizer, _ note: NoteChildVM) {
-        let frameInView = CGRect(x: note.frame.minX,
-                                 y: note.frame.minY - self.canvasView.contentOffset.y,
-                                 width: note.frame.width,
-                                 height: note.frame.height)
-        let dist = distance(from: view.bounds, to: frameInView)
-        let zoomOffset = CGPoint(x: dist.x, y: dist.y - statusBarHeight)
-
-        let ratio = view.bounds.width / note.frame.width
-
-        if rec.state == .changed {
-            let scale = clamp(rec.scale, lower: 1, upper: ratio)
-            view.transform = zoomDownTransform(at: scale, for: zoomOffset)
-        }
-
-        if rec.state == .ended {
-            guard rec.scale > 2 else {
-                UIView.animate(withDuration: 0.1) {
-                    self.view.transform = .identity
-                }
-                return
-            }
-
-            guard let noteViewController = NoteViewController.from(self.storyboard) else {
-                    return
-            }
-
-            noteViewController.viewModel = self.viewModel.childViewModel(for: note)
-            noteViewController
-                .previewChangedSubject
-                .sink { note.preview = $0 }
-                .store(in: &cancellables)
-            navigationController?.pushViewController(noteViewController, animated: false)
-            self.view.transform = .identity
-        }
-    }
-
     private enum MoveOrigin {
         case drawer
         case canvas
@@ -517,7 +517,7 @@ extension NoteViewController {
 
         preview.copyIndicator.addGestureRecognizer(cloneGesture(for: sublevel))
 
-        preview.addGestureRecognizer(panGesture(for: sublevel, preview))
+        preview.addGestureRecognizer(self.panGesture(for: sublevel, preview))
 
         preview.addGestureRecognizer(ZNPinchGestureRecognizer { self.onPreviewZoomUp($0) })
 
