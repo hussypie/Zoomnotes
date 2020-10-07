@@ -140,6 +140,26 @@ class NoteLevelAccessImpl: NoteLevelAccess {
         }
     }
 
+    func read(image id: UUID) throws -> NoteImageDescription? {
+        return try accessing(to: .read, id: id) { (store: ImageStore?) in
+            guard let store = store else { return nil }
+            guard let preview = UIImage(data: store.preview!) else { return nil }
+            guard let image = UIImage(data: store.image!) else { return nil }
+            guard let drawing = try? PKDrawing(data: store.drawingAnnotation!) else { return nil }
+
+            let frame = CGRect(x: CGFloat(store.frame!.x),
+                               y: CGFloat(store.frame!.y),
+                               width: CGFloat(store.frame!.width),
+                               height: CGFloat(store.frame!.height))
+
+            return NoteImageDescription(id: store.id!,
+                                        preview: preview,
+                                        drawing: drawing,
+                                        image: image,
+                                        frame: frame)
+        }
+    }
+
     func update(drawing: PKDrawing, for id: UUID) throws {
         try accessing(to: .write, id: id) { (store: NoteLevelStore?) in
             guard let store = store else { return }
@@ -156,6 +176,13 @@ class NoteLevelAccessImpl: NoteLevelAccess {
 
     func update(preview: UIImage, for id: UUID) throws {
         try accessing(to: .write, id: id) { (store: NoteLevelStore?) in
+            guard let store = store else { return }
+            store.preview = preview.pngData()!
+        }
+    }
+
+    func update(preview: UIImage, image: UUID) throws {
+        try accessing(to: .write, id: image) { (store: ImageStore?) in
             guard let store = store else { return }
             store.preview = preview.pngData()!
         }

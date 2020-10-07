@@ -167,7 +167,7 @@
         <!--Image Detail View Controller-->
         <scene sceneID="hY2-Mh-6F4">
             <objects>
-                <viewController id="NWu-Sx-owd" customClass="ImageDetailViewController" customModule="Zoomnotes" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController restorationIdentifier="ImageDetailViewController" storyboardIdentifier="ImageDetailViewController" id="NWu-Sx-owd" customClass="ImageDetailViewController" customModule="Zoomnotes" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="ryx-3c-wmD">
                         <rect key="frame" x="0.0" y="0.0" width="1080" height="810"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

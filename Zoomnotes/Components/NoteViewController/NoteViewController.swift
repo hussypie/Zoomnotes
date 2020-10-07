@@ -62,10 +62,26 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         return NoteEditorDropDelegate(
             locationProvider: { session in session.location(in: self.view)},
             onDrop: { location, image in
-                let frame = self.defaultPreviewFrame(from: location)
+                let aspect = image.size.height / image.size.width
+                let reference: CGFloat
+
+                if image.size.width > image.size.height {
+                    reference = self.view.frame.width / 4
+                } else {
+                    reference = self.view.frame.height / 4
+                }
+
+                let width = image.size.width > image.size.height ? reference : reference / aspect
+                let height = image.size.height >= image.size.width ? reference : reference * aspect
+
+                let actualFrame = CGRect(x: location.x - width / 2,
+                                         y: location.y - height / 2,
+                                         width: width,
+                                         height: height)
+
                 let vm = NoteChildVM(id: UUID(),
                                      preview: image,
-                                     frame: frame,
+                                     frame: actualFrame,
                                      commander: NoteImageCommander())
                 self.addChild(vm)
         })
@@ -255,7 +271,11 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     @objc func onPinch(_ rec: UIPinchGestureRecognizer) { }
 
     @objc private func updateDrawingMeta() {
-        let screen = captureCurrentScreen()
+        let screen = capture(
+            self.view,
+            prepare: { drawerView?.alpha = 0.0 },
+            done: { drawerView?.alpha = 1.0 }
+        )
         self.previewChangedSubject.send(screen)
         self.viewModel.process(.refresh(screen))
     }
@@ -288,17 +308,47 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         let ratio = view.bounds.width / note.frame.width
 
         if rec.state == .began {
-            transitionManager.set(destination: frameInView)
-            guard let noteViewController = NoteViewController.from(self.storyboard) else {
-                    return
+            self.transitionManager = transitionManager.down(animator: ZoomDownTransitionAnimator(destinationRect: frameInView))
+
+            guard let destinationVC = note.commander.viewController(from: storyboard) else {
+                return
             }
-            noteViewController.transitionManager = NoteTransitionDelegate(source: note.frame)
-            noteViewController.viewModel = self.viewModel.childViewModel(for: note)
-            noteViewController
-                .previewChangedSubject
-                .sink { note.preview = $0 }
-                .store(in: &cancellables)
-            navigationController?.pushViewController(noteViewController, animated: true)
+
+            switch destinationVC {
+            case .image(let imageVC):
+                imageVC.viewModel = self.viewModel.imageDetailViewModel(for: note)
+                imageVC
+                    .previewChanged
+                    .sink { image in
+                        note.preview = image
+                        self.viewModel.process(.updatePreview(id: note.id, with: image))
+
+                }
+                    .store(in: &cancellables)
+
+                imageVC
+                    .drawingChanged
+                    .sink { self.viewModel.process(.updateAnnotation(id: note.id, with: $0)) }
+                    .store(in: &cancellables)
+
+                imageVC.transitionManager =
+                    NoteTransitionDelegate()
+                        .up(animator: ZoomUpTransitionAnimator(with: note.frame))
+
+                navigationController?.pushViewController(imageVC, animated: true)
+            case .sublevel(let sublevelVC):
+                sublevelVC.transitionManager =
+                    NoteTransitionDelegate()
+                        .up(animator: ZoomUpTransitionAnimator(with: note.frame))
+                sublevelVC.viewModel = self.viewModel.childViewModel(for: note)
+
+                sublevelVC
+                    .previewChangedSubject
+                    .sink { note.preview = $0 }
+                    .store(in: &cancellables)
+
+                navigationController?.pushViewController(sublevelVC, animated: true)
+            }
         }
 
         if rec.state == .changed {

@@ -73,6 +73,11 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
                                    onUpdateName: self.onUpdateName)
     }
 
+    func imageDetailViewModel(for image: NoteChildVM) -> ImageDetailViewModel? {
+        guard let subimage = try? self.access.read(image: image.id) else { return nil }
+        return ImageDetailViewModel(using: subimage.image, with: subimage.drawing)
+    }
+
     private func moveLevel(level: NoteChildVM, to destinationFrame: CGRect) {
         do {
             try access.update(frame: destinationFrame, for: level.id)
@@ -222,6 +227,19 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
 
         case .resizeImage(let image, from: _, to: let frame):
             self.resize(image: image, to: frame)
+
+        case .updateAnnotation(id: let id, with: let drawing):
+            do {
+                try self.access.update(annotation: drawing, image: id)
+            } catch let error {
+                fatalError(error.localizedDescription)
+            }
+        case .updatePreview(id: let id, with: let with):
+            do {
+                try self.access.update(preview: with, image: id)
+            } catch let error {
+                fatalError(error.localizedDescription)
+            }
         }
         eventSubject.send(command)
     }

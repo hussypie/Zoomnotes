@@ -10,14 +10,27 @@ import UIKit
 import PencilKit
 import Combine
 
+enum NoteChildDetailViewController {
+    case image(ImageDetailViewController)
+    case sublevel(NoteViewController)
+}
+
 protocol NoteChildCommandable {
     func create(_ vm: NoteChildVM) -> NoteEditorCommand
     func resize(_ vm: NoteChildVM, to: CGRect) -> NoteEditorCommand
     func move(_ vm: NoteChildVM, to: CGRect) -> NoteEditorCommand
     func remove(_ vm: NoteChildVM) -> NoteEditorCommand
+    func viewController(from storyboard: UIStoryboard?) -> NoteChildDetailViewController?
 }
 
 struct NoteLevelCommander: NoteChildCommandable {
+    func viewController(from storyboard: UIStoryboard?) -> NoteChildDetailViewController? {
+        guard let noteViewController = NoteViewController.from(storyboard) else {
+                return nil
+        }
+        return .sublevel(noteViewController)
+    }
+
     func create(_ vm: NoteChildVM) -> NoteEditorCommand {
         return .createLevel(vm)
     }
@@ -52,6 +65,12 @@ struct NoteImageCommander: NoteChildCommandable {
         return .removeImage(vm)
     }
 
+    func viewController(from storyboard: UIStoryboard?) -> NoteChildDetailViewController? {
+        guard let imageDetailViewController = ImageDetailViewController.from(storyboard) else {
+                return nil
+        }
+        return .image(imageDetailViewController)
+    }
 }
 
 class NoteChildVM: ObservableObject {

@@ -23,19 +23,6 @@ extension NoteViewController {
         canvasView.contentSize = CGSize(width: view.frame.width * canvasView.zoomScale, height: contentHeight)
     }
 
-    func captureCurrentScreen() -> UIImage {
-        drawerView!.alpha = 0.0
-        defer {
-            drawerView!.alpha = 1.0
-        }
-        UIGraphicsBeginImageContext(view.frame.size)
-        let context = UIGraphicsGetCurrentContext()!
-        view.layer.render(in: context)
-        let image = UIGraphicsGetImageFromCurrentImageContext()!
-        UIGraphicsEndImageContext()
-        return image
-    }
-
     func updateLayout(for toolPicker: PKToolPicker) {
         let obscuredFrame = toolPicker.frameObscured(in: view)
 

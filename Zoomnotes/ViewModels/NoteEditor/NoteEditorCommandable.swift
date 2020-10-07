@@ -20,6 +20,8 @@ enum NoteEditorCommand {
     case resizeLevel(NoteChildVM, from: CGRect, to: CGRect)
     case resizeImage(NoteChildVM, from: CGRect, to: CGRect)
     case update(PKDrawing)
+    case updateAnnotation(id: UUID, with: PKDrawing)
+    case updatePreview(id: UUID, with: UIImage)
     case refresh(UIImage)
     case moveToDrawer(NoteChildVM, frame: CGRect)
     case moveFromDrawer(NoteChildVM, frame: CGRect)

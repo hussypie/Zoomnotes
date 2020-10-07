@@ -117,13 +117,13 @@ class NoteModelDBAccessTests: XCTestCase {
         }
 
         let imageFromDB = asynchronously(access: .read, moc: self.moc) {
-            return try access.read(level: rootLevel.id)
+            return try access.read(image: image.id)
         }
 
-        XCTAssertEqual(imageFromDB!.images.count, 1)
-        XCTAssertEqual(imageFromDB!.images.first!.id, image.id)
-        XCTAssertEqual(imageFromDB!.images.first!.frame, image.frame)
-        XCTAssertEqual(imageFromDB!.images.first!.drawing, image.drawing)
+        XCTAssertNotNil(imageFromDB)
+        XCTAssertEqual(imageFromDB!.id, image.id)
+        XCTAssertEqual(imageFromDB!.frame, image.frame)
+        XCTAssertEqual(imageFromDB!.drawing, image.drawing)
     }
 
     func testRemoveSubImage() {

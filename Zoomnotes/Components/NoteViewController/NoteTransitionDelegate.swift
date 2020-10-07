@@ -10,29 +10,19 @@ import Foundation
 import UIKit
 
 class NoteTransitionDelegate: NSObject, UINavigationControllerDelegate {
-    let sourceRect: CGRect?
-    var destinationRect: CGRect?
-    private let interactionController: UIPercentDrivenInteractiveTransition
+    private let interactionController = UIPercentDrivenInteractiveTransition()
 
-    init(source: CGRect?) {
-        self.interactionController = UIPercentDrivenInteractiveTransition()
-        self.sourceRect = source
-        self.destinationRect = nil
-        super.init()
-    }
+    private var downAnimator: UIViewControllerAnimatedTransitioning? = nil
+    private var upAnimator: UIViewControllerAnimatedTransitioning? = nil
 
     func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from fromVC: UIViewController, to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         switch operation {
         case .pop:
-            guard let source = self.sourceRect else {
-                return nil
-            }
             self.interactionController.update(0)
-            return ZoomUpTransitionAnimator(with: source)
+            return self.upAnimator
         case .push:
-            guard let dest = destinationRect else { return nil }
             self.interactionController.update(0)
-            return ZoomDownTransitionAnimator(destinationRect: dest)
+            return downAnimator
         case .none:
             return nil
         @unknown default:
@@ -40,8 +30,8 @@ class NoteTransitionDelegate: NSObject, UINavigationControllerDelegate {
         }
     }
 
-    func set(destination: CGRect) {
-        self.destinationRect = destination
+    func navigationController(_ navigationController: UINavigationController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+        return interactionController
     }
 
     func step(percent: CGFloat) {
@@ -56,7 +46,13 @@ class NoteTransitionDelegate: NSObject, UINavigationControllerDelegate {
         self.interactionController.cancel()
     }
 
-    func navigationController(_ navigationController: UINavigationController, interactionControllerFor animationController: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
-        return interactionController
+    func down(animator: UIViewControllerAnimatedTransitioning) -> Self {
+        self.downAnimator = animator
+        return self
+    }
+
+    func up(animator: UIViewControllerAnimatedTransitioning) -> Self {
+        self.upAnimator = animator
+        return self
     }
 }

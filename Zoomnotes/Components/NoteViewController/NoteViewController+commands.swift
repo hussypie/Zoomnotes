@@ -126,18 +126,19 @@ extension NoteViewController {
 
         case .moveImage:
             return
-
         case .resizeImage:
             return
-
         case .removeImage:
             return
-
         case .moveLevel:
             return
         case .update:
             return
         case .refresh:
+            return
+        case .updateAnnotation(id: let id, with: let with):
+            return
+        case .updatePreview(id: let id, with: let with):
             return
         }
     }
