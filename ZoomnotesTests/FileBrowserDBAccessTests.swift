@@ -24,10 +24,10 @@ class FileBrowserDBAccessTests: XCTestCase {
         case write
     }
 
-     func asynchronously<T>(access: AccessType,
-                            moc: NSManagedObjectContext,
-                            _ action: () throws -> T
-     ) -> T {
+    func asynchronously<T>(access: AccessType,
+                           moc: NSManagedObjectContext,
+                           _ action: () throws -> T
+    ) -> T {
         let expectation: XCTestExpectation
 
         switch access {
@@ -72,12 +72,19 @@ class FileBrowserDBAccessTests: XCTestCase {
         }
 
         let result = asynchronously(access: .read, moc: self.moc) {
-            return try access.read(id: fileToBeCreated.id)
+            return try access.children(of: root.id)
         }
 
-        XCTAssertNotNil(result)
-        XCTAssertEqual(result!.name, fileToBeCreated.name)
-        XCTAssertEqual(result!.lastModified, fileToBeCreated.lastModified)
+        XCTAssertEqual(result.count, 1)
+
+        switch result.first! {
+        case .file(let file):
+            XCTAssertEqual(file.id, fileToBeCreated.id.id)
+            XCTAssertEqual(file.name, fileToBeCreated.name)
+            XCTAssertEqual(file.lastModified, fileToBeCreated.lastModified)
+        default:
+            XCTFail("Created file shoud be file")
+        }
 
         let noteLevelAccess = NoteLevelAccessImpl(using: self.moc)
 
@@ -91,47 +98,50 @@ class FileBrowserDBAccessTests: XCTestCase {
 
     func testUpdateFileLastModified() {
         let fileToBeUpdated = DocumentStoreDescription.stub
-        let access = DirectoryAccessImpl(using: self.moc)
-            .stub(root: DirectoryStoreDescription.stub(documents: [
-                DocumentStoreDescription.stub,
-                fileToBeUpdated,
-                DocumentStoreDescription.stub
-                ],
-                                                       directories: []))
+        let root = DirectoryStoreDescription.stub(documents: [
+            DocumentStoreDescription.stub,
+            fileToBeUpdated,
+            DocumentStoreDescription.stub
+        ], directories: [])
+
+        let access = DirectoryAccessImpl(using: self.moc).stub(root: root)
 
         let newDate = Date().advanced(by: 24*68*60)
         asynchronously(access: .write, moc: self.moc) {
             try access.updateLastModified(of: fileToBeUpdated.id, with: newDate)
         }
 
-        let updatedFile = asynchronously(access: .read, moc: self.moc) {
-            return try access.read(id: fileToBeUpdated.id)
+        let children = asynchronously(access: .read, moc: self.moc) {
+            return try access.children(of: root.id)
         }
-        XCTAssertNotNil(updatedFile)
-        XCTAssertEqual(updatedFile!.lastModified, newDate)
+
+        XCTAssertEqual(children.count, 3)
+        let updatedFile = children.first { $0.id == fileToBeUpdated.id.id }!
+        XCTAssertEqual(updatedFile.date, newDate)
     }
 
     func testUpdateFileName() {
         let fileToBeUpdated = DocumentStoreDescription.stub
-        let access = DirectoryAccessImpl(using: self.moc)
-            .stub(root: DirectoryStoreDescription.stub(documents: [
-                DocumentStoreDescription.stub,
-                fileToBeUpdated,
-                DocumentStoreDescription.stub
-                ],
-                                                       directories: []))
+       let root = DirectoryStoreDescription.stub(documents: [
+            DocumentStoreDescription.stub,
+            fileToBeUpdated,
+            DocumentStoreDescription.stub
+        ], directories: [])
+
+        let access = DirectoryAccessImpl(using: self.moc).stub(root: root)
 
         let newName = "This name is surely better than the prevoius one"
         asynchronously(access: .write, moc: self.moc) {
             try access.updateName(of: fileToBeUpdated.id, to: newName)
         }
 
-        let updatedFile = asynchronously(access: .read, moc: self.moc) {
-            return try access.read(id: fileToBeUpdated.id)
+        let children = asynchronously(access: .read, moc: self.moc) {
+            return try access.children(of: root.id)
         }
 
-        XCTAssertNotNil(updatedFile)
-        XCTAssertEqual(updatedFile!.name, newName)
+        XCTAssertEqual(children.count, 3)
+        let updatedFile = children.first { $0.id == fileToBeUpdated.id.id }!
+        XCTAssertEqual(updatedFile.name, newName)
     }
 
     func testUpdateDirectoryName() {
@@ -223,28 +233,16 @@ class FileBrowserDBAccessTests: XCTestCase {
             try access.delete(child: fileToBeDeleted.id, of: parent.id)
         }
 
-        let filePlaceholder = asynchronously(access: .read, moc: self.moc) {
-            return try access.read(id: fileToBeDeleted.id)
-        }
-
-        XCTAssertNil(filePlaceholder)
-
         let children = asynchronously(access: .read, moc: self.moc) {
             return try access.children(of: parent.id)
         }
 
         XCTAssertEqual(children.count, 2)
+        XCTAssertNil(children.first { $0.id == fileToBeDeleted.id.id })
 
-        let (u1, u2) = asynchronously(access: .read, moc: self.moc) {
-            return (try access.read(id: unAffectedFile1.id),
-                    try access.read(id: unAffectedFile2.id))
-        }
+        XCTAssertNotNil(children.first { $0.id == unAffectedFile1.id.id })
 
-        XCTAssertNotNil(u1)
-        XCTAssertEqual(u1!.id, unAffectedFile1.id)
-
-        XCTAssertNotNil(u2)
-        XCTAssertEqual(u2!.id, unAffectedFile2.id)
+        XCTAssertNotNil(children.first { $0.id == unAffectedFile2.id.id })
     }
 
     func testDeleteDirectory() {
@@ -292,16 +290,6 @@ class FileBrowserDBAccessTests: XCTestCase {
 
         XCTAssertNotNil(u2)
         XCTAssertEqual(u2!.id, unaffectedDirectory2.id)
-
-        let (doc1, dir1, dir2) = asynchronously(access: .read, moc: self.moc) {
-            return (try access.read(id: directoryToBeDeleted.documentChildren[0].id),
-                    try access.read(id: directoryToBeDeleted.directoryChildren[0].id),
-                    try access.read(id: directoryToBeDeleted.directoryChildren[1].id))
-        }
-
-        XCTAssertNil(doc1)
-        XCTAssertNil(dir1)
-        XCTAssertNil(dir2)
     }
 
     func testMoveDirectory() {
@@ -314,8 +302,8 @@ class FileBrowserDBAccessTests: XCTestCase {
 
         asynchronously(access: .write, moc: self.moc) {
             try access.reparent(from: parent.id,
-                                          node: child.id,
-                                          to: newParent.id)
+                                node: child.id,
+                                to: newParent.id)
         }
 
         let children = asynchronously(access: .read, moc: self.moc) {

@@ -11,7 +11,6 @@ import UIKit
 
 protocol DirectoryAccess {
     func read(id dir: DirectoryStoreId) throws -> DirectoryStoreLookupResult?
-    func read(id: DocumentStoreId) throws -> DocumentStoreDescription?
     func updateName(of id: DirectoryStoreId, to name: String) throws
     func updateName(of id: DocumentStoreId, to name: String) throws
     func root(from description: DirectoryStoreDescription) throws

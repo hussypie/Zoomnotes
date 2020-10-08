@@ -21,10 +21,6 @@ class DirectoryAccessMock: DirectoryAccess {
         self.directories = directories
     }
 
-    func read(id: DocumentStoreId) throws -> DocumentStoreDescription? {
-        return documents[id.id]
-    }
-
     func read(id: DirectoryStoreId) throws -> DirectoryStoreLookupResult? {
         guard let desc = directories[id.id] else { return nil }
         return DirectoryStoreLookupResult(id: desc.id,
