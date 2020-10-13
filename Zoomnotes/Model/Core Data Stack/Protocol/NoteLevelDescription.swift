@@ -13,7 +13,7 @@ import UIKit
 struct NoteLevelDescription {
     let preview: UIImage
     let frame: CGRect
-    let id: UUID
+    let id: NoteLevelID
     let drawing: PKDrawing
     let sublevels: [NoteLevelDescription]
     let images: [NoteImageDescription]
@@ -34,7 +34,7 @@ extension NoteLevelDescription {
         return NoteLevelDescription(
             preview: UIImage(data: store.preview!)!,
             frame: frame,
-            id: store.id!,
+            id: ID(store.id!),
             drawing: drawing,
             sublevels: sublevels.compactMap { try? NoteLevelDescription.from(store: $0) },
             images: images.map { NoteImageDescription.from($0) }

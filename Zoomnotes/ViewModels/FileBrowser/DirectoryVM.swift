@@ -11,20 +11,14 @@ import UIKit
 
 class DirectoryVM: NSObject, Codable {
     let id: UUID
+    let store: DirectoryID
     var name: String
     var created: Date
 
-    required init(id: UUID, name: String, created: Date) {
+    required init(id: UUID, store: DirectoryID, name: String, created: Date) {
         self.id = id
+        self.store = store
         self.name = name
         self.created = created
-    }
-
-    static func fresh(name: String, created: Date) -> DirectoryVM {
-        return DirectoryVM(id: UUID(), name: name, created: created)
-    }
-
-    static var `default`: DirectoryVM {
-        return DirectoryVM.fresh(name: "Documents", created: Date())
     }
 }

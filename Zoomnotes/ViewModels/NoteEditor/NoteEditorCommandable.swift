@@ -10,23 +10,33 @@ import Foundation
 import UIKit
 import PencilKit
 
-enum NoteEditorCommand {
-    case createLevel(NoteChildVM)
-    case createImage(NoteChildVM)
-    case moveLevel(NoteChildVM, from: CGRect, to: CGRect)
-    case moveImage(NoteChildVM, from: CGRect, to: CGRect)
-    case removeLevel(NoteChildVM)
-    case removeImage(NoteChildVM)
-    case resizeLevel(NoteChildVM, from: CGRect, to: CGRect)
-    case resizeImage(NoteChildVM, from: CGRect, to: CGRect)
-    case update(PKDrawing)
-    case updateAnnotation(id: UUID, with: PKDrawing)
-    case updatePreview(id: UUID, with: UIImage)
-    case refresh(UIImage)
-    case moveToDrawer(NoteChildVM, frame: CGRect)
-    case moveFromDrawer(NoteChildVM, frame: CGRect)
+enum NoteChildDetailViewController {
+    case image(ImageDetailViewController, id: NoteImageID)
+    case sublevel(NoteViewController, id: NoteLevelID)
 }
 
-protocol NoteEditorCommandable {
-    func process(_ command: NoteEditorCommand)
+protocol NoteChildProtocol {
+    func resize(using editor: NoteEditorProtocol, to: CGRect)
+    func move(using editor: NoteEditorProtocol, to: CGRect)
+    func remove(using editor: NoteEditorProtocol)
+    func detailViewController(from: UIStoryboard?) -> NoteChildDetailViewController?
+}
+
+protocol NoteEditorProtocol {
+    func create(id: NoteLevelID, frame: CGRect, preview: UIImage)
+    func create(id: NoteImageID, frame: CGRect, preview: UIImage)
+    func update(drawing: PKDrawing)
+    func refresh(image: UIImage)
+    func update(id: NoteImageID, annotation: PKDrawing)
+    func update(id: NoteImageID, preview: UIImage)
+    func move(id: NoteLevelID, to: CGRect)
+    func move(id: NoteImageID, to: CGRect)
+    func resize(id: NoteLevelID, to: CGRect)
+    func resize(id: NoteImageID, to: CGRect)
+    func remove(id: NoteImageID)
+    func remove(id: NoteLevelID)
+    func moveToDrawer(id: NoteLevelID, frame: CGRect)
+    func moveToDrawer(id: NoteImageID, frame: CGRect)
+    func moveFromDrawer(id: NoteLevelID, frame: CGRect)
+    func moveFromDrawer(id: NoteImageID, frame: CGRect)
 }

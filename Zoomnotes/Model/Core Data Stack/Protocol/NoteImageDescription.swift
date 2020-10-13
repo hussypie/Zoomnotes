@@ -11,7 +11,7 @@ import UIKit
 import PencilKit
 
 struct NoteImageDescription {
-    let id: UUID
+    let id: NoteImageID
     let preview: UIImage
     let drawing: PKDrawing
     let image: UIImage
@@ -28,7 +28,7 @@ extension NoteImageDescription {
                           width: CGFloat(store.frame!.width),
                           height: CGFloat(store.frame!.height))
 
-        return NoteImageDescription(id: store.id!,
+        return NoteImageDescription(id: ID(store.id!),
                                     preview: UIImage(data: store.preview!)!,
                                     drawing: drawing,
                                     image: UIImage(data: store.image!)!,

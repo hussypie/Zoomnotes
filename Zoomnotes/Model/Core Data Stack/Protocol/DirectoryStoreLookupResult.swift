@@ -9,7 +9,7 @@
 import Foundation
 
 struct DirectoryStoreLookupResult {
-    let id: DirectoryStoreId
+    let id: DirectoryID
     let created: Date
     let name: String
 }

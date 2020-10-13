@@ -18,12 +18,12 @@ extension DocumentStoreDescription {
         let thumbnail = stubImages.randomElement()!
         let rootLevel = NoteLevelDescription(preview: thumbnail,
                                              frame: CGRect(x: 0, y: 0, width: 1280, height: 800),
-                                             id: UUID(),
+                                             id: ID(UUID()),
                                              drawing: PKDrawing(),
                                              sublevels: [],
                                              images: [])
 
-        return DocumentStoreDescription(id: UUID(),
+        return DocumentStoreDescription(id: ID(UUID()),
                                         lastModified: Date(),
                                         name: stubNames.randomElement()!,
                                         thumbnail: thumbnail,

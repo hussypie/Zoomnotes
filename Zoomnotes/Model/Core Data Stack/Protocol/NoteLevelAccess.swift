@@ -11,16 +11,16 @@ import PencilKit
 import UIKit
 
 protocol NoteLevelAccess {
-    func append(level description: NoteLevelDescription, to parent: UUID) throws
-    func append(image description: NoteImageDescription, to parent: UUID) throws
-    func remove(level id: UUID, from parent: UUID) throws
-    func remove(image id: UUID, from parent: UUID) throws
-    func read(level id: UUID) throws -> NoteLevelDescription?
-    func read(image id: UUID) throws -> NoteImageDescription?
-    func update(drawing: PKDrawing, for id: UUID) throws
-    func update(preview: UIImage, for id: UUID) throws
-    func update(preview: UIImage, image: UUID) throws
-    func update(frame: CGRect, for id: UUID) throws
-    func update(frame: CGRect, image: UUID) throws
-    func update(annotation: PKDrawing, image: UUID) throws
+    func append(level description: NoteLevelDescription, to parent: NoteLevelID) throws
+    func append(image description: NoteImageDescription, to parent: NoteLevelID) throws
+    func remove(level id: NoteLevelID, from parent: NoteLevelID) throws
+    func remove(image id: NoteImageID, from parent: NoteLevelID) throws
+    func read(level id: NoteLevelID) throws -> NoteLevelDescription?
+    func read(image id: NoteImageID) throws -> NoteImageDescription?
+    func update(drawing: PKDrawing, for id: NoteLevelID) throws
+    func update(preview: UIImage, for id: NoteLevelID) throws
+    func update(preview: UIImage, image: NoteImageID) throws
+    func update(frame: CGRect, for id: NoteLevelID) throws
+    func update(frame: CGRect, image: NoteImageID) throws
+    func update(annotation: PKDrawing, image: NoteImageID) throws
 }

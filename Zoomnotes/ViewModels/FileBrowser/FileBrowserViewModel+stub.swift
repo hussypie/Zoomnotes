@@ -10,7 +10,7 @@ import Foundation
 
 extension FolderBrowserViewModel {
     static var stub: FolderBrowserViewModel {
-        return FolderBrowserViewModel(directoryId: UUID(),
+        return FolderBrowserViewModel(directoryId: ID(UUID()),
                                       name: "Documents",
                                       nodes: [],
                                       access: DirectoryAccessMock(documents: [:],
@@ -19,7 +19,7 @@ extension FolderBrowserViewModel {
 
     static func stub(nodes: [FolderBrowserViewModel.Node]) -> FolderBrowserViewModel {
 
-        return FolderBrowserViewModel(directoryId: UUID(),
+        return FolderBrowserViewModel(directoryId: ID(UUID()),
                                       name: "Documents",
                                       nodes: nodes,
                                       access: DirectoryAccessMock(documents: [:],

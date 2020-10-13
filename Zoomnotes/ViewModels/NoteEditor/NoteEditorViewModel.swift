@@ -12,34 +12,30 @@ import PencilKit
 import Combine
 import CoreData
 
-class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
+class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
     @Published var title: String
     @Published var drawing: PKDrawing
-    @Published var nodes: [UUID: NoteChildVM]
-    @Published var drawerContents: [UUID: NoteChildVM]
 
-    private let id: UUID
+    private let id: NoteLevelID
     private let access: NoteLevelAccess
     private let onUpdateName: (String) -> Void
+    private let sublevels: [NoteChildVM]
 
-    let eventSubject = PassthroughSubject<NoteEditorCommand, Never>()
     private var cancellables: Set<AnyCancellable> = []
 
-    init(id: UUID,
+    init(id: NoteLevelID,
          title: String,
-         sublevels: [UUID: NoteChildVM],
+         sublevels: [NoteChildVM],
          drawing: PKDrawing,
          access: NoteLevelAccess,
-         drawer: [UUID: NoteChildVM],
          onUpdateName: @escaping (String) -> Void
     ) {
         self.id = id
         self.title = title
-        self.nodes = sublevels
         self.drawing = drawing
+        self.sublevels = sublevels
 
         self.onUpdateName = onUpdateName
-        self.drawerContents = drawer
 
         self.access = access
 
@@ -48,70 +44,67 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
             .store(in: &cancellables)
     }
 
-    func childViewModel(for level: NoteChildVM) -> NoteEditorViewModel? {
-        guard let subLevel = try? self.access.read(level: level.id) else { return nil }
+    func load(_ use: (NoteChildVM) -> Void) {
+        for sublevel in self.sublevels {
+            use(sublevel)
+        }
+    }
+
+    func childViewModel(for id: NoteLevelID) -> NoteEditorViewModel? {
+        guard let subLevel = try? self.access.read(level: id) else { return nil }
         let subSubLevels = subLevel.sublevels
-            .map { NoteChildVM(id: $0.id,
+            .map { NoteChildVM(id: UUID(),
                                preview: $0.preview,
                                frame: $0.frame,
-                               commander: NoteLevelCommander()) }
-            .map { ($0.id, $0) }
+                               commander: NoteLevelCommander(id: $0.id)) }
 
         let subSubImages = subLevel.images
-            .map { NoteChildVM(id: $0.id,
+            .map { NoteChildVM(id: UUID(),
                                preview: $0.preview,
                                frame: $0.frame,
-                               commander: NoteImageCommander()) }
-            .map { ($0.id, $0) }
+                               commander: NoteImageCommander(id: $0.id)) }
 
-        return NoteEditorViewModel(id: level.id,
+        return NoteEditorViewModel(id: id,
                                    title: self.title,
-                                   sublevels: Dictionary.init(uniqueKeysWithValues: subSubLevels + subSubImages),
+                                   sublevels: subSubLevels + subSubImages,
                                    drawing: subLevel.drawing,
                                    access: self.access,
-                                   drawer: self.drawerContents,
                                    onUpdateName: self.onUpdateName)
     }
 
-    func imageDetailViewModel(for image: NoteChildVM) -> ImageDetailViewModel? {
-        guard let subimage = try? self.access.read(image: image.id) else { return nil }
+    func imageDetailViewModel(for id: NoteImageID) -> ImageDetailViewModel? {
+        guard let subimage = try? self.access.read(image: id) else { return nil }
         return ImageDetailViewModel(using: subimage.image, with: subimage.drawing)
     }
 
-    private func moveLevel(level: NoteChildVM, to destinationFrame: CGRect) {
+    func create(id: NoteLevelID, frame: CGRect, preview: UIImage) {
         do {
-            try access.update(frame: destinationFrame, for: level.id)
-            nodes[level.id]!.frame = destinationFrame
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
-    }
-
-    private func removeLevel(level: NoteChildVM) {
-        do {
-            try access.remove(level: level.id, from: id)
-            nodes.removeValue(forKey: level.id)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
-    }
-
-    private func createLevel(level: NoteChildVM) {
-        do {
-            let description = NoteLevelDescription(preview: level.preview,
-                                                   frame: level.frame,
-                                                   id: level.id,
+            let description = NoteLevelDescription(preview: preview,
+                                                   frame: frame,
+                                                   id: id,
                                                    drawing: PKDrawing(),
                                                    sublevels: [],
                                                    images: [])
-            try access.append(level: description, to: id)
-            nodes[level.id] = level
+            try access.append(level: description, to: self.id)
         } catch let error {
             fatalError(error.localizedDescription)
         }
     }
 
-    private func update(drawing: PKDrawing) {
+    func create(id: NoteImageID, frame: CGRect, preview: UIImage) {
+        do {
+            let description = NoteImageDescription(id: id,
+                                                   preview: preview,
+                                                   drawing: PKDrawing(),
+                                                   image: preview,
+                                                   frame: frame)
+            try self.access.append(image: description, to: self.id)
+        } catch let error {
+            fatalError(error.localizedDescription)
+        }
+    }
+
+    func update(drawing: PKDrawing) {
         do {
             try access.update(drawing: drawing, for: self.id)
             self.drawing = drawing
@@ -120,7 +113,23 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
         }
     }
 
-    private func refresh(with image: UIImage) {
+    func update(id: NoteImageID, annotation: PKDrawing) {
+        do {
+            try access.update(annotation: annotation, image: id)
+        } catch let error {
+            fatalError(error.localizedDescription)
+        }
+    }
+
+    func update(id: NoteImageID, preview: UIImage) {
+        do {
+            try access.update(preview: preview, image: id)
+        } catch let error {
+            fatalError(error.localizedDescription)
+        }
+    }
+
+    func refresh(image: UIImage) {
         do {
             try access.update(preview: image, for: self.id)
         } catch let error {
@@ -128,119 +137,67 @@ class NoteEditorViewModel: ObservableObject, NoteEditorCommandable {
         }
     }
 
-    private func moveToDrawer(_ sublevel: NoteChildVM, to frame: CGRect) {
-        self.nodes.removeValue(forKey: sublevel.id)
-        sublevel.frame = frame
-        drawerContents[sublevel.id] = sublevel
-    }
-
-    private func moveFromDrawer(_ sublevel: NoteChildVM, to frame: CGRect) {
-        self.nodes[sublevel.id] = sublevel
-        sublevel.frame = frame
-        drawerContents.removeValue(forKey: sublevel.id)
-    }
-
-    private func resize(level: NoteChildVM, to frame: CGRect) {
+    func move(id: NoteLevelID, to: CGRect) {
         do {
-            try self.access.update(frame: frame, for: level.id)
-            level.frame = frame
+            try access.update(frame: to, for: id)
         } catch let error {
             fatalError(error.localizedDescription)
         }
     }
 
-    private func create(image: NoteChildVM) {
+    func move(id: NoteImageID, to: CGRect) {
         do {
-            let description = NoteImageDescription(id: image.id,
-                                                   preview: image.preview,
-                                                   drawing: PKDrawing(),
-                                                   image: image.preview,
-                                                   frame: image.frame)
-            try self.access.append(image: description, to: id)
-            nodes[image.id] = image
+            try self.access.update(frame: to, image: id)
         } catch let error {
             fatalError(error.localizedDescription)
         }
     }
 
-    private func remove(image: NoteChildVM) {
+    func resize(id: NoteLevelID, to frame: CGRect) {
         do {
-            try self.access.remove(image: image.id, from: id)
-            nodes.removeValue(forKey: image.id)
+            try self.access.update(frame: frame, for: id)
         } catch let error {
             fatalError(error.localizedDescription)
         }
     }
 
-    private func move(image: NoteChildVM, to frame: CGRect) {
+    func remove(id: NoteLevelID) {
         do {
-            try self.access.update(frame: frame, image: image.id)
-            nodes[image.id]!.frame = frame
+            try self.access.remove(level: id, from: self.id)
         } catch let error {
             fatalError(error.localizedDescription)
         }
     }
 
-    private func resize(image: NoteChildVM, to frame: CGRect) {
+    func remove(id: NoteImageID) {
         do {
-            try self.access.update(frame: frame, image: image.id)
-            nodes[image.id]!.frame = frame
+            try self.access.remove(image: id, from: self.id)
         } catch let error {
             fatalError(error.localizedDescription)
         }
     }
 
-    func process(_ command: NoteEditorCommand) {
-        switch command {
-        case .moveLevel(let level, from: _, to: let destinationFrame):
-            self.moveLevel(level: level, to: destinationFrame)
-
-        case .removeLevel(let level):
-            self.removeLevel(level: level)
-
-        case .createLevel(let level):
-            self.createLevel(level: level)
-
-        case .update(let drawing):
-            self.update(drawing: drawing)
-
-        case .refresh(let image):
-            self.refresh(with: image)
-
-        case .moveToDrawer(let sublevel, frame: let frame):
-            self.moveToDrawer(sublevel, to: frame)
-
-        case .moveFromDrawer(let sublevel, frame: let frame):
-            moveFromDrawer(sublevel, to: frame)
-
-        case .resizeLevel(let sublevel, from: _, to: let frame):
-            self.resize(level: sublevel, to: frame)
-
-        case .createImage(let image):
-            self.create(image: image)
-
-        case .removeImage(let image):
-            self.remove(image: image)
-
-        case .moveImage(let image, from: _, to: let frame):
-            self.move(image: image, to: frame)
-
-        case .resizeImage(let image, from: _, to: let frame):
-            self.resize(image: image, to: frame)
-
-        case .updateAnnotation(id: let id, with: let drawing):
-            do {
-                try self.access.update(annotation: drawing, image: id)
-            } catch let error {
-                fatalError(error.localizedDescription)
-            }
-        case .updatePreview(id: let id, with: let with):
-            do {
-                try self.access.update(preview: with, image: id)
-            } catch let error {
-                fatalError(error.localizedDescription)
-            }
+    func resize(id: NoteImageID, to: CGRect) {
+        do {
+            try self.access.update(frame: to, image: id)
+        } catch let error {
+            fatalError(error.localizedDescription)
         }
-        eventSubject.send(command)
+    }
+
+    func moveToDrawer(id: NoteImageID, frame: CGRect) {
+        fatalError("Not implemented")
+    }
+
+    func moveFromDrawer(id: NoteImageID, frame: CGRect) {
+        fatalError("Not implemented")
+    }
+
+    func moveToDrawer(id: NoteLevelID, frame: CGRect) {
+        fatalError("Not implemented")
+    }
+
+    func moveFromDrawer(id: NoteLevelID, frame: CGRect) {
+        fatalError("Not implemented")
     }
 }

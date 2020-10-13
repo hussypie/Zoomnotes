@@ -11,24 +11,23 @@ import Foundation
 extension NoteLevelAccessImpl {
     func stub(with description: NoteLevelDescription) -> NoteLevelAccessImpl {
         // swiftlint:disable:next force_try
-        let rect = try! StoreBuilder<RectStore>(prepare: { store in
+        let rect = try! access.build(prepare: { (store: RectStore) -> RectStore in
             store.x = Float(description.frame.minX)
             store.y = Float(description.frame.minY)
             store.width = Float(description.frame.width)
             store.height = Float(description.frame.height)
 
             return store
-        }).build(using: self.moc)
+        })
 
         // swiftlint:disable:next force_try
-        _ = try! StoreBuilder<NoteLevelStore>(prepare: { entity in
-            entity.id = description.id
+        _ = try! access.build(id: description.id, prepare: { (entity: NoteLevelStore) -> NoteLevelStore in
             entity.preview = description.preview.pngData()!
             entity.frame = rect
             entity.drawing = description.drawing.dataRepresentation()
 
             return entity
-        }).build(using: self.moc)
+        })
 
         for sublevel in description.sublevels {
             // swiftlint:disable:next force_try

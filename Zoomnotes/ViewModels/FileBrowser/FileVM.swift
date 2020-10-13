@@ -11,22 +11,22 @@ import UIKit
 
 class FileVM: NSObject, Codable {
     let id: UUID
+    let store: DocumentID
     var preview: CodableImage
     var name: String
     var lastModified: Date
 
-    required init(id: UUID, preview: UIImage, name: String, lastModified: Date) {
+    required init(
+        id: UUID,
+        store: DocumentID,
+        preview: UIImage,
+        name: String,
+        lastModified: Date
+    ) {
         self.id = id
+        self.store = store
         self.preview = CodableImage(wrapping: preview)
         self.name = name
         self.lastModified = lastModified
     }
-
-    static func fresh(preview: UIImage, name: String, created on: Date) -> FileVM {
-        return FileVM(id: UUID(),
-                      preview: preview,
-                      name: name,
-                      lastModified: on)
-    }
-
 }

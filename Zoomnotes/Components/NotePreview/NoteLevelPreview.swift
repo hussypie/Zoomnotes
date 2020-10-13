@@ -12,7 +12,8 @@ import PencilKit
 import SnapKit
 
 class NoteLevelPreview: UIImageView {
-    typealias OnResizeEndedCallback = (CGRect) -> Void
+    var viewModel: NoteChildVM?
+    typealias OnResizeEndedCallback = (NoteChildVM?, CGRect, CGRect) -> Void
 
     private var isEdited: Bool
 
@@ -34,12 +35,14 @@ class NoteLevelPreview: UIImageView {
 
     struct ResizeGestureState {
         let aspect: CGFloat
+        let originalFrame: CGRect
     }
 
     lazy var resizeGesture: ZNPanGestureRecognizer = {
         return ZNPanGestureRecognizer<ResizeGestureState>(
             begin: { _ in
-                return ResizeGestureState(aspect: self.frame.width / self.frame.height)
+                return ResizeGestureState(aspect: self.frame.width / self.frame.height,
+                                          originalFrame: self.frame)
         },
             step: { rec, state in
                 let translation = rec.translation(in: self.resizeIndicator)
@@ -50,8 +53,8 @@ class NoteLevelPreview: UIImageView {
                 self.setFrame(to: newFrame)
                 rec.setTranslation(CGPoint.zero, in: self.resizeIndicator)
                 return state
-        }, end: { _, _ in
-            self.onResizeEnded(self.frame)
+        }, end: { _, state in
+            self.onResizeEnded(self.viewModel, state.originalFrame, self.frame)
         })
     }()
 
@@ -71,6 +74,7 @@ class NoteLevelPreview: UIImageView {
     ) {
         self.isEdited = false
         self.onResizeEnded = resizeEnded
+        self.viewModel = nil
 
         super.init(frame: frame)
 

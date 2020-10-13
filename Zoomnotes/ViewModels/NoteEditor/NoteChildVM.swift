@@ -10,79 +10,62 @@ import UIKit
 import PencilKit
 import Combine
 
-enum NoteChildDetailViewController {
-    case image(ImageDetailViewController)
-    case sublevel(NoteViewController)
-}
+struct NoteLevelCommander: NoteChildProtocol {
+    let id: NoteLevelID
 
-protocol NoteChildCommandable {
-    func create(_ vm: NoteChildVM) -> NoteEditorCommand
-    func resize(_ vm: NoteChildVM, to: CGRect) -> NoteEditorCommand
-    func move(_ vm: NoteChildVM, to: CGRect) -> NoteEditorCommand
-    func remove(_ vm: NoteChildVM) -> NoteEditorCommand
-    func viewController(from storyboard: UIStoryboard?) -> NoteChildDetailViewController?
-}
-
-struct NoteLevelCommander: NoteChildCommandable {
-    func viewController(from storyboard: UIStoryboard?) -> NoteChildDetailViewController? {
+    func detailViewController(from storyboard: UIStoryboard?) -> NoteChildDetailViewController? {
         guard let noteViewController = NoteViewController.from(storyboard) else {
                 return nil
         }
-        return .sublevel(noteViewController)
+        return .sublevel(noteViewController, id: id)
     }
 
-    func create(_ vm: NoteChildVM) -> NoteEditorCommand {
-        return .createLevel(vm)
+    func resize(using editor: NoteEditorProtocol, to: CGRect) {
+        editor.resize(id: id, to: to)
     }
 
-    func resize(_ vm: NoteChildVM, to: CGRect) -> NoteEditorCommand {
-        return .resizeLevel(vm, from: vm.frame, to: to)
+    func move(using editor: NoteEditorProtocol, to: CGRect) {
+        editor.move(id: id, to: to)
     }
 
-    func move(_ vm: NoteChildVM, to: CGRect) -> NoteEditorCommand {
-        return .moveLevel(vm, from: vm.frame, to: to)
-    }
-
-    func remove(_ vm: NoteChildVM) -> NoteEditorCommand {
-        return .removeLevel(vm)
+    func remove(using editor: NoteEditorProtocol) {
+        editor.remove(id: id)
     }
 }
 
-struct NoteImageCommander: NoteChildCommandable {
-    func create(_ vm: NoteChildVM) -> NoteEditorCommand {
-        return .createImage(vm)
+struct NoteImageCommander: NoteChildProtocol {
+    let id: NoteImageID
+
+    func resize(using editor: NoteEditorProtocol, to: CGRect) {
+        editor.resize(id: id, to: to)
     }
 
-    func resize(_ vm: NoteChildVM, to: CGRect) -> NoteEditorCommand {
-        return .resizeImage(vm, from: vm.frame, to: to)
+    func move(using editor: NoteEditorProtocol, to: CGRect) {
+        editor.move(id: id, to: to)
     }
 
-    func move(_ vm: NoteChildVM, to: CGRect) -> NoteEditorCommand {
-        return .moveImage(vm, from: vm.frame, to: to)
+    func remove(using editor: NoteEditorProtocol) {
+        editor.remove(id: id)
     }
 
-    func remove(_ vm: NoteChildVM) -> NoteEditorCommand {
-        return .removeImage(vm)
-    }
-
-    func viewController(from storyboard: UIStoryboard?) -> NoteChildDetailViewController? {
+    func detailViewController(from storyboard: UIStoryboard?) -> NoteChildDetailViewController? {
         guard let imageDetailViewController = ImageDetailViewController.from(storyboard) else {
                 return nil
         }
-        return .image(imageDetailViewController)
+        return .image(imageDetailViewController, id: id)
     }
 }
 
 class NoteChildVM: ObservableObject {
     let id: UUID
-    let commander: NoteChildCommandable
+    let commander: NoteChildProtocol
     @Published var preview: UIImage
     @Published var frame: CGRect
 
     init(id: UUID,
          preview: UIImage,
          frame: CGRect,
-         commander: NoteChildCommandable) {
+         commander: NoteChildProtocol) {
         self.id = id
         self.commander = commander
         self.preview = preview

@@ -12,15 +12,17 @@ import UIKit
 import Combine
 
 class NoteLevelAccessMock: NoteLevelAccess {
-    var levels: [UUID: NoteLevelDescription]
-    var images: [UUID: NoteImageDescription]
+    typealias LevelTable = [NoteLevelID: NoteLevelDescription]
+    typealias ImageTable = [NoteImageID: NoteImageDescription]
+    var levels: LevelTable
+    var images: ImageTable
 
-    init(levels: [UUID: NoteLevelDescription], images: [UUID: NoteImageDescription]) {
+    init(levels: LevelTable, images: ImageTable) {
         self.levels = levels
         self.images = images
     }
 
-    func append(level description: NoteLevelDescription, to parent: UUID) throws {
+    func append(level description: NoteLevelDescription, to parent: NoteLevelID) throws {
         guard let desc = levels[parent] else { return }
         levels[desc.id] = NoteLevelDescription(preview: desc.preview,
                                                frame: desc.frame,
@@ -35,7 +37,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
         }
     }
 
-    func append(image description: NoteImageDescription, to parent: UUID) throws {
+    func append(image description: NoteImageDescription, to parent: NoteLevelID) throws {
         guard let desc = levels[parent] else { return }
         levels[desc.id] = NoteLevelDescription(preview: desc.preview,
                                                frame: desc.frame,
@@ -46,7 +48,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
         images[description.id] = description
     }
 
-    func remove(level id: UUID, from parent: UUID) throws {
+    func remove(level id: NoteLevelID, from parent: NoteLevelID) throws {
         guard let desc = levels[parent] else { return }
         guard let subject = levels[id] else { return }
 
@@ -64,7 +66,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
         levels.removeValue(forKey: id)
     }
 
-    func remove(image id: UUID, from parent: UUID) throws {
+    func remove(image id: NoteImageID, from parent: NoteLevelID) throws {
         guard let desc = levels[parent] else { return }
 
         levels[desc.id] = NoteLevelDescription(preview: desc.preview,
@@ -77,7 +79,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
         images.removeValue(forKey: id)
     }
 
-    func delete(level id: UUID) throws {
+    func delete(level id: NoteLevelID) throws {
         guard let desc = levels[id] else { return }
         for sublevel in desc.sublevels {
             // swiftlint:disable:next force_try
@@ -86,15 +88,15 @@ class NoteLevelAccessMock: NoteLevelAccess {
         levels.removeValue(forKey: id)
     }
 
-    func read(level id: UUID) throws -> NoteLevelDescription? {
+    func read(level id: NoteLevelID) throws -> NoteLevelDescription? {
         return levels[id]
     }
 
-    func read(image id: UUID) throws -> NoteImageDescription? {
+    func read(image id: NoteImageID) throws -> NoteImageDescription? {
         return images[id]
     }
 
-    func update(drawing: PKDrawing, for id: UUID) throws {
+    func update(drawing: PKDrawing, for id: NoteLevelID) throws {
         guard let desc = levels[id] else { return }
         levels[id] = NoteLevelDescription(preview: desc.preview,
                                           frame: desc.frame,
@@ -104,7 +106,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
                                           images: desc.images)
     }
 
-    func update(annotation: PKDrawing, image: UUID) throws {
+    func update(annotation: PKDrawing, image: NoteImageID) throws {
         guard let desc = images[image] else { return }
         images[desc.id] = NoteImageDescription(id: desc.id,
                                                preview: desc.image,
@@ -113,7 +115,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
                                                frame: desc.frame)
     }
 
-    func update(preview: UIImage, for id: UUID) throws {
+    func update(preview: UIImage, for id: NoteLevelID) throws {
         guard let desc = levels[id] else { return }
         levels[id] = NoteLevelDescription(preview: preview,
                                           frame: desc.frame,
@@ -123,7 +125,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
                                           images: desc.images)
     }
 
-    func update(preview: UIImage, image: UUID) throws {
+    func update(preview: UIImage, image: NoteImageID) throws {
         guard let desc = images[image] else { return }
         images[desc.id] = NoteImageDescription(id: desc.id,
                                                preview: preview,
@@ -132,7 +134,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
                                                frame: desc.frame)
     }
 
-    func update(frame: CGRect, for id: UUID) throws {
+    func update(frame: CGRect, for id: NoteLevelID) throws {
         guard let desc = levels[id] else { return }
         levels[id] = NoteLevelDescription(preview: desc.preview,
                                           frame: frame,
@@ -142,7 +144,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
                                           images: desc.images)
     }
 
-    func update(frame: CGRect, image: UUID) throws {
+    func update(frame: CGRect, image: NoteImageID) throws {
         guard let desc = images[image] else { return }
         images[desc.id] = NoteImageDescription(id: desc.id,
                                                preview: desc.preview,
