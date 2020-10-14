@@ -11,24 +11,24 @@ import SwiftUI
 import Photos
 
 class PhotoManager: NSObject, ObservableObject, PHPhotoLibraryChangeObserver {
-    private var photos: PHFetchResult<PHAsset>!
+    private var photos = PHFetchResult<PHAsset>()
     @Published var images: [UIImage] = []
 
     override init() {
         super.init()
+        PHPhotoLibrary.shared().register(self)
+
         let allPhotosOptions = PHFetchOptions()
         allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-        allPhotosOptions.includeHiddenAssets = false
 
         PHAsset.fetchAssets(with: allPhotosOptions).enumerateObjects { asset, _, _ in
             let requestOptions = PHImageRequestOptions()
             requestOptions.resizeMode = .exact
             requestOptions.deliveryMode = .highQualityFormat
-            requestOptions.isSynchronous = true
 
             PHImageManager.default().requestImage(for: asset, targetSize: PHImageManagerMaximumSize, contentMode: .default, options: requestOptions) { image, _ in
-                guard let image = image else { fatalError("no image") }
-                self.images.append(image)
+                    guard let image = image else { fatalError("no image") }
+                    self.images.append(image)
             }
         }
     }
@@ -41,26 +41,25 @@ class PhotoManager: NSObject, ObservableObject, PHPhotoLibraryChangeObserver {
         guard let changes = changeInstance.changeDetails(for: photos)
             else { return }
 
-        DispatchQueue.main.async {
-            self.images = []
-            changes.fetchResultAfterChanges.enumerateObjects { asset, _, _ in
-                let requestOptions = PHImageRequestOptions()
-                requestOptions.resizeMode = .exact
-                requestOptions.deliveryMode = .highQualityFormat
-                requestOptions.isSynchronous = true
+        self.images = []
+        changes.fetchResultAfterChanges.enumerateObjects { asset, _, _ in
+            let requestOptions = PHImageRequestOptions()
+            requestOptions.resizeMode = .exact
+            requestOptions.deliveryMode = .highQualityFormat
 
-                PHImageManager.default().requestImage(for: asset, targetSize: PHImageManagerMaximumSize, contentMode: .default, options: requestOptions) { image, _ in
-                    guard let image = image else { fatalError("no image") }
-                    self.images.append(image)
-                }
+            PHImageManager.default().requestImage(for: asset, targetSize: PHImageManagerMaximumSize, contentMode: .default, options: requestOptions) { image, _ in
+                guard let image = image else { fatalError("no image") }
+                self.images.append(image)
             }
         }
+
     }
 }
 
 struct ImagePickerDrawer: View {
     var onDismiss: (() -> Void)? = nil
-    @ObservedObject private var photoManager = PhotoManager()
+    @ObservedObject var manager = PhotoManager()
+
     var body: some View {
         VStack(alignment: .leading) {
             Button(action: { self.onDismiss?() },
@@ -68,7 +67,7 @@ struct ImagePickerDrawer: View {
             ).padding(7)
             ScrollView(.horizontal) {
                 HStack {
-                    ForEach(self.photoManager.images, id: \.self) { image in
+                    List(self.manager.images, id: \.self) { image in
                         Image(uiImage: image)
                             .resizable()
                             .scaledToFit()

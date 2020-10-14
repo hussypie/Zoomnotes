@@ -191,7 +191,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         let title: Binding<String> = .init(get: { self.viewModel.title },
                                            set: { self.viewModel.title = $0 })
 
-        self.drawerView = DrawerView(title: title, onCameraButtonTapped: self.showImagePicker)
+        self.drawerView = DrawerView(title: title, onCameraButtonTapped: { /* NOP */})
 
         self.view.addSubview(drawerView!)
         self.view.bringSubviewToFront(drawerView!)
@@ -366,7 +366,8 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         self.drawerViewTopOffset.update(offset: 0)
         self.drawerView!.layoutIfNeeded()
 
-        self.imagePicker = UIHostingController(rootView: ImagePickerDrawer(onDismiss: self.hideImagePicker))
+        self.imagePicker =
+            UIHostingController(rootView: ImagePickerDrawer(onDismiss: self.hideImagePicker))
 
         self.view.addSubview(imagePicker!.view)
 
