@@ -307,7 +307,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
             switch destinationVC {
             case .image(let imageVC, id: let id):
-                imageVC.viewModel = viewModel.imageDetailViewModel(for: id)
                 imageVC
                     .previewChanged
                     .sink { image in
@@ -326,20 +325,29 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                     NoteTransitionDelegate()
                         .up(animator: ZoomUpTransitionAnimator(with: vm.frame))
 
-                navigationController?.pushViewController(imageVC, animated: true)
+                viewModel.imageDetailViewModel(for: id)
+                    .sink(receiveCompletion: { _ in return }, // TODO: signal error
+                          receiveValue: { viewModel in
+                            imageVC.viewModel = viewModel
+                            self.navigationController?.pushViewController(imageVC, animated: true)
+                    })
 
             case .sublevel(let sublevelVC, id: let id):
                 sublevelVC.transitionManager =
                     NoteTransitionDelegate()
                         .up(animator: ZoomUpTransitionAnimator(with: vm.frame))
-                sublevelVC.viewModel = self.viewModel.childViewModel(for: id)
 
                 sublevelVC
                     .previewChangedSubject
                     .sink { vm.preview = $0 }
                     .store(in: &cancellables)
 
-                navigationController?.pushViewController(sublevelVC, animated: true)
+                self.viewModel.childViewModel(for: id)
+                    .sink(receiveCompletion: { _ in return }, // TODO: log
+                          receiveValue: { viewModel in
+                            sublevelVC.viewModel = viewModel
+                            self.navigationController?.pushViewController(sublevelVC, animated: true)
+                    }).store(in: &cancellables)
             }
         }
 

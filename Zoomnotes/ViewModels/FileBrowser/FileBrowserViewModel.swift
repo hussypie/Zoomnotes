@@ -18,22 +18,25 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
     @Published private(set) var title: String
 
     private var cdaccess: DirectoryAccess
+    private var cancellables: Set<AnyCancellable> = []
 
-    static func root(defaults: UserDefaults, access: DirectoryAccess) -> FolderBrowserViewModel {
+    static func root(defaults: UserDefaults, access: DirectoryAccess) -> AnyPublisher<FolderBrowserViewModel, Error> {
         if let rootDirId: UUID = defaults.uuid(forKey: UserDefaultsKey.rootDirectoryId.rawValue) {
-            do {
-                guard let rootDir: DirectoryStoreLookupResult = try access.read(id: ID(rootDirId)) else {
-                    fatalError("Cannot find root dir, although id is noted")
-                }
-                let children = try access.children(of: rootDir.id)
-
-                return FolderBrowserViewModel(directoryId: rootDir.id,
-                                              name: rootDir.name,
-                                              nodes: children,
-                                              access: access)
-            } catch let error {
-                fatalError(error.localizedDescription)
-            }
+            return access
+                .read(id: ID(rootDirId))
+                .flatMap { (rootDir: DirectoryStoreLookupResult?) -> AnyPublisher<FolderBrowserViewModel, Error> in
+                    guard let rootDir = rootDir else {
+                        fatalError("Root dir id noted, but not present in DB")
+                    }
+                    return access
+                        .children(of: rootDir.id)
+                        .map { children in
+                            return FolderBrowserViewModel(directoryId: rootDir.id,
+                                                          name: rootDir.name,
+                                                          nodes: children,
+                                                          access: access)
+                    }.eraseToAnyPublisher()
+            }.eraseToAnyPublisher()
         }
 
         let defaultID = UUID()
@@ -42,17 +45,15 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                                        name: "Documents",
                                                        documents: [],
                                                        directories: [])
-        do {
-            try access.root(from: defaultRootDir)
-            defaults.set(defaultID, forKey: UserDefaultsKey.rootDirectoryId.rawValue)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
 
-        return FolderBrowserViewModel(directoryId: defaultRootDir.id,
-                                      name: defaultRootDir.name,
-                                      nodes: [],
-                                      access: access)
+        return access.root(from: defaultRootDir)
+            .map { _ in
+                defaults.set(defaultID, forKey: UserDefaultsKey.rootDirectoryId.rawValue)
+                return FolderBrowserViewModel(directoryId: defaultRootDir.id,
+                                              name: defaultRootDir.name,
+                                              nodes: [],
+                                              access: access)
+        }.eraseToAnyPublisher()
     }
 
     init(directoryId: DirectoryID,
@@ -67,53 +68,50 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
         self.cdaccess = access
     }
 
-    func subFolderBrowserVM(for directory: DirectoryVM) -> FolderBrowserViewModel? {
-        do {
-            let children = try self.cdaccess.children(of: directory.store)
+    func subFolderBrowserVM(for directory: DirectoryVM) -> AnyPublisher<FolderBrowserViewModel, Error> {
+        return cdaccess
+            .children(of: directory.store)
+            .map { children in
+                return FolderBrowserViewModel(directoryId: directory.store,
+                                              name: directory.name,
+                                              nodes: children,
+                                              access: self.cdaccess)
 
-            return FolderBrowserViewModel(directoryId: directory.store,
-                                          name: directory.name,
-                                          nodes: children,
-                                          access: self.cdaccess)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        }.eraseToAnyPublisher()
     }
 
-    func noteEditorVM(for note: FileVM) -> NoteEditorViewModel? {
-        do {
-            guard let noteModel =
-                try self.cdaccess.noteModel(of: note.store) else { return nil }
+    func noteEditorVM(for note: FileVM) -> AnyPublisher<NoteEditorViewModel?, Error> {
+        // swiftlint:disable:next force_cast
+        let noteLevelAccess = (UIApplication.shared.delegate as! AppDelegate).noteLevelAccess
 
-            // swiftlint:disable:next force_cast
-            let noteLevelAccess = (UIApplication.shared.delegate as! AppDelegate).noteLevelAccess
+        return self.cdaccess
+            .noteModel(of: note.store)
+            .map { noteModel in
+                guard let noteModel = noteModel else { return nil }
+                let subLevels =
+                    noteModel.sublevels
+                        .map { NoteChildVM(id: UUID(),
+                                           preview: $0.preview,
+                                           frame: $0.frame,
+                                           commander: NoteLevelCommander(id: $0.id)) }
 
-            let subLevels =
-                noteModel.sublevels
-                    .map { NoteChildVM(id: UUID(),
-                                       preview: $0.preview,
-                                       frame: $0.frame,
-                                       commander: NoteLevelCommander(id: $0.id)) }
+                let images =
+                    noteModel.images
+                        .map { NoteChildVM(id: UUID(),
+                                           preview: $0.preview,
+                                           frame: $0.frame,
+                                           commander: NoteImageCommander(id: $0.id)) }
 
-            let images =
-                noteModel.images
-                    .map { NoteChildVM(id: UUID(),
-                                       preview: $0.preview,
-                                       frame: $0.frame,
-                                       commander: NoteImageCommander(id: $0.id)) }
-
-            return NoteEditorViewModel(
-                id: noteModel.id,
-                title: note.name,
-                sublevels: subLevels + images,
-                drawing: noteModel.drawing,
-                access: noteLevelAccess,
-                onUpdateName: { name in
-                    _ = try? self.cdaccess.updateName(of: note.store, to: name)
-            })
-        } catch let error {
-            fatalError(error.localizedDescription)
+                return NoteEditorViewModel(
+                    id: noteModel.id,
+                    title: note.name,
+                    sublevels: subLevels + images,
+                    drawing: noteModel.drawing,
+                    access: noteLevelAccess,
+                    onUpdateName: { self.cdaccess.updateName(of: note.store, to: $0) }
+                )
         }
+        .eraseToAnyPublisher()
     }
 
     private func newFile() -> FileVM {
@@ -134,98 +132,118 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
     }
 
     private func delete(_ node: Node) {
-        do {
-            switch node {
-            case .directory(let dir):
-                try self.cdaccess.delete(child: dir.store, of: directoryId)
-            case .file(let file):
-                try self.cdaccess.delete(child: file.store, of: directoryId)
-            }
-            self.nodes = self.nodes.filter { $0.id != node.id }
-        } catch let error {
-            fatalError(error.localizedDescription)
+        switch node {
+        case .directory(let dir):
+            self.cdaccess
+                .delete(child: dir.store, of: directoryId)
+                .sink(receiveCompletion: { _ in return }, // TODO
+                    receiveValue: {
+                        self.nodes = self.nodes.filter { $0.id != node.id }
+                })
+                .store(in: &cancellables)
+        case .file(let file):
+            self.cdaccess
+                .delete(child: file.store, of: directoryId)
+                .sink(receiveCompletion: { _ in return }, // TODO
+                    receiveValue: {
+                        self.nodes = self.nodes.filter { $0.id != node.id }
+                })
+                .store(in: &cancellables)
         }
     }
 
     private func createFile(_ file: FileVM, with preview: UIImage) {
-        do {
-            let rootData = NoteLevelDescription(preview: preview,
-                                                frame: CGRect(x: 0, y: 0, width: 1280, height: 900),
-                                                id: ID(UUID()),
-                                                drawing: PKDrawing(),
-                                                sublevels: [],
-                                                images: [])
-            let description: DocumentStoreDescription
-                = DocumentStoreDescription(id: file.store,
-                                           lastModified: file.lastModified,
-                                           name: file.name,
-                                           thumbnail: preview,
-                                           root: rootData)
 
-            try self.cdaccess.append(document: description, to: directoryId)
-            self.nodes.append(.file(file))
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        let rootData = NoteLevelDescription(preview: preview,
+                                            frame: CGRect(x: 0, y: 0, width: 1280, height: 900),
+                                            id: ID(UUID()),
+                                            drawing: PKDrawing(),
+                                            sublevels: [],
+                                            images: [])
+        let description: DocumentStoreDescription
+            = DocumentStoreDescription(id: file.store,
+                                       lastModified: file.lastModified,
+                                       name: file.name,
+                                       thumbnail: preview,
+                                       root: rootData)
+
+        self.cdaccess
+            .append(document: description, to: directoryId)
+            .sink(receiveCompletion: { _ in return }, // TODO
+                receiveValue: {
+                    self.nodes.append(.file(file))
+            })
+            .store(in: &cancellables)
     }
 
     private func createFolder(_ folder: DirectoryVM) {
-        do {
-            let description = DirectoryStoreDescription(id: folder.store,
-                                                        created: folder.created,
-                                                        name: folder.name,
-                                                        documents: [],
-                                                        directories: [])
-            try self.cdaccess.append(directory: description, to: directoryId)
-            self.nodes.append(.directory(folder))
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        let description = DirectoryStoreDescription(id: folder.store,
+                                                    created: folder.created,
+                                                    name: folder.name,
+                                                    documents: [],
+                                                    directories: [])
+        self.cdaccess.append(directory: description, to: directoryId)
+            .sink(receiveCompletion: { _ in return }, // TODO
+                receiveValue: {
+                    self.nodes.append(.directory(folder))
+            })
+            .store(in: &cancellables)
     }
 
     private func move(_ node: Node, to dest: DirectoryVM) {
-        do {
-            switch node {
-            case .directory(let dir):
-                try self.cdaccess.reparent(from: directoryId,
-                                           node: dir.store,
-                                           to: dest.store)
-            case .file(let file):
-                try self.cdaccess.reparent(from: directoryId,
-                                           node: file.store,
-                                           to: dest.store)
-            }
-            self.nodes = self.nodes.filter { $0.id != node.id }
-        } catch let error {
-            fatalError(error.localizedDescription)
+        switch node {
+        case .directory(let dir):
+            self.cdaccess.reparent(from: directoryId,
+                                   node: dir.store,
+                                   to: dest.store)
+                .sink(receiveCompletion: { _ in return }, // TODO
+                    receiveValue: {
+                        self.nodes = self.nodes.filter { $0.id != node.id }
+                })
+                .store(in: &cancellables)
+        case .file(let file):
+            self.cdaccess.reparent(from: directoryId,
+                                   node: file.store,
+                                   to: dest.store)
+                .sink(receiveCompletion: { _ in return }, // TODO
+                    receiveValue: {
+                        self.nodes = self.nodes.filter { $0.id != node.id }
+                })
+                .store(in: &cancellables)
+
         }
     }
 
     private func rename(_ node: Node, to name: String) {
-        do {
-            switch node {
-            case .directory(let dir):
-                try self.cdaccess.updateName(of: dir.store, to: name)
-            case .file(let file):
-                try self.cdaccess.updateName(of: file.store, to: name)
-            }
-
-            self.nodes = self.nodes.map {
-                if $0.id == node.id {
-                    switch $0 {
-                    case .directory(let dir):
-                        dir.name = name
-
-                    case .file(let file):
-                        file.name = name
-
-                    }
-                }
-                return $0
-            }
-        } catch let error {
-            fatalError(error.localizedDescription)
+        switch node {
+        case .directory(let dir):
+            self.cdaccess
+                .updateName(of: dir.store, to: name)
+                .sink(receiveCompletion: { _ in return }, // TODO
+                    receiveValue: { })
+                .store(in: &cancellables)
+        case .file(let file):
+            self.cdaccess
+                .updateName(of: file.store, to: name)
+                .sink(receiveCompletion: { _ in return }, // TODO
+                    receiveValue: { })
+                .store(in: &cancellables)
         }
+
+        self.nodes = self.nodes.map {
+            if $0.id == node.id {
+                switch $0 {
+                case .directory(let dir):
+                    dir.name = name
+
+                case .file(let file):
+                    file.name = name
+
+                }
+            }
+            return $0
+        }
+
     }
 
     func process(command: FileBrowserCommand) {
@@ -246,11 +264,11 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
             self.rename(node, to: name)
 
         case .update(let file, preview: let image):
-            do {
-                try self.cdaccess.updatePreviewImage(of: file.store, with: image)
-            } catch let error {
-                fatalError(error.localizedDescription)
-            }
+            self.cdaccess
+                .updatePreviewImage(of: file.store, with: image)
+                .sink(receiveCompletion: { _ in return }, // TODO
+                    receiveValue: { })
+                .store(in: &cancellables)
         }
     }
 }

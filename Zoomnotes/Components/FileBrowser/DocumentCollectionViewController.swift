@@ -43,9 +43,13 @@ class DocumentCollectionViewController: UICollectionViewController {
         if folderVM == nil {
             // swiftlint:disable:next force_cast
             let access = (UIApplication.shared.delegate as! AppDelegate).fileBrowserAccess
-            folderVM =
-                FolderBrowserViewModel.root(defaults: UserDefaults.standard,
-                                            access: access)
+            FolderBrowserViewModel.root(defaults: UserDefaults.standard, access: access)
+                .sink(receiveCompletion: { _ in return }, // todo
+                      receiveValue: { folderVM in
+                        self.folderVM = folderVM
+                })
+                .store(in: &cancellables)
+
         }
 
         folderVM.$title
@@ -135,13 +139,17 @@ class DocumentCollectionViewController: UICollectionViewController {
     private func navigateTo(folder: DirectoryVM) {
         guard let destinationViewController =
             DocumentCollectionViewController.from(storyboard: self.storyboard) else { return }
-        destinationViewController.folderVM = self.folderVM.subFolderBrowserVM(for: folder)
-        self.navigationController?.pushViewController(destinationViewController, animated: true)
+        self.folderVM.subFolderBrowserVM(for: folder)
+            .sink(receiveCompletion: { _ in return }, // TODO
+                  receiveValue: { folderVM in
+                    destinationViewController.folderVM = folderVM
+                    self.navigationController?.pushViewController(destinationViewController, animated: true)
+            })
+            .store(in: &cancellables)
     }
 
     private func openNoteEditor(for note: FileVM) {
         guard let destinationViewController = NoteViewController.from(self.storyboard) else { return }
-        destinationViewController.viewModel = self.folderVM.noteEditorVM(for: note)
         destinationViewController.transitionManager = NoteTransitionDelegate()
         destinationViewController
             .previewChangedSubject
@@ -152,7 +160,13 @@ class DocumentCollectionViewController: UICollectionViewController {
             })
             .store(in: &cancellables)
 
-        self.navigationController?.pushViewController(destinationViewController, animated: true)
+        self.folderVM.noteEditorVM(for: note)
+            .sink(receiveCompletion: { _ in return }, // TODO
+                  receiveValue: {
+                    destinationViewController.viewModel = $0
+                    self.navigationController?.pushViewController(destinationViewController, animated: true)
+            })
+            .store(in: &cancellables)
     }
 }
 

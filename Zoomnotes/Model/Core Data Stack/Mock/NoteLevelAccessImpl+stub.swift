@@ -7,36 +7,34 @@
 //
 
 import Foundation
+import Combine
 
 extension NoteLevelAccessImpl {
     func stub(with description: NoteLevelDescription) -> NoteLevelAccessImpl {
-        // swiftlint:disable:next force_try
-        let rect = try! access.build(prepare: { (store: RectStore) -> RectStore in
+        let cancellable = access.build(prepare: { (store: RectStore) -> RectStore in
             store.x = Float(description.frame.minX)
             store.y = Float(description.frame.minY)
             store.width = Float(description.frame.width)
             store.height = Float(description.frame.height)
 
             return store
-        })
+        }).flatMap { rect in
+            return self.access.build(id: description.id, prepare: { (entity: NoteLevelStore) -> NoteLevelStore in
+                entity.preview = description.preview.pngData()!
+                entity.frame = rect
+                entity.drawing = description.drawing.dataRepresentation()
 
-        // swiftlint:disable:next force_try
-        _ = try! access.build(id: description.id, prepare: { (entity: NoteLevelStore) -> NoteLevelStore in
-            entity.preview = description.preview.pngData()!
-            entity.frame = rect
-            entity.drawing = description.drawing.dataRepresentation()
-
-            return entity
-        })
-
-        for sublevel in description.sublevels {
-            // swiftlint:disable:next force_try
-            try! self.append(level: sublevel, to: description.id)
-        }
-
-        for image in description.images {
-            // swiftlint:disable:next force_try
-            try! self.append(image: image, to: description.id)
+                return entity
+            })
+        }.flatMap { _ in
+            Publishers.Zip(
+                Publishers.Sequence(sequence: description.sublevels)
+                    .flatMap { sublevel in self.append(level: sublevel, to: description.id) }
+                    .collect(),
+                Publishers.Sequence(sequence: description.images)
+                    .flatMap { image in self.append(image: image, to: description.id) }
+                    .collect()
+            )
         }
 
         return self

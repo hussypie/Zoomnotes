@@ -50,139 +50,140 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         }
     }
 
-    func childViewModel(for id: NoteLevelID) -> NoteEditorViewModel? {
-        guard let subLevel = try? self.access.read(level: id) else { return nil }
-        let subSubLevels = subLevel.sublevels
-            .map { NoteChildVM(id: UUID(),
-                               preview: $0.preview,
-                               frame: $0.frame,
-                               commander: NoteLevelCommander(id: $0.id)) }
+    func childViewModel(for id: NoteLevelID) -> AnyPublisher<NoteEditorViewModel?, Error> {
+        return access.read(level: id)
+            .map { subLevel in
+                    guard let subLevel = subLevel else { return nil }
 
-        let subSubImages = subLevel.images
-            .map { NoteChildVM(id: UUID(),
-                               preview: $0.preview,
-                               frame: $0.frame,
-                               commander: NoteImageCommander(id: $0.id)) }
+                    let subSubLevels =
+                        subLevel.sublevels
+                            .map { NoteChildVM(id: UUID(),
+                                               preview: $0.preview,
+                                               frame: $0.frame,
+                                               commander: NoteLevelCommander(id: $0.id)) }
 
-        return NoteEditorViewModel(id: id,
-                                   title: self.title,
-                                   sublevels: subSubLevels + subSubImages,
-                                   drawing: subLevel.drawing,
-                                   access: self.access,
-                                   onUpdateName: self.onUpdateName)
+                    let subSubImages =
+                        subLevel.images
+                            .map { NoteChildVM(id: UUID(),
+                                               preview: $0.preview,
+                                               frame: $0.frame,
+                                               commander: NoteImageCommander(id: $0.id)) }
+
+                    return NoteEditorViewModel(id: id,
+                                               title: self.title,
+                                               sublevels: subSubLevels + subSubImages,
+                                               drawing: subLevel.drawing,
+                                               access: self.access,
+                                               onUpdateName: self.onUpdateName)
+        }.eraseToAnyPublisher()
     }
 
-    func imageDetailViewModel(for id: NoteImageID) -> ImageDetailViewModel? {
-        guard let subimage = try? self.access.read(image: id) else { return nil }
-        return ImageDetailViewModel(using: subimage.image, with: subimage.drawing)
+    func imageDetailViewModel(for id: NoteImageID) -> AnyPublisher<ImageDetailViewModel?, Error> {
+        access.read(image: id)
+            .map { subimage in
+                        guard let subimage = subimage else { return nil }
+                        return ImageDetailViewModel(using: subimage.image, with: subimage.drawing)
+        }.eraseToAnyPublisher()
     }
 
     func create(id: NoteLevelID, frame: CGRect, preview: UIImage) {
-        do {
-            let description = NoteLevelDescription(preview: preview,
-                                                   frame: frame,
-                                                   id: id,
-                                                   drawing: PKDrawing(),
-                                                   sublevels: [],
-                                                   images: [])
-            try access.append(level: description, to: self.id)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        let description = NoteLevelDescription(preview: preview,
+                                               frame: frame,
+                                               id: id,
+                                               drawing: PKDrawing(),
+                                               sublevels: [],
+                                               images: [])
+
+        access.append(level: description, to: self.id)
+            .sink(receiveCompletion: { error in fatalError("\(error)") },
+                  receiveValue: { })
+            .store(in: &cancellables)
     }
 
     func create(id: NoteImageID, frame: CGRect, preview: UIImage) {
-        do {
-            let description = NoteImageDescription(id: id,
-                                                   preview: preview,
-                                                   drawing: PKDrawing(),
-                                                   image: preview,
-                                                   frame: frame)
-            try self.access.append(image: description, to: self.id)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        let description = NoteImageDescription(id: id,
+                                               preview: preview,
+                                               drawing: PKDrawing(),
+                                               image: preview,
+                                               frame: frame)
+        access.append(image: description, to: self.id)
+            .sink(receiveCompletion: { error in fatalError("\(error)") },
+                  receiveValue: { })
+            .store(in: &cancellables)
+
     }
 
     func update(drawing: PKDrawing) {
-        do {
-            try access.update(drawing: drawing, for: self.id)
-            self.drawing = drawing
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        access.update(drawing: drawing, for: self.id)
+            .sink(receiveCompletion: { error in fatalError("\(error)") },
+                  receiveValue: { self.drawing = drawing })
+            .store(in: &cancellables)
     }
 
     func update(id: NoteImageID, annotation: PKDrawing) {
-        do {
-            try access.update(annotation: annotation, image: id)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        access.update(annotation: annotation, image: id)
+            .sink(receiveCompletion: { error in fatalError("\(error)")},
+                      receiveValue: { })
+            .store(in: &cancellables)
     }
 
     func update(id: NoteImageID, preview: UIImage) {
-        do {
-            try access.update(preview: preview, image: id)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        access.update(preview: preview, image: id)
+            .sink(receiveCompletion: { error in fatalError("\(error)")},
+                  receiveValue: { })
+            .store(in: &cancellables)
+
     }
 
     func refresh(image: UIImage) {
-        do {
-            try access.update(preview: image, for: self.id)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        access.update(preview: image, for: self.id)
+            .sink(receiveCompletion: { error in fatalError("\(error)")},
+                  receiveValue: { })
+            .store(in: &cancellables)
     }
 
     func move(id: NoteLevelID, to: CGRect) {
-        do {
-            try access.update(frame: to, for: id)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        access.update(frame: to, for: id)
+            .sink(receiveCompletion: { error in fatalError("\(error)")},
+                  receiveValue: { })
+            .store(in: &cancellables)
+
     }
 
     func move(id: NoteImageID, to: CGRect) {
-        do {
-            try self.access.update(frame: to, image: id)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        access.update(frame: to, image: id)
+            .sink(receiveCompletion: { error in fatalError("\(error)")},
+                  receiveValue: { })
+            .store(in: &cancellables)
     }
 
     func resize(id: NoteLevelID, to frame: CGRect) {
-        do {
-            try self.access.update(frame: frame, for: id)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        access.update(frame: frame, for: id)
+            .sink(receiveCompletion: { error in fatalError("\(error)")},
+                  receiveValue: { })
+            .store(in: &cancellables)
+
     }
 
     func remove(id: NoteLevelID) {
-        do {
-            try self.access.remove(level: id, from: self.id)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        self.access.remove(level: id, from: self.id)
+            .sink(receiveCompletion: { error in fatalError("\(error)")},
+                  receiveValue: { })
+            .store(in: &cancellables)
     }
 
     func remove(id: NoteImageID) {
-        do {
-            try self.access.remove(image: id, from: self.id)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        access.remove(image: id, from: self.id)
+            .sink(receiveCompletion: { error in fatalError("\(error)")},
+                  receiveValue: { })
+            .store(in: &cancellables)
     }
 
     func resize(id: NoteImageID, to: CGRect) {
-        do {
-            try self.access.update(frame: to, image: id)
-        } catch let error {
-            fatalError(error.localizedDescription)
-        }
+        access.update(frame: to, image: id)
+            .sink(receiveCompletion: { error in fatalError("\(error)")},
+                  receiveValue: { })
+            .store(in: &cancellables)
     }
 
     func moveToDrawer(id: NoteImageID, frame: CGRect) {

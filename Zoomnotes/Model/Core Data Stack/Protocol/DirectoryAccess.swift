@@ -8,20 +8,21 @@
 
 import Foundation
 import UIKit
+import Combine
 
 protocol DirectoryAccess {
-    func read(id dir: DirectoryID) throws -> DirectoryStoreLookupResult?
-    func updateName(of id: DirectoryID, to name: String) throws
-    func updateName(of id: DocumentID, to name: String) throws
-    func root(from description: DirectoryStoreDescription) throws
-    func delete(child: DirectoryID, of: DirectoryID) throws
-    func delete(child: DocumentID, of: DirectoryID) throws
-    func reparent(from id: DirectoryID, node: DirectoryID, to dest: DirectoryID) throws
-    func reparent(from id: DirectoryID, node: DocumentID, to dest: DirectoryID) throws
-    func children(of parent: DirectoryID) throws -> [FolderBrowserViewModel.Node]
-    func append(document description: DocumentStoreDescription, to parent: DirectoryID) throws
-    func append(directory description: DirectoryStoreDescription, to parent: DirectoryID) throws
-    func noteModel(of id: DocumentID) throws -> NoteLevelDescription?
-    func updateLastModified(of file: DocumentID, with date: Date) throws
-    func updatePreviewImage(of file: DocumentID, with image: UIImage) throws
+    func read(id dir: DirectoryID) -> AnyPublisher<DirectoryStoreLookupResult?, Error>
+    func updateName(of id: DirectoryID, to name: String) -> AnyPublisher<Void, Error>
+    func updateName(of id: DocumentID, to name: String) -> AnyPublisher<Void, Error>
+    func root(from description: DirectoryStoreDescription) -> AnyPublisher<Void, Error>
+    func delete(child: DirectoryID, of: DirectoryID) -> AnyPublisher<Void, Error>
+    func delete(child: DocumentID, of: DirectoryID) -> AnyPublisher<Void, Error>
+    func reparent(from id: DirectoryID, node: DirectoryID, to dest: DirectoryID) -> AnyPublisher<Void, Error>
+    func reparent(from id: DirectoryID, node: DocumentID, to dest: DirectoryID) -> AnyPublisher<Void, Error>
+    func children(of parent: DirectoryID) -> AnyPublisher<[FolderBrowserViewModel.Node], Error>
+    func append(document description: DocumentStoreDescription, to parent: DirectoryID) -> AnyPublisher<Void, Error>
+    func append(directory description: DirectoryStoreDescription, to parent: DirectoryID) -> AnyPublisher<Void, Error>
+    func noteModel(of id: DocumentID) -> AnyPublisher<NoteLevelDescription?, Error>
+    func updateLastModified(of file: DocumentID, with date: Date) -> AnyPublisher<Void, Error>
+    func updatePreviewImage(of file: DocumentID, with image: UIImage) -> AnyPublisher<Void, Error>
 }

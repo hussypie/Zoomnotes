@@ -8,7 +8,9 @@
 
 import Foundation
 import CoreData
+import Combine
 
+// swiftlint:disable:next type_name
 struct ID<T>: Hashable, Codable {
     fileprivate let id: UUID
     init(_ id: UUID) {
@@ -16,11 +18,11 @@ struct ID<T>: Hashable, Codable {
     }
 }
 
-func ==<T>(lhs: ID<T>, rhs: UUID) -> Bool {
+func == <T>(lhs: ID<T>, rhs: UUID) -> Bool {
     return lhs.id == rhs
 }
 
-func ==<T>(lhs: UUID, rhs: ID<T>) -> Bool {
+func == <T>(lhs: UUID, rhs: ID<T>) -> Bool {
     return rhs.id == lhs
 }
 
@@ -74,41 +76,62 @@ enum AccessMode {
 struct DBAccess {
     let moc: NSManagedObjectContext
 
-    func accessing<Store: NSManagedObject, T, U>(to mode: AccessMode,
-                                                 id: ID<U>,
-                                                 doing action: (Store?) throws -> T
-    ) throws -> T {
+    func accessing<Store: NSManagedObject, Result, EntityTag>(to mode: AccessMode,
+                                                 id: ID<EntityTag>,
+                                                 doing action: @escaping (Store?) throws -> Result
+    ) -> AnyPublisher<Result, Error> {
         let id = id.id
         let request: NSFetchRequest<NSFetchRequestResult> =
             NSFetchRequest(entityName: String(describing: Store.self))
         request.predicate = NSPredicate(format: "id = %@", id as CVarArg)
 
-        guard let entries = try moc.fetch(request) as? [Store] else {
-            fatalError("Cannot cast to result type")
-        }
-        
-        guard entries.count < 2 else { throw DBAccessError.moreThanOneEntryFound }
+        return Future { promise in
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    guard let entries = try self.moc.fetch(request) as? [Store] else {
+                        fatalError("Cannot cast to result type")
+                    }
 
-        let result = try action(entries.first)
+                    guard entries.count < 2 else { throw DBAccessError.moreThanOneEntryFound }
 
-        if mode == .write {
-            try self.moc.save()
-        }
+                    let result = try action(entries.first)
 
-        return result
+                    if mode == .write {
+                        try self.moc.save()
+                    }
+                    promise(.success(result))
+                } catch let error {
+                    promise(.failure(error))
+                }
+            }
+        }.eraseToAnyPublisher()
     }
 
     func build<T: NoteEntity, U: NSManagedObject>(
         id: ID<T>?,
         prepare: @escaping (U) -> U
-    ) throws -> U? {
-        return try StoreBuilder(prepare: prepare).build(id: id, using: self.moc)
+    ) -> AnyPublisher<U?, Error> {
+        return Future { promise in
+            do {
+                let res = try StoreBuilder(prepare: prepare).build(id: id, using: self.moc)
+                promise(.success(res))
+            } catch let error {
+                promise(.failure(error))
+            }
+        }.eraseToAnyPublisher()
     }
 
     func build<U: NSManagedObject>(
         prepare: @escaping (U) -> U
-    ) throws -> U? {
-        return try StoreBuilder(prepare: prepare).build(using: self.moc)
+    ) -> AnyPublisher<U?, Error> {
+        return Future { promise in
+            do {
+                let res = try StoreBuilder(prepare: prepare).build(using: self.moc)
+                promise(.success(res))
+            } catch let error {
+                promise(.failure(error))
+            }
+        }.eraseToAnyPublisher()
     }
 
     func delete<T: NSManagedObject>(_ thing: T) {

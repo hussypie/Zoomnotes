@@ -62,12 +62,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return container
     }()
 
+    lazy var access: DBAccess = {
+        return DBAccess(moc: self.persistentContainer.viewContext)
+    }()
+
     lazy var fileBrowserAccess: DirectoryAccess = {
-        return DirectoryAccessImpl(using: self.persistentContainer.viewContext)
+        return DirectoryAccessImpl(access: access)
     }()
 
     lazy var noteLevelAccess: NoteLevelAccess = {
-        return NoteLevelAccessImpl(using: self.persistentContainer.viewContext)
+        return NoteLevelAccessImpl(access: access)
     }()
 
     // MARK: - Core Data Saving support

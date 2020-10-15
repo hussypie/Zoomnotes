@@ -8,6 +8,8 @@
 
 import Foundation
 
+protocol NoteError: Error { }
+
 protocol NoteEntity { }
 
 struct NoteLevel: NoteEntity { private init() {} }

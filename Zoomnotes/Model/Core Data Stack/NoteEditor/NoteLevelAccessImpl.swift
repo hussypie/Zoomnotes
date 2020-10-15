@@ -12,12 +12,8 @@ import PencilKit
 import Combine
 import UIKit
 
-class NoteLevelAccessImpl: NoteLevelAccess {
+struct NoteLevelAccessImpl: NoteLevelAccess {
     let access: DBAccess
-
-    init(using moc: NSManagedObjectContext) {
-        self.access = DBAccess(moc: moc)
-    }
 
     enum AccessMode {
         case read
@@ -30,93 +26,93 @@ class NoteLevelAccessImpl: NoteLevelAccess {
         case cannotCreateImageStore
     }
 
-    func append(level description: NoteLevelDescription, to parent: NoteLevelID) throws {
-        guard let rect =
-            try access.build(prepare: { (store: RectStore) -> RectStore in
-                store.x = Float(description.frame.minX)
-                store.y = Float(description.frame.minY)
-                store.width = Float(description.frame.width)
-                store.height = Float(description.frame.height)
-
-                return store
-            }) else { throw AccessError.cannotCreateRectStore }
-
-        guard let sublevel =
-            try access.build(id: description.id, prepare: { (entity: NoteLevelStore) -> NoteLevelStore in
-                entity.preview = description.preview.pngData()!
-                entity.frame = rect
-                entity.drawing = description.drawing.dataRepresentation()
-
-                return entity
-            }) else { throw AccessError.cannotCreateLevelStore }
-
-        try access.accessing(to: .write, id: parent) { (store: NoteLevelStore?) in
-            guard let store = store else { return }
-            store.addToSublevels(sublevel)
-        }
-
-        for sublevel in description.sublevels {
-            try self.append(level: sublevel, to: description.id)
-        }
-    }
-
-    func append(image description: NoteImageDescription, to parent: NoteLevelID) throws {
-        guard let rect = try access.build(prepare: { (store: RectStore) -> RectStore in
+    func append(level description: NoteLevelDescription, to parent: NoteLevelID) -> AnyPublisher<Void, Error> {
+        access.build(prepare: { (store: RectStore) -> RectStore in
             store.x = Float(description.frame.minX)
             store.y = Float(description.frame.minY)
             store.width = Float(description.frame.width)
             store.height = Float(description.frame.height)
 
             return store
-        }) else { throw AccessError.cannotCreateRectStore }
+        }).flatMap { rect in
+            return self.access.build(id: description.id, prepare: { (entity: NoteLevelStore) -> NoteLevelStore in
+                entity.preview = description.preview.pngData()!
+                entity.frame = rect
+                entity.drawing = description.drawing.dataRepresentation()
 
-        guard let image = try access.build(id: description.id, prepare: { (store: ImageStore) -> ImageStore in
-            store.frame = rect
-            store.drawingAnnotation = description.drawing.dataRepresentation()
-            store.image = description.image.pngData()!
-            store.preview = description.image.pngData()!
-
-            return store
-        }) else { throw AccessError.cannotCreateImageStore }
-
-        try access.accessing(to: .write, id: parent) { (store: NoteLevelStore?) in
-            guard let store = store else { return }
-            store.addToImages(image)
-        }
+                return entity
+            })
+        }.flatMap { sublevel in
+            return self.access.accessing(to: .write, id: parent) { (store: NoteLevelStore?) -> Void in
+                guard let store = store else { throw AccessError.cannotCreateLevelStore }
+                guard let sublevel = sublevel else { throw AccessError.cannotCreateLevelStore }
+                store.addToSublevels(sublevel)
+            }
+        }.flatMap { _ in
+            Publishers.Sequence(sequence: description.sublevels)
+                .flatMap { sublevel in self.append(level: sublevel, to: description.id) }
+                .collect()
+        }.map { _ in return }.eraseToAnyPublisher()
     }
 
-    func remove(level id: NoteLevelID, from parent: NoteLevelID) throws {
-        try access.accessing(to: .write, id: parent) { (store: NoteLevelStore?) in
+    func append(image description: NoteImageDescription, to parent: NoteLevelID) -> AnyPublisher<Void, Error> {
+       return access.build(prepare: { (store: RectStore) -> RectStore in
+            store.x = Float(description.frame.minX)
+            store.y = Float(description.frame.minY)
+            store.width = Float(description.frame.width)
+            store.height = Float(description.frame.height)
+
+            return store
+        }).flatMap { rect in
+            return self.access.build(id: description.id, prepare: { (store: ImageStore) -> ImageStore in
+                store.frame = rect
+                store.drawingAnnotation = description.drawing.dataRepresentation()
+                store.image = description.image.pngData()!
+                store.preview = description.image.pngData()!
+
+                return store
+            })
+        }.flatMap { image in
+            self.access.accessing(to: .write, id: parent) { (store: NoteLevelStore?) in
+                guard let store = store else { throw AccessError.cannotCreateImageStore }
+                guard let image = image else { throw AccessError.cannotCreateImageStore }
+                store.addToImages(image)
+            }
+       }.eraseToAnyPublisher()
+    }
+
+    func remove(level id: NoteLevelID, from parent: NoteLevelID) -> AnyPublisher<Void, Error> {
+        return access.accessing(to: .write, id: parent) { (store: NoteLevelStore?) in
             guard let store = store else { return }
             guard let sublevels = store.sublevels as? Set<NoteLevelStore> else { return }
             guard let child = sublevels.first(where: { $0.id! == id }) else { return }
 
             store.removeFromSublevels(child)
-            access.delete(child)
-        }
+            self.access.delete(child)
+        }.eraseToAnyPublisher()
     }
 
-    func remove(image id: NoteImageID, from parent: NoteLevelID) throws {
-        try access.accessing(to: .write, id: parent) { (store: NoteLevelStore?) in
+    func remove(image id: NoteImageID, from parent: NoteLevelID) -> AnyPublisher<Void, Error> {
+        access.accessing(to: .write, id: parent) { (store: NoteLevelStore?) in
             guard let store = store else { return }
             guard let images = store.images as? Set<ImageStore> else { return }
             guard let subject = images.first(where: { $0.id! == id }) else { return }
 
             store.removeFromImages(subject)
-            access.delete(subject)
-        }
+            self.access.delete(subject)
+        }.eraseToAnyPublisher()
     }
 
-    func read(level id: NoteLevelID) throws -> NoteLevelDescription? {
-        return try access.accessing(to: .read, id: id) { (store: NoteLevelStore?) in
+    func read(level id: NoteLevelID) -> AnyPublisher<NoteLevelDescription?, Error> {
+        access.accessing(to: .read, id: id) { (store: NoteLevelStore?) in
             guard let store = store else { return nil }
 
             return try NoteLevelDescription.from(store: store)
-        }
+        }.eraseToAnyPublisher()
     }
 
-    func read(image id: NoteImageID) throws -> NoteImageDescription? {
-        return try access.accessing(to: .read, id: id) { (store: ImageStore?) in
+    func read(image id: NoteImageID) -> AnyPublisher<NoteImageDescription?, Error> {
+        access.accessing(to: .read, id: id) { (store: ImageStore?) in
             guard let store = store else { return nil }
             guard let preview = UIImage(data: store.preview!) else { return nil }
             guard let image = UIImage(data: store.image!) else { return nil }
@@ -135,63 +131,63 @@ class NoteLevelAccessImpl: NoteLevelAccess {
         }
     }
 
-    func update(drawing: PKDrawing, for id: NoteLevelID) throws {
-        try access.accessing(to: .write, id: id) { (store: NoteLevelStore?) in
+    func update(drawing: PKDrawing, for id: NoteLevelID) -> AnyPublisher<Void, Error> {
+        access.accessing(to: .write, id: id) { (store: NoteLevelStore?) in
             guard let store = store else { return }
             store.drawing = drawing.dataRepresentation()
         }
     }
 
-    func update(annotation: PKDrawing, image: NoteImageID) throws {
-        try access.accessing(to: .write, id: image) { (store: ImageStore?) in
+    func update(annotation: PKDrawing, image: NoteImageID) -> AnyPublisher<Void, Error> {
+        access.accessing(to: .write, id: image) { (store: ImageStore?) in
             guard let store = store else { return }
             store.drawingAnnotation = annotation.dataRepresentation()
         }
     }
 
-    func update(preview: UIImage, for id: NoteLevelID) throws {
-        try access.accessing(to: .write, id: id) { (store: NoteLevelStore?) in
+    func update(preview: UIImage, for id: NoteLevelID) -> AnyPublisher<Void, Error> {
+        access.accessing(to: .write, id: id) { (store: NoteLevelStore?) in
             guard let store = store else { return }
             store.preview = preview.pngData()!
         }
     }
 
-    func update(preview: UIImage, image: NoteImageID) throws {
-        try access.accessing(to: .write, id: image) { (store: ImageStore?) in
+    func update(preview: UIImage, image: NoteImageID) -> AnyPublisher<Void, Error> {
+        access.accessing(to: .write, id: image) { (store: ImageStore?) in
             guard let store = store else { return }
             store.preview = preview.pngData()!
         }
     }
 
-    func update(frame: CGRect, for id: NoteLevelID) throws {
-        guard let rect = try access.build(prepare: { (store: RectStore) -> RectStore in
+    func update(frame: CGRect, for id: NoteLevelID) -> AnyPublisher<Void, Error> {
+        access.build(prepare: { (store: RectStore) -> RectStore in
             store.x = Float(frame.minX)
             store.y = Float(frame.minY)
             store.width = Float(frame.width)
             store.height = Float(frame.height)
 
             return store
-        }) else { throw AccessError.cannotCreateRectStore }
-
-        try access.accessing(to: .write, id: id) { (store: NoteLevelStore?) in
-            guard let store = store else { return }
-            store.frame = rect
-        }
+        }).flatMap { rect in
+            self.access.accessing(to: .write, id: id) { (store: NoteLevelStore?) in
+                guard let store = store else { return }
+                store.frame = rect
+            }
+        }.eraseToAnyPublisher()
     }
 
-    func update(frame: CGRect, image: NoteImageID) throws {
-        guard let rect = try access.build(prepare: { (store: RectStore) -> RectStore in
+    func update(frame: CGRect, image: NoteImageID) -> AnyPublisher<Void, Error> {
+        access.build(prepare: { (store: RectStore) -> RectStore in
             store.x = Float(frame.minX)
             store.y = Float(frame.minY)
             store.width = Float(frame.width)
             store.height = Float(frame.height)
 
             return store
-        }) else { throw AccessError.cannotCreateRectStore }
-
-        try access.accessing(to: .write, id: image) { (store: ImageStore?) in
-            guard let store = store else { return }
-            store.frame = rect
-        }
+        }).flatMap { rect in
+            self.access.accessing(to: .write, id: image) { (store: ImageStore?) in
+                guard let store = store else { return }
+                store.frame = rect
+            }
+        }.eraseToAnyPublisher()
     }
 }
