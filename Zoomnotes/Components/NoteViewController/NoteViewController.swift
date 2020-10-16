@@ -80,11 +80,17 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                                          width: width,
                                          height: height)
 
-                let id: NoteImageID = ID(UUID())
-                let vm = self.historian.createImage(id: id, frame: actualFrame, with: image)
                 let preview = self.sublevelPreview(frame: actualFrame, preview: image)
-                preview.viewModel = vm
+                let id: NoteImageID = ID(UUID())
                 self.view.addSubview(preview)
+
+                self.historian
+                    .createImage(id: id, frame: actualFrame, with: image)
+                    .sink(receiveDone: { },
+                          receiveError: { _ in /* TODO */ },
+                          receiveValue: { vm in preview.viewModel = vm })
+                    .store(in: &self.cancellables)
+
         })
     }()
 
@@ -124,12 +130,14 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 if catapult.tryFling(velocity, magnitude, state.currentlyDraggedPreview) { return }
 
                 let id: NoteLevelID = ID(UUID())
-                let vm = self.historian.createLevel(id: id,
-                                                    frame: state.currentlyDraggedPreview.frame,
-                                                    with: state.currentlyDraggedPreview.image!)
-
-                state.currentlyDraggedPreview.viewModel = vm
-
+                self.historian
+                    .createLevel(id: id,
+                                 frame: state.currentlyDraggedPreview.frame,
+                                 with: state.currentlyDraggedPreview.image!)
+                    .sink(receiveDone: { /* TODO */ },
+                          receiveError: {  _ in /* TODO */ },
+                          receiveValue: { vm in state.currentlyDraggedPreview.viewModel = vm })
+                    .store(in: &self.cancellables)
         })
 
         edgeGestureRecognizer.edges = edge
@@ -326,11 +334,13 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                         .up(animator: ZoomUpTransitionAnimator(with: vm.frame))
 
                 viewModel.imageDetailViewModel(for: id)
+                    .receive(on: DispatchQueue.main)
                     .sink(receiveCompletion: { _ in return }, // TODO: signal error
                           receiveValue: { viewModel in
                             imageVC.viewModel = viewModel
                             self.navigationController?.pushViewController(imageVC, animated: true)
                     })
+                    .store(in: &self.cancellables)
 
             case .sublevel(let sublevelVC, id: let id):
                 sublevelVC.transitionManager =
@@ -343,6 +353,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                     .store(in: &cancellables)
 
                 self.viewModel.childViewModel(for: id)
+                    .receive(on: DispatchQueue.main)
                     .sink(receiveCompletion: { _ in return }, // TODO: log
                           receiveValue: { viewModel in
                             sublevelVC.viewModel = viewModel
@@ -552,12 +563,14 @@ extension NoteViewController {
                 return state
         },
             end: { _, state in
-                let vm = self.historian.createLevel(id: ID(UUID()),
-                                                    frame: state.dragging.frame,
-                                                    with: state.dragging.image!)
-
-                state.dragging.viewModel = vm
-
+                self.historian
+                    .createLevel(id: ID(UUID()),
+                                 frame: state.dragging.frame,
+                                 with: state.dragging.image!)
+                    .sink(receiveDone: { /* TODO */ },
+                          receiveError: {  _ in /* TODO */ },
+                          receiveValue: { vm in state.dragging.viewModel = vm })
+                    .store(in: &self.cancellables)
         })
     }
 

@@ -8,6 +8,7 @@
 
 import XCTest
 import SwiftCheck
+import Combine
 @testable import Zoomnotes
 
 class ZoomnotesUtilsTests: XCTestCase {
@@ -80,5 +81,19 @@ class ZoomnotesUtilsTests: XCTestCase {
     func testStringEmptyIsEmpty() {
         XCTAssertEqual(String.empty.count, 0)
         XCTAssertEqual(String.empty, "")
+    }
+
+    enum TestError: Error { case error }
+
+    func testSink3() {
+        _ = Just(3).sink(receiveDone: { XCTAssertTrue(true, "OK")},
+                                       receiveError: { _ in },
+                                       receiveValue: { XCTAssertEqual($0, 3)})
+
+        _ = Fail<Never, ZoomnotesUtilsTests.TestError>(error: TestError.error)
+            .sink(receiveDone: { XCTAssertTrue(true, "OK") },
+               receiveError: { XCTAssertEqual($0, TestError.error) },
+               receiveValue: { _ in })
+
     }
 }

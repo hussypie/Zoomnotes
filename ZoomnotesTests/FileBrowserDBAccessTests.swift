@@ -8,6 +8,7 @@
 
 import XCTest
 import CoreData
+import Combine
 
 @testable import Zoomnotes
 
@@ -24,76 +25,46 @@ class FileBrowserDBAccessTests: XCTestCase {
         case write
     }
 
-    func asynchronously<T>(access: AccessType,
-                           moc: NSManagedObjectContext,
-                           _ action: () throws -> T
-    ) -> T {
-        let expectation: XCTestExpectation
-
-        switch access {
-        case .read:
-            expectation = self.expectation(description: "Do it!")
-        case .write:
-            expectation = self.expectation(forNotification: .NSManagedObjectContextDidSave, object: moc) { _ in return true }
-        }
-
-        do {
-            let result = try action()
-            if access == .read {
-                expectation.fulfill()
-            }
-            self.waitForExpectations(timeout: 2.0) { error in XCTAssertNil(error)}
-            return result
-        } catch let error {
-            XCTFail(error.localizedDescription)
-            fatalError(error.localizedDescription)
-        }
-    }
-
     func testCreateFile() {
-        let root = DirectoryStoreDescription(id: UUID(),
+        let root = DirectoryStoreDescription(id: ID(UUID()),
                                              created: Date(),
                                              name: "Root",
                                              documents: [],
                                              directories: [])
 
-        let access = DirectoryAccessImpl(using: self.moc).stub(root: root)
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc)).stub(root: root)
 
         let rootLevel = NoteLevelDescription.stub(parent: nil)
         let fileToBeCreated =
-            DocumentStoreDescription(id: UUID(),
+            DocumentStoreDescription(id: ID(UUID()),
                                      lastModified: Date(),
                                      name: "New file",
                                      thumbnail: .checkmark,
                                      root: rootLevel)
 
-        asynchronously(access: .write, moc: self.moc) {
-            try access.append(document: fileToBeCreated, to: root.id)
+        let appendAction = access.append(document: fileToBeCreated, to: root.id)
+        let noteLevelAccess = NoteLevelAccessImpl(access: DBAccess(moc: moc))
+
+        let _ = appendAction
+            .flatMap({ access.children(of: root.id) })
+            .flatMap { result -> AnyPublisher<NoteLevelDescription?, Error> in
+                XCTAssertEqual(result.count, 1)
+                switch result.first! {
+                case .file(let file):
+                    XCTAssertEqual(fileToBeCreated.id, file.store)
+                    XCTAssertEqual(file.name, fileToBeCreated.name)
+                    XCTAssertEqual(file.lastModified, fileToBeCreated.lastModified)
+                default:
+                    XCTFail("Created file shoud be file")
+                }
+                return noteLevelAccess.read(level: rootLevel.id).eraseToAnyPublisher()
         }
+        .sink(receiveCompletion: { error in XCTFail("\(error)")},
+              receiveValue: { rootLevel2 in
+                XCTAssertNotNil(rootLevel2)
+                XCTAssertEqual(rootLevel2!.id, rootLevel.id)
+        })
 
-        let result = asynchronously(access: .read, moc: self.moc) {
-            return try access.children(of: root.id)
-        }
-
-        XCTAssertEqual(result.count, 1)
-
-        switch result.first! {
-        case .file(let file):
-            XCTAssertEqual(file.id, fileToBeCreated.id.id)
-            XCTAssertEqual(file.name, fileToBeCreated.name)
-            XCTAssertEqual(file.lastModified, fileToBeCreated.lastModified)
-        default:
-            XCTFail("Created file shoud be file")
-        }
-
-        let noteLevelAccess = NoteLevelAccessImpl(using: self.moc)
-
-        let rootLevel2 = asynchronously(access: .read, moc: self.moc) {
-            return try noteLevelAccess.read(level: rootLevel.id)
-        }
-
-        XCTAssertNotNil(rootLevel2)
-        XCTAssertEqual(rootLevel2!.id, rootLevel.id)
     }
 
     func testUpdateFileLastModified() {
@@ -104,49 +75,45 @@ class FileBrowserDBAccessTests: XCTestCase {
             DocumentStoreDescription.stub
         ], directories: [])
 
-        let access = DirectoryAccessImpl(using: self.moc).stub(root: root)
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc)).stub(root: root)
 
         let newDate = Date().advanced(by: 24*68*60)
-        asynchronously(access: .write, moc: self.moc) {
-            try access.updateLastModified(of: fileToBeUpdated.id, with: newDate)
-        }
 
-        let children = asynchronously(access: .read, moc: self.moc) {
-            return try access.children(of: root.id)
-        }
-
-        XCTAssertEqual(children.count, 3)
-        let updatedFile = children.first { $0.id == fileToBeUpdated.id.id }!
-        XCTAssertEqual(updatedFile.date, newDate)
+        _ = access.updateLastModified(of: fileToBeUpdated.id, with: newDate)
+            .flatMap { _ in access.children(of: root.id) }
+            .sink(receiveCompletion: { error in XCTFail("\(error)")},
+                  receiveValue: { children in
+                    XCTAssertEqual(children.count, 3)
+                    let updatedFile = children.first { $0.id == fileToBeUpdated.id }!
+                    XCTAssertEqual(updatedFile.date, newDate)
+            })
     }
 
     func testUpdateFileName() {
         let fileToBeUpdated = DocumentStoreDescription.stub
-       let root = DirectoryStoreDescription.stub(documents: [
+        let root = DirectoryStoreDescription.stub(documents: [
             DocumentStoreDescription.stub,
             fileToBeUpdated,
             DocumentStoreDescription.stub
         ], directories: [])
 
-        let access = DirectoryAccessImpl(using: self.moc).stub(root: root)
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc)).stub(root: root)
 
         let newName = "This name is surely better than the prevoius one"
-        asynchronously(access: .write, moc: self.moc) {
-            try access.updateName(of: fileToBeUpdated.id, to: newName)
-        }
-
-        let children = asynchronously(access: .read, moc: self.moc) {
-            return try access.children(of: root.id)
-        }
-
-        XCTAssertEqual(children.count, 3)
-        let updatedFile = children.first { $0.id == fileToBeUpdated.id.id }!
-        XCTAssertEqual(updatedFile.name, newName)
+        let _ =
+        access.updateName(of: fileToBeUpdated.id, to: newName)
+            .flatMap { _ in access.children(of: root.id) }
+            .sink(receiveCompletion: { error in XCTFail("\(error)")},
+                  receiveValue: { children in
+                    XCTAssertEqual(children.count, 3)
+                    let updatedFile = children.first { $0.id == fileToBeUpdated.id }!
+                    XCTAssertEqual(updatedFile.name, newName)
+            })
     }
 
     func testUpdateDirectoryName() {
         let directoryToBeUpdated = DirectoryStoreDescription.stub
-        let access = DirectoryAccessImpl(using: self.moc)
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc))
             .stub(root: DirectoryStoreDescription.stub(documents: [],
                                                        directories: [
                                                         DirectoryStoreDescription.stub,
@@ -155,17 +122,14 @@ class FileBrowserDBAccessTests: XCTestCase {
             ]))
 
         let newName = "This name is surely better than the previous one"
-
-        asynchronously(access: .write, moc: self.moc) {
-            return try access.updateName(of: directoryToBeUpdated.id, to: newName)
-        }
-
-        let updatedFile = asynchronously(access: .read, moc: self.moc) {
-            return try access.read(id: directoryToBeUpdated.id)
-        }
-
-        XCTAssertNotNil(updatedFile)
-        XCTAssertEqual(updatedFile!.name, newName)
+        let _ =
+        access.updateName(of: directoryToBeUpdated.id, to: newName)
+            .flatMap { _ in access.read(id: directoryToBeUpdated.id) }
+            .sink(receiveCompletion: { error in XCTFail("\(error)")},
+                  receiveValue: { updatedFile in
+                    XCTAssertNotNil(updatedFile)
+                    XCTAssertEqual(updatedFile!.name, newName)
+            })
     }
 
     func testReparentDocument() {
@@ -175,43 +139,40 @@ class FileBrowserDBAccessTests: XCTestCase {
         let parentDirectory = DirectoryStoreDescription.stub(documents: [ noteToBeMoved ],
                                                              directories: [ destinationDirectory ])
 
-        let access = DirectoryAccessImpl(using: self.moc)
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc))
             .stub(root: parentDirectory)
 
-        asynchronously(access: .write, moc: self.moc) {
-            try access.reparent(from: parentDirectory.id,
-                                node: noteToBeMoved.id,
-                                to: destinationDirectory.id)
-        }
-
-        asynchronously(access: .read, moc: self.moc) {
-            let children = try access.children(of: parentDirectory.id)
-
-            XCTAssertEqual(children.count, 1)
-        }
-
-        asynchronously(access: .read, moc: self.moc) {
-            let children = try access.children(of: destinationDirectory.id)
-
-            XCTAssertEqual(children.count, 1)
-
-            XCTAssertEqual(children.first!.id, noteToBeMoved.id.id)
-        }
-
+        let _ =
+        access.reparent(from: parentDirectory.id,
+                        node: noteToBeMoved.id,
+                        to: destinationDirectory.id)
+            .flatMap { _ in access.children(of: parentDirectory.id) }
+            .sink(receiveCompletion: { error in XCTFail("\(error)")},
+                  receiveValue: { children in
+                    XCTAssertEqual(children.count, 1)
+                    switch children.first! {
+                    case .file(let file):
+                        XCTAssertEqual(file.store, noteToBeMoved.id)
+                    default:
+                        XCTFail("Moved document lost")
+                    }
+            })
     }
 
     func testCreateDirectory() {
-        let access = DirectoryAccessImpl(using: self.moc)
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc))
         let dirToBeCreated = DirectoryStoreDescription.stub
-        asynchronously(access: .write, moc: self.moc) { return try access.root(from: dirToBeCreated) }
 
-        let result = asynchronously(access: .read, moc: self.moc) { return try access.read(id: dirToBeCreated.id) }
-
-        XCTAssertNotNil(result)
-
-        XCTAssertEqual(result!.id, dirToBeCreated.id)
-        XCTAssertEqual(result!.name, dirToBeCreated.name)
-        XCTAssertEqual(result!.created, dirToBeCreated.created)
+        let _ =
+        access.root(from: dirToBeCreated)
+            .flatMap { access.read(id: dirToBeCreated.id) }
+            .sink(receiveCompletion: { error in XCTFail("\(error)")},
+                  receiveValue: { result in
+                    XCTAssertNotNil(result)
+                    XCTAssertEqual(result!.id, dirToBeCreated.id)
+                    XCTAssertEqual(result!.name, dirToBeCreated.name)
+                    XCTAssertEqual(result!.created, dirToBeCreated.created)
+            })
     }
 
     func testDeleteFile() {
@@ -219,30 +180,28 @@ class FileBrowserDBAccessTests: XCTestCase {
         let unAffectedFile1 = DocumentStoreDescription.stub
         let unAffectedFile2 = DocumentStoreDescription.stub
 
-        let parent = DirectoryStoreDescription.stub(documents: [
-            fileToBeDeleted,
-            unAffectedFile1,
-            unAffectedFile2
+        let parent = DirectoryStoreDescription.stub(
+            documents: [
+                fileToBeDeleted,
+                unAffectedFile1,
+                unAffectedFile2
             ],
-                                                    directories: [])
+            directories: []
+        )
 
-        let access = DirectoryAccessImpl(using: self.moc)
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc))
             .stub(root: parent)
 
-        asynchronously(access: .write, moc: self.moc) {
-            try access.delete(child: fileToBeDeleted.id, of: parent.id)
-        }
-
-        let children = asynchronously(access: .read, moc: self.moc) {
-            return try access.children(of: parent.id)
-        }
-
-        XCTAssertEqual(children.count, 2)
-        XCTAssertNil(children.first { $0.id == fileToBeDeleted.id.id })
-
-        XCTAssertNotNil(children.first { $0.id == unAffectedFile1.id.id })
-
-        XCTAssertNotNil(children.first { $0.id == unAffectedFile2.id.id })
+        let _ =
+        access.delete(child: fileToBeDeleted.id, of: parent.id)
+            .flatMap { _ in access.children(of: parent.id) }
+            .sink(receiveCompletion: { error in XCTFail("\(error)")},
+                  receiveValue: { children in
+                    XCTAssertEqual(children.count, 2)
+                    XCTAssertNil(children.first { $0.id == fileToBeDeleted.id })
+                    XCTAssertNotNil(children.first { $0.id == unAffectedFile1.id })
+                    XCTAssertNotNil(children.first { $0.id == unAffectedFile2.id })
+            })
     }
 
     func testDeleteDirectory() {
@@ -262,34 +221,30 @@ class FileBrowserDBAccessTests: XCTestCase {
                                                         unaffectedDirectory2
         ])
 
-        let access = DirectoryAccessImpl(using: self.moc)
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc))
             .stub(root: parent)
-
-        asynchronously(access: .write, moc: self.moc) {
-            try access.delete(child: directoryToBeDeleted.id, of: parent.id)
+        let _ =
+        access.delete(child: directoryToBeDeleted.id, of: parent.id)
+            .flatMap { _ in access.read(id: directoryToBeDeleted.id) }
+            .flatMap { directoryPlaceholder -> AnyPublisher<[FolderBrowserViewModel.Node], Error> in
+                XCTAssertNil(directoryPlaceholder)
+                return access.children(of: parent.id).eraseToAnyPublisher()
         }
-
-        let directoryPlaceholder = asynchronously(access: .read, moc: self.moc) {
-            return try access.read(id: directoryToBeDeleted.id)
-        }
-
-        XCTAssertNil(directoryPlaceholder)
-
-        asynchronously(access: .read, moc: self.moc) {
-            let children = try access.children(of: parent.id)
+        .flatMap { children -> AnyPublisher<DirectoryStoreLookupResult?, Error> in
             XCTAssertEqual(children.count, 2)
+            return access.read(id: unAffectedDirectory1.id).eraseToAnyPublisher()
         }
-
-        let (u1, u2) = asynchronously(access: .read, moc: self.moc) {
-            return (try access.read(id: unAffectedDirectory1.id),
-                    try access.read(id: unaffectedDirectory2.id))
+        .flatMap { u1 -> AnyPublisher<DirectoryStoreLookupResult?, Error> in
+            XCTAssertNotNil(u1)
+            XCTAssertEqual(u1!.id, unAffectedDirectory1.id)
+            return access.read(id: unaffectedDirectory2.id).eraseToAnyPublisher()
         }
-
-        XCTAssertNotNil(u1)
-        XCTAssertEqual(u1!.id, unAffectedDirectory1.id)
-
-        XCTAssertNotNil(u2)
-        XCTAssertEqual(u2!.id, unaffectedDirectory2.id)
+        .eraseToAnyPublisher()
+        .sink(receiveCompletion: { error in XCTFail("\(error)") },
+              receiveValue: { u2 in
+                XCTAssertNotNil(u2)
+                XCTAssertEqual(u2!.id, unaffectedDirectory2.id)
+        })
     }
 
     func testMoveDirectory() {
@@ -298,25 +253,23 @@ class FileBrowserDBAccessTests: XCTestCase {
         let parent = DirectoryStoreDescription.stub(documents: [ ],
                                                     directories: [ newParent, child ])
 
-        let access = DirectoryAccessImpl(using: self.moc).stub(root: parent)
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc)).stub(root: parent)
 
-        asynchronously(access: .write, moc: self.moc) {
-            try access.reparent(from: parent.id,
-                                node: child.id,
-                                to: newParent.id)
-        }
-
-        let children = asynchronously(access: .read, moc: self.moc) {
-            return try access.children(of: newParent.id)
-        }
-
-        XCTAssertEqual(children.count, 1)
-        XCTAssertEqual(children[0].id, child.id.id)
-
-        let childrenOfOldParent = asynchronously(access: .read, moc: self.moc) {
-            return try access.children(of: parent.id)
-        }
-
-        XCTAssertEqual(childrenOfOldParent.count, 1)
+        let _ =
+        access.reparent(from: parent.id, node: child.id, to: newParent.id)
+            .flatMap { _ in access.children(of: newParent.id) }
+            .flatMap { children -> AnyPublisher<[FolderBrowserViewModel.Node], Error> in
+                XCTAssertEqual(children.count, 1)
+                switch children.first! {
+                case .directory(let dir):
+                    XCTAssertEqual(dir.store, child.id)
+                default:
+                    XCTFail("Node type changed")
+                }
+                return access.children(of: parent.id).eraseToAnyPublisher()
+        }.sink(receiveCompletion: { error in XCTFail("\(error)") },
+               receiveValue: { childrenOfOldParent in
+                XCTAssertEqual(childrenOfOldParent.count, 1)
+        })
     }
 }

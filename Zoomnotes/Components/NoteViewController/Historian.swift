@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import Combine
 import PencilKit
 
 class Historian {
@@ -19,32 +20,39 @@ class Historian {
         self.viewModel = viewModel
     }
 
-    func createImage(id: NoteImageID, frame: CGRect, with preview: UIImage) -> NoteChildVM {
-        self.viewModel.create(id: id, frame: frame, preview: preview)
-        let childVM = NoteChildVM(id: UUID(),
-                                    preview: preview,
-                                    frame: frame,
-                                    commander: NoteImageCommander(id: id))
+    func createImage(id: NoteImageID, frame: CGRect, with preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
+        return self.viewModel
+            .create(id: id, frame: frame, preview: preview)
+            .map { _ in
+                let childVM = NoteChildVM(id: UUID(),
+                                          preview: preview,
+                                          frame: frame,
+                                          commander: NoteImageCommander(id: id))
 
-        undoManager?.registerUndo(withTarget: self) {
-            childVM.commander.remove(using: $0.viewModel)
-        }
-        self.undoManager?.setActionName("AddSubimage")
-        return childVM
+                self.undoManager?.registerUndo(withTarget: self) {
+                    childVM.commander.remove(using: $0.viewModel)
+                }
+                self.undoManager?.setActionName("AddSubimage")
+
+                return childVM
+        }.eraseToAnyPublisher()
     }
 
-    func createLevel(id: NoteLevelID, frame: CGRect, with preview: UIImage) -> NoteChildVM {
-        self.viewModel.create(id: id, frame: frame, preview: preview)
-        let childVM = NoteChildVM(id: UUID(),
-                                    preview: preview,
-                                    frame: frame,
-                                    commander: NoteLevelCommander(id: id))
+    func createLevel(id: NoteLevelID, frame: CGRect, with preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
+        self.viewModel
+            .create(id: id, frame: frame, preview: preview)
+            .map { _ in
+                let childVM = NoteChildVM(id: UUID(),
+                                            preview: preview,
+                                            frame: frame,
+                                            commander: NoteLevelCommander(id: id))
 
-        undoManager?.registerUndo(withTarget: self) {
-            childVM.commander.remove(using: $0.viewModel)
-        }
-        self.undoManager?.setActionName("AddSubimage")
-        return childVM
+                self.undoManager?.registerUndo(withTarget: self) {
+                    childVM.commander.remove(using: $0.viewModel)
+                }
+                self.undoManager?.setActionName("AddSubimage")
+                return childVM
+        }.eraseToAnyPublisher()
     }
 
     func removeChild(_ sublevel: NoteChildVM, undo: @escaping (NoteChildVM) -> Void) {

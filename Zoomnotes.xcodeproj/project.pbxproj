@@ -27,6 +27,8 @@
 		310F03B72510095B000CF0F0 /* FileBrowserDBReadingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310F03B62510095B000CF0F0 /* FileBrowserDBReadingTests.swift */; };
 		310F03B9251009A6000CF0F0 /* FileBrowserDBAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310F03B8251009A6000CF0F0 /* FileBrowserDBAccessTests.swift */; };
 		310F03D32510DF1D000CF0F0 /* ManagedContext+inMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310F03D22510DF1D000CF0F0 /* ManagedContext+inMemory.swift */; };
+		311B818A2539A82D00C60ACE /* Publisher+sink3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311B81892539A82D00C60ACE /* Publisher+sink3.swift */; };
+		311B818C2539DC7B00C60ACE /* synched.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311B818B2539DC7B00C60ACE /* synched.swift */; };
 		3121A8312516007D00D8AD37 /* String+empty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3121A8302516007D00D8AD37 /* String+empty.swift */; };
 		3121A83425160E7A00D8AD37 /* NoteLevelAccessImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3121A83325160E7A00D8AD37 /* NoteLevelAccessImpl.swift */; };
 		3121A83625168D7A00D8AD37 /* NoteModelDBAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3121A83525168D7A00D8AD37 /* NoteModelDBAccessTests.swift */; };
@@ -45,7 +47,6 @@
 		313BFDE6251E601500EBF70F /* NoteLevelAccessMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDE5251E601500EBF70F /* NoteLevelAccessMock.swift */; };
 		313BFDE8251E638100EBF70F /* NoteLevelDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDE7251E638100EBF70F /* NoteLevelDescription.swift */; };
 		313BFDEC251E6CD200EBF70F /* NoteLevelDescription+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDEB251E6CD200EBF70F /* NoteLevelDescription+stub.swift */; };
-		313BFDEE251FA40F00EBF70F /* NoteEditorVMNoteModelDBAccessIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDED251FA40F00EBF70F /* NoteEditorVMNoteModelDBAccessIntegration.swift */; };
 		313BFDF0251FA66200EBF70F /* NoteEditorViewModel+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDEF251FA66200EBF70F /* NoteEditorViewModel+stub.swift */; };
 		313BFDF42520BC5500EBF70F /* NoteLevelAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDF32520BC5500EBF70F /* NoteLevelAccess.swift */; };
 		313BFDF62520E4F100EBF70F /* DirectoryAccess+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDF52520E4F100EBF70F /* DirectoryAccess+stub.swift */; };
@@ -135,6 +136,8 @@
 		310F03B62510095B000CF0F0 /* FileBrowserDBReadingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserDBReadingTests.swift; sourceTree = "<group>"; };
 		310F03B8251009A6000CF0F0 /* FileBrowserDBAccessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserDBAccessTests.swift; sourceTree = "<group>"; };
 		310F03D22510DF1D000CF0F0 /* ManagedContext+inMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ManagedContext+inMemory.swift"; sourceTree = "<group>"; };
+		311B81892539A82D00C60ACE /* Publisher+sink3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+sink3.swift"; sourceTree = "<group>"; };
+		311B818B2539DC7B00C60ACE /* synched.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = synched.swift; sourceTree = "<group>"; };
 		3121A8302516007D00D8AD37 /* String+empty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+empty.swift"; sourceTree = "<group>"; };
 		3121A83325160E7A00D8AD37 /* NoteLevelAccessImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteLevelAccessImpl.swift; sourceTree = "<group>"; };
 		3121A83525168D7A00D8AD37 /* NoteModelDBAccessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteModelDBAccessTests.swift; sourceTree = "<group>"; };
@@ -153,7 +156,6 @@
 		313BFDE5251E601500EBF70F /* NoteLevelAccessMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteLevelAccessMock.swift; sourceTree = "<group>"; };
 		313BFDE7251E638100EBF70F /* NoteLevelDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteLevelDescription.swift; sourceTree = "<group>"; };
 		313BFDEB251E6CD200EBF70F /* NoteLevelDescription+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteLevelDescription+stub.swift"; sourceTree = "<group>"; };
-		313BFDED251FA40F00EBF70F /* NoteEditorVMNoteModelDBAccessIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorVMNoteModelDBAccessIntegration.swift; sourceTree = "<group>"; };
 		313BFDEF251FA66200EBF70F /* NoteEditorViewModel+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteEditorViewModel+stub.swift"; sourceTree = "<group>"; };
 		313BFDF32520BC5500EBF70F /* NoteLevelAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteLevelAccess.swift; sourceTree = "<group>"; };
 		313BFDF52520E4F100EBF70F /* DirectoryAccess+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DirectoryAccess+stub.swift"; sourceTree = "<group>"; };
@@ -278,7 +280,6 @@
 		3101754624E5211F007D3589 /* ZoomnotesTests */ = {
 			isa = PBXGroup;
 			children = (
-				313BFDED251FA40F00EBF70F /* NoteEditorVMNoteModelDBAccessIntegration.swift */,
 				3121A83525168D7A00D8AD37 /* NoteModelDBAccessTests.swift */,
 				313B6CE32511125B00789595 /* FileBrowserBoundaryTests.swift */,
 				310F03B8251009A6000CF0F0 /* FileBrowserDBAccessTests.swift */,
@@ -319,6 +320,7 @@
 				31D6648C24EC53890062AF8D /* CodableImage.swift */,
 				31AD9BD42507B3BB00C193CF /* Catapult.swift */,
 				3166F0D2252F9F7E006FE84A /* DBAccess.swift */,
+				311B818B2539DC7B00C60ACE /* synched.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -501,6 +503,7 @@
 				310F03D22510DF1D000CF0F0 /* ManagedContext+inMemory.swift */,
 				3121A8302516007D00D8AD37 /* String+empty.swift */,
 				31048077252E241500EC8EAC /* UIViewController+ext.swift */,
+				311B81892539A82D00C60ACE /* Publisher+sink3.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -869,11 +872,13 @@
 				3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */,
 				31CD520F251CF80600561D27 /* DocumentStoreDescription.swift in Sources */,
 				31AD9BD72507CA9700C193CF /* FileBrowserViewModel.swift in Sources */,
+				311B818C2539DC7B00C60ACE /* synched.swift in Sources */,
 				31CD5213251D118E00561D27 /* DirectoryStoreDescription+stub.swift in Sources */,
 				31BF9E2C24E5906100142EBF /* NoteChildVM.swift in Sources */,
 				31B1AA3824FD5DC7007DAF4D /* UserDefaults+ext.swift in Sources */,
 				314CA953252BB4D300FE9B73 /* NoteTransitionDelegate.swift in Sources */,
 				3101752E24E5211D007D3589 /* AppDelegate.swift in Sources */,
+				311B818A2539A82D00C60ACE /* Publisher+sink3.swift in Sources */,
 				3101753024E5211D007D3589 /* SceneDelegate.swift in Sources */,
 				31BA8F812523D7030016B78C /* NoteLevelAccessImpl+stub.swift in Sources */,
 				31AD9BD1250793A300C193CF /* ZNScreenEdgePanGesture.swift in Sources */,
@@ -899,7 +904,6 @@
 				310F03B72510095B000CF0F0 /* FileBrowserDBReadingTests.swift in Sources */,
 				310F03B9251009A6000CF0F0 /* FileBrowserDBAccessTests.swift in Sources */,
 				3121A83625168D7A00D8AD37 /* NoteModelDBAccessTests.swift in Sources */,
-				313BFDEE251FA40F00EBF70F /* NoteEditorVMNoteModelDBAccessIntegration.swift in Sources */,
 				313B6CE42511125B00789595 /* FileBrowserBoundaryTests.swift in Sources */,
 				3101754824E5211F007D3589 /* ZoomnotesTests.swift in Sources */,
 			);

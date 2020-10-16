@@ -10,6 +10,25 @@ import XCTest
 import CoreData
 @testable import Zoomnotes
 
+extension FileVM {
+    static func fresh(preview: UIImage, name: String, created: Date) -> FileVM {
+        return FileVM(id: UUID(),
+                      store: ID(UUID()),
+                      preview: preview,
+                      name: name,
+                      lastModified: created)
+    }
+}
+
+extension DirectoryVM {
+    static func fresh(name: String, created: Date) -> DirectoryVM {
+        return DirectoryVM(id: UUID(),
+                           store: ID(UUID()),
+                           name: name,
+                           created: created)
+    }
+}
+
 class FileBrowserVMTests: XCTestCase {
     func testCreateFile() {
         let vm = FolderBrowserViewModel.stub
@@ -150,13 +169,13 @@ class FileBrowserVMTests: XCTestCase {
     }
 
     func testProduceCorrectSubfolderVM() {
-        let dir = DirectoryStoreDescription(id: UUID(),
+        let dir = DirectoryStoreDescription(id: ID(UUID()),
                                             created: Date(),
                                             name: "Horror",
                                             documents: [],
                                             directories: [])
 
-        let rootDir = DirectoryStoreDescription(id: UUID(),
+        let rootDir = DirectoryStoreDescription(id: ID(UUID()),
                                                 created: Date(),
                                                 name: "Movies",
                                                 documents: [],
@@ -164,57 +183,62 @@ class FileBrowserVMTests: XCTestCase {
 
         let access = DirectoryAccessMock(documents: [:],
                                          directories: [
-                                            rootDir.id.id: rootDir,
-                                            dir.id.id: dir ])
+                                            rootDir.id: rootDir,
+                                            dir.id: dir ])
 
-        let dirVM = DirectoryVM(id: dir.id.id,
+        let dirVM = DirectoryVM(id: UUID(),
+                                store: dir.id,
                                 name: dir.name,
                                 created: dir.created)
 
-        let vm = FolderBrowserViewModel(directoryId: rootDir.id.id,
+        let vm = FolderBrowserViewModel(directoryId: rootDir.id,
                                         name: rootDir.name,
                                         nodes: [ .directory(dirVM) ],
                                         access: access)
 
-        let childVM = vm.subFolderBrowserVM(for: dirVM)
-
-        XCTAssertNotNil(childVM)
-        XCTAssertEqual(childVM!.title, dirVM.name)
-        XCTAssertEqual(childVM!.nodes.count, dir.directoryChildren.count + dir.documentChildren.count)
+        _ = vm.subFolderBrowserVM(for: dirVM)
+            .sink(receiveDone: { XCTAssertTrue(true, "OK") },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: { childVM in
+                    XCTAssertEqual(childVM.title, dirVM.name)
+                    XCTAssertEqual(childVM.nodes.count, dir.directories.count + dir.documents.count)
+            })
     }
 
     func testProduceCorrectNoteEditorVM() {
-        let doc = DocumentStoreDescription(id: UUID(),
+        let doc = DocumentStoreDescription(id: ID(UUID()),
                                            lastModified: Date(),
                                            name: "Best Schwarzenegger movies",
                                            thumbnail: .actions,
                                            root: NoteLevelDescription.stub(parent: nil))
 
-        let rootDir = DirectoryStoreDescription(id: UUID(),
+        let rootDir = DirectoryStoreDescription(id: ID(UUID()),
                                                 created: Date(),
                                                 name: "Movies",
                                                 documents: [doc],
                                                 directories: [])
 
-        let access = DirectoryAccessMock(documents: [doc.id.id: doc],
-                                         directories: [rootDir.id.id: rootDir])
+        let access = DirectoryAccessMock(documents: [doc.id: doc],
+                                         directories: [rootDir.id: rootDir])
 
-        let file = FileVM(id: doc.id.id,
+        let file = FileVM(id: UUID(),
+                          store: doc.id,
                           preview: doc.thumbnail,
                           name: doc.name,
                           lastModified: doc.lastModified)
 
-        let vm = FolderBrowserViewModel(directoryId: rootDir.id.id,
+        let vm = FolderBrowserViewModel(directoryId: rootDir.id,
                                         name: rootDir.name,
                                         nodes: [ .file(file) ],
                                         access: access)
 
-        let noteVM = vm.noteEditorVM(for: file)
-
-        XCTAssertNotNil(noteVM)
-        XCTAssertEqual(noteVM!.drawerContents.count, 0)
-        XCTAssertEqual(noteVM!.drawing, doc.root.drawing)
-        XCTAssertEqual(noteVM!.nodes.count, doc.root.sublevels.count)
-        XCTAssertEqual(noteVM!.title, doc.name)
+        _ = vm.noteEditorVM(for: file)
+            .sink(receiveDone: { XCTAssertTrue(true, "OK") },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: { noteVM in
+                    XCTAssertNotNil(noteVM)
+                    XCTAssertEqual(noteVM!.drawing, doc.root.drawing)
+                    XCTAssertEqual(noteVM!.title, doc.name)
+            })
     }
 }

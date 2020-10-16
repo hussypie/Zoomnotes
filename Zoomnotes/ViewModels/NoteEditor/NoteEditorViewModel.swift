@@ -86,7 +86,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         }.eraseToAnyPublisher()
     }
 
-    func create(id: NoteLevelID, frame: CGRect, preview: UIImage) {
+    func create(id: NoteLevelID, frame: CGRect, preview: UIImage) -> AnyPublisher<Void, Error> {
         let description = NoteLevelDescription(preview: preview,
                                                frame: frame,
                                                id: id,
@@ -94,42 +94,35 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
                                                sublevels: [],
                                                images: [])
 
-        access.append(level: description, to: self.id)
-            .sink(receiveCompletion: { error in fatalError("\(error)") },
-                  receiveValue: { })
-            .store(in: &cancellables)
+        return access.append(level: description, to: self.id)
     }
 
-    func create(id: NoteImageID, frame: CGRect, preview: UIImage) {
+    func create(id: NoteImageID, frame: CGRect, preview: UIImage) -> AnyPublisher<Void, Error> {
         let description = NoteImageDescription(id: id,
                                                preview: preview,
                                                drawing: PKDrawing(),
                                                image: preview,
                                                frame: frame)
-        access.append(image: description, to: self.id)
-            .sink(receiveCompletion: { error in fatalError("\(error)") },
-                  receiveValue: { })
-            .store(in: &cancellables)
-
+        return access.append(image: description, to: self.id)
     }
 
     func update(drawing: PKDrawing) {
         access.update(drawing: drawing, for: self.id)
-            .sink(receiveCompletion: { error in fatalError("\(error)") },
+            .sink(receiveCompletion: { _ in  },
                   receiveValue: { self.drawing = drawing })
             .store(in: &cancellables)
     }
 
     func update(id: NoteImageID, annotation: PKDrawing) {
         access.update(annotation: annotation, image: id)
-            .sink(receiveCompletion: { error in fatalError("\(error)")},
+            .sink(receiveCompletion: { _ in },
                       receiveValue: { })
             .store(in: &cancellables)
     }
 
     func update(id: NoteImageID, preview: UIImage) {
         access.update(preview: preview, image: id)
-            .sink(receiveCompletion: { error in fatalError("\(error)")},
+            .sink(receiveCompletion: { _ in },
                   receiveValue: { })
             .store(in: &cancellables)
 
@@ -137,14 +130,14 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
 
     func refresh(image: UIImage) {
         access.update(preview: image, for: self.id)
-            .sink(receiveCompletion: { error in fatalError("\(error)")},
+            .sink(receiveCompletion: { _ in },
                   receiveValue: { })
             .store(in: &cancellables)
     }
 
     func move(id: NoteLevelID, to: CGRect) {
         access.update(frame: to, for: id)
-            .sink(receiveCompletion: { error in fatalError("\(error)")},
+            .sink(receiveCompletion: { _ in },
                   receiveValue: { })
             .store(in: &cancellables)
 
@@ -152,14 +145,14 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
 
     func move(id: NoteImageID, to: CGRect) {
         access.update(frame: to, image: id)
-            .sink(receiveCompletion: { error in fatalError("\(error)")},
+            .sink(receiveCompletion: { _ in },
                   receiveValue: { })
             .store(in: &cancellables)
     }
 
     func resize(id: NoteLevelID, to frame: CGRect) {
         access.update(frame: frame, for: id)
-            .sink(receiveCompletion: { error in fatalError("\(error)")},
+            .sink(receiveCompletion: { _ in },
                   receiveValue: { })
             .store(in: &cancellables)
 
@@ -167,21 +160,21 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
 
     func remove(id: NoteLevelID) {
         self.access.remove(level: id, from: self.id)
-            .sink(receiveCompletion: { error in fatalError("\(error)")},
+            .sink(receiveCompletion: { _ in },
                   receiveValue: { })
             .store(in: &cancellables)
     }
 
     func remove(id: NoteImageID) {
         access.remove(image: id, from: self.id)
-            .sink(receiveCompletion: { error in fatalError("\(error)")},
+            .sink(receiveCompletion: { _ in },
                   receiveValue: { })
             .store(in: &cancellables)
     }
 
     func resize(id: NoteImageID, to: CGRect) {
         access.update(frame: to, image: id)
-            .sink(receiveCompletion: { error in fatalError("\(error)")},
+            .sink(receiveCompletion: { _ in },
                   receiveValue: { })
             .store(in: &cancellables)
     }

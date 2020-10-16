@@ -40,24 +40,36 @@ class DocumentCollectionViewController: UICollectionViewController {
 
         self.navigationItem.leftItemsSupplementBackButton = true
 
-        if folderVM == nil {
-            // swiftlint:disable:next force_cast
-            let access = (UIApplication.shared.delegate as! AppDelegate).fileBrowserAccess
-            FolderBrowserViewModel.root(defaults: UserDefaults.standard, access: access)
-                .sink(receiveCompletion: { _ in return }, // todo
-                      receiveValue: { folderVM in
-                        self.folderVM = folderVM
-                })
-                .store(in: &cancellables)
+        Just(folderVM)
+            .eraseToAnyPublisher()
+            .setFailureType(to: Error.self)
+            .flatMap { vm -> AnyPublisher<FolderBrowserViewModel, Error> in
+                if vm != nil {
+                    return Just(vm!)
+                        .setFailureType(to: Error.self)
+                        .eraseToAnyPublisher()
 
+                }
+                // swiftlint:disable:next force_cast
+                let access = (UIApplication.shared.delegate as! AppDelegate).fileBrowserAccess
+                return FolderBrowserViewModel
+                    .root(defaults: UserDefaults.standard, access: access)
         }
+        .sink(receiveCompletion: { _ in },
+               receiveValue: { folderVM in
+                self.folderVM = folderVM
 
-        folderVM.$title
-            .sink { [unowned self] title in self.navigationItem.title = title }
-            .store(in: &cancellables)
+                folderVM.$title
+                    .receive(on: DispatchQueue.main)
+                    .sink { [unowned self] title in self.navigationItem.title = title }
+                    .store(in: &self.cancellables)
 
-        folderVM.$nodes
-            .sink { [unowned self] _ in self.collectionView.reloadData() }
+                folderVM.$nodes
+                    .receive(on: DispatchQueue.main)
+                    .sink { [unowned self] _ in self.collectionView.reloadData() }
+                    .store(in: &self.cancellables)
+
+        })
             .store(in: &cancellables)
     }
 
@@ -73,7 +85,10 @@ class DocumentCollectionViewController: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return folderVM.nodes.count
+        if let folderVM = self.folderVM {
+            return folderVM.nodes.count
+        }
+        return 0
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -140,6 +155,7 @@ class DocumentCollectionViewController: UICollectionViewController {
         guard let destinationViewController =
             DocumentCollectionViewController.from(storyboard: self.storyboard) else { return }
         self.folderVM.subFolderBrowserVM(for: folder)
+            .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in return }, // TODO
                   receiveValue: { folderVM in
                     destinationViewController.folderVM = folderVM
@@ -161,6 +177,7 @@ class DocumentCollectionViewController: UICollectionViewController {
             .store(in: &cancellables)
 
         self.folderVM.noteEditorVM(for: note)
+            .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in return }, // TODO
                   receiveValue: {
                     destinationViewController.viewModel = $0

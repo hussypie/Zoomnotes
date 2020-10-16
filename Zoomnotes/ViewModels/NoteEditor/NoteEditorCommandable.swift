@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import Combine
 import PencilKit
 
 enum NoteChildDetailViewController {
@@ -23,8 +24,8 @@ protocol NoteChildProtocol {
 }
 
 protocol NoteEditorProtocol {
-    func create(id: NoteLevelID, frame: CGRect, preview: UIImage)
-    func create(id: NoteImageID, frame: CGRect, preview: UIImage)
+    func create(id: NoteLevelID, frame: CGRect, preview: UIImage) -> AnyPublisher<Void, Error>
+    func create(id: NoteImageID, frame: CGRect, preview: UIImage) -> AnyPublisher<Void, Error>
     func update(drawing: PKDrawing)
     func refresh(image: UIImage)
     func update(id: NoteImageID, annotation: PKDrawing)

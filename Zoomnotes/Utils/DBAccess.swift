@@ -76,9 +76,10 @@ enum AccessMode {
 struct DBAccess {
     let moc: NSManagedObjectContext
 
-    func accessing<Store: NSManagedObject, Result, EntityTag>(to mode: AccessMode,
-                                                 id: ID<EntityTag>,
-                                                 doing action: @escaping (Store?) throws -> Result
+    func accessing<Store: NSManagedObject, Result, EntityTag>(
+        to mode: AccessMode,
+        id: ID<EntityTag>,
+        doing action: @escaping (Store?) throws -> Result
     ) -> AnyPublisher<Result, Error> {
         let id = id.id
         let request: NSFetchRequest<NSFetchRequestResult> =
@@ -135,6 +136,8 @@ struct DBAccess {
     }
 
     func delete<T: NSManagedObject>(_ thing: T) {
-        self.moc.delete(thing)
+        synced(self.moc) {
+            self.moc.delete(thing)
+        }
     }
 }
