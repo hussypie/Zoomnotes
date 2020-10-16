@@ -63,7 +63,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }()
 
     lazy var access: DBAccess = {
-        return DBAccess(moc: self.persistentContainer.viewContext)
+        let privateContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        privateContext.parent = self.persistentContainer.viewContext
+        return DBAccess(moc: privateContext)
     }()
 
     lazy var fileBrowserAccess: DirectoryAccess = {

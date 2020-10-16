@@ -20,7 +20,7 @@ class ZoomnotesUtilsTests: XCTestCase {
     }
 
     func testUserDefaultsWithDefaultsAddedKey() {
-        let mockUserDefaults = UserDefaults()
+        let mockUserDefaults = UserDefaults.mock(name: #file)
         property("For any key that is set in defaults, the set value is returned") <- forAll { (key: String, value: Int, defaultValue: Int) in
             return (value != defaultValue ==> {
                 mockUserDefaults.set(value, forKey: key)
@@ -83,14 +83,14 @@ class ZoomnotesUtilsTests: XCTestCase {
         XCTAssertEqual(String.empty, "")
     }
 
-    enum TestError: Error { case error }
-
     func testSink3() {
+        // swiftlint:disable:next nesting
+        enum TestError: Error { case error }
         _ = Just(3).sink(receiveDone: { XCTAssertTrue(true, "OK")},
                                        receiveError: { _ in },
                                        receiveValue: { XCTAssertEqual($0, 3)})
 
-        _ = Fail<Never, ZoomnotesUtilsTests.TestError>(error: TestError.error)
+        _ = Fail<Never, TestError>(error: TestError.error)
             .sink(receiveDone: { XCTAssertTrue(true, "OK") },
                receiveError: { XCTAssertEqual($0, TestError.error) },
                receiveValue: { _ in })

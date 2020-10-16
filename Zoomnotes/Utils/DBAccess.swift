@@ -99,6 +99,9 @@ struct DBAccess {
 
                     if mode == .write {
                         try self.moc.save()
+                        if let parent = self.moc.parent {
+                            try parent.save()
+                        }
                     }
                     promise(.success(result))
                 } catch let error {

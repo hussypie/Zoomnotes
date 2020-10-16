@@ -21,11 +21,12 @@ extension DirectoryStoreDescription {
                                          directories: [])
     }
 
-    static func stub(documents: [DocumentStoreDescription],
+    static func stub(id: UUID,
+                     documents: [DocumentStoreDescription],
                      directories: [DirectoryStoreDescription]
     ) -> DirectoryStoreDescription {
         let someTimeInThePast = Date().addingTimeInterval(-Double.random(in: 0..<10000))
-        return DirectoryStoreDescription(id: ID(UUID()),
+        return DirectoryStoreDescription(id: ID(id),
                                          created: someTimeInThePast,
                                          name: stubNames.randomElement()!,
                                          documents: documents,

@@ -50,7 +50,6 @@
 		313BFDF0251FA66200EBF70F /* NoteEditorViewModel+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDEF251FA66200EBF70F /* NoteEditorViewModel+stub.swift */; };
 		313BFDF42520BC5500EBF70F /* NoteLevelAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDF32520BC5500EBF70F /* NoteLevelAccess.swift */; };
 		313BFDF62520E4F100EBF70F /* DirectoryAccess+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDF52520E4F100EBF70F /* DirectoryAccess+stub.swift */; };
-		3142FE83250A81D800002DD8 /* ExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE82250A81D800002DD8 /* ExtensionsTests.swift */; };
 		3142FE86250B59AF00002DD8 /* NoteEditorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE85250B59AF00002DD8 /* NoteEditorTests.swift */; };
 		314CA94F252B811F00FE9B73 /* NoteEditorDropDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 314CA94E252B811F00FE9B73 /* NoteEditorDropDelegate.swift */; };
 		314CA951252BB2FA00FE9B73 /* ImageDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 314CA950252BB2FA00FE9B73 /* ImageDetailViewController.swift */; };
@@ -159,7 +158,6 @@
 		313BFDEF251FA66200EBF70F /* NoteEditorViewModel+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteEditorViewModel+stub.swift"; sourceTree = "<group>"; };
 		313BFDF32520BC5500EBF70F /* NoteLevelAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteLevelAccess.swift; sourceTree = "<group>"; };
 		313BFDF52520E4F100EBF70F /* DirectoryAccess+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DirectoryAccess+stub.swift"; sourceTree = "<group>"; };
-		3142FE82250A81D800002DD8 /* ExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionsTests.swift; sourceTree = "<group>"; };
 		3142FE85250B59AF00002DD8 /* NoteEditorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorTests.swift; sourceTree = "<group>"; };
 		314CA94E252B811F00FE9B73 /* NoteEditorDropDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorDropDelegate.swift; sourceTree = "<group>"; };
 		314CA950252BB2FA00FE9B73 /* ImageDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailViewController.swift; sourceTree = "<group>"; };
@@ -294,7 +292,6 @@
 		3101755124E5211F007D3589 /* ZoomnotesUITests */ = {
 			isa = PBXGroup;
 			children = (
-				3142FE82250A81D800002DD8 /* ExtensionsTests.swift */,
 				3101755224E5211F007D3589 /* ZoomnotesUITests.swift */,
 				3101755424E5211F007D3589 /* Info.plist */,
 			);
@@ -914,7 +911,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3101755324E5211F007D3589 /* ZoomnotesUITests.swift in Sources */,
-				3142FE83250A81D800002DD8 /* ExtensionsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
