@@ -10,7 +10,7 @@ import Foundation
 import PencilKit
 
 extension NoteEditorViewModel {
-    static func stub(sublevels: [NoteChildVM],
+    static func stub(sublevels: SublevelFactory,
                      access: NoteLevelAccess,
                      onUpdateName: @escaping (String) -> Void
     ) -> NoteEditorViewModel {

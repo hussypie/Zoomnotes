@@ -34,7 +34,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
         levels[description.id] = description
 
         for sublevel in description.sublevels {
-            self.append(level: sublevel, to: description.id)
+            _ = self.append(level: sublevel, to: description.id)
         }
 
         return Future { $0(.success(())) }.eraseToAnyPublisher()

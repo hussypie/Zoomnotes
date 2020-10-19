@@ -229,7 +229,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         edges.forEach { self.view.addGestureRecognizer(edgeGestureRecognizer(edge: $0)) }
 
-        self.viewModel.load { child in
+        for child in self.viewModel.nodes {
             let sublevel = self.sublevelPreview(frame: child.frame, preview: child.preview)
             sublevel.viewModel = child
 
@@ -419,7 +419,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
 extension NoteViewController: PKCanvasViewDelegate {
     func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
-        self.viewModel.update(drawing: canvasView.drawing)
+        self.historian.update(from: self.viewModel.drawing, to: canvasView.drawing)
         updateContentSizeForDrawing()
     }
 

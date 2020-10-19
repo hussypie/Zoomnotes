@@ -35,3 +35,9 @@ extension UIImage {
         return image
     }
 }
+
+extension UIImage {
+    static func folder() -> UIImage {
+        UIImage(named: "folder")!
+    }
+}

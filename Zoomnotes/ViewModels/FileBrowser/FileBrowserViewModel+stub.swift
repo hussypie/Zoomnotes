@@ -17,7 +17,7 @@ extension FolderBrowserViewModel {
                                                                   directories: [:]))
     }
 
-    static func stub(nodes: [FolderBrowserViewModel.Node]) -> FolderBrowserViewModel {
+    static func stub(nodes: [FolderBrowserNode]) -> FolderBrowserViewModel {
 
         return FolderBrowserViewModel(directoryId: ID(UUID()),
                                       name: "Documents",

@@ -87,26 +87,24 @@ struct DBAccess {
         request.predicate = NSPredicate(format: "id = %@", id as CVarArg)
 
         return Future { promise in
-            DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    guard let entries = try self.moc.fetch(request) as? [Store] else {
-                        fatalError("Cannot cast to result type")
-                    }
-
-                    guard entries.count < 2 else { throw DBAccessError.moreThanOneEntryFound }
-
-                    let result = try action(entries.first)
-
-                    if mode == .write {
-                        try self.moc.save()
-                        if let parent = self.moc.parent {
-                            try parent.save()
-                        }
-                    }
-                    promise(.success(result))
-                } catch let error {
-                    promise(.failure(error))
+            do {
+                guard let entries = try self.moc.fetch(request) as? [Store] else {
+                    fatalError("Cannot cast to result type")
                 }
+
+                guard entries.count < 2 else { throw DBAccessError.moreThanOneEntryFound }
+
+                let result = try action(entries.first)
+
+                if mode == .write {
+                    try self.moc.save()
+                    if let parent = self.moc.parent {
+                        try parent.save()
+                    }
+                }
+                promise(.success(result))
+            } catch let error {
+                promise(.failure(error))
             }
         }.eraseToAnyPublisher()
     }

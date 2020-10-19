@@ -133,27 +133,28 @@ struct DirectoryAccessImpl: DirectoryAccess {
         }
     }
 
-    func children(of parent: DirectoryID) -> AnyPublisher<[FolderBrowserViewModel.Node], Error> {
+    func children(of parent: DirectoryID) -> AnyPublisher<[FolderBrowserNode], Error> {
         self.access.accessing(to: .read, id: parent) { (store: DirectoryStore?) in
             guard let store = store else { return [] }
 
             guard let directories = store.directoryChildren as? Set<DirectoryStore> else { return [] }
             guard let documents = store.documentChildren as? Set<NoteStore> else { return [] }
 
-            let directoryChildren = directories.map { (child: DirectoryStore) -> DirectoryVM in
-                return DirectoryVM(id: UUID(),
-                                   store: ID(child.id!),
-                                   name: child.name!,
-                                   created: child.created!)
-            }.map { FolderBrowserViewModel.Node.directory($0) }
+            let directoryChildren = directories.map { (child: DirectoryStore) -> FolderBrowserNode in
+                return FolderBrowserNode(id: UUID(),
+                                         store: .directory(ID(child.id!)),
+                                         preview: CodableImage(wrapping: UIImage.folder()),
+                                         name: child.name!,
+                                         lastModified: child.created!)
+            }
 
             let documentChildren = documents.map {
-                return FileVM(id: UUID(),
-                              store: ID($0.id!),
-                              preview: UIImage(data: $0.thumbnail!)!,
-                              name: $0.name!,
-                              lastModified: $0.lastModified!)
-            }.map { FolderBrowserViewModel.Node.file($0) }
+                return FolderBrowserNode(id: UUID(),
+                                         store: .document(ID($0.id!)),
+                                         preview: CodableImage(wrapping: UIImage(data: $0.thumbnail!)!),
+                                         name: $0.name!,
+                                         lastModified: $0.lastModified!)
+            }
 
             return directoryChildren + documentChildren
         }

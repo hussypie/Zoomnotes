@@ -9,99 +9,94 @@ enum EncodingError: Error {
 fileprivate let typeIdFolder = "org.berci.zoomnotes.directory"
 fileprivate let typeIdDocument = "org.berci.zoomontes.file"
 
-extension DirectoryVM: NSItemProviderWriting {
+extension FolderBrowserNode {
+    class DirectoryWrapper: NSObject, Codable {
+        let node: FolderBrowserNode
+        init(node: FolderBrowserNode) { self.node = node }
+    }
+
+    class DocumentWrapper: NSObject, Codable {
+        let node: FolderBrowserNode
+        init(node: FolderBrowserNode) { self.node = node }
+    }
+}
+
+extension FolderBrowserNode.DocumentWrapper: NSItemProviderWriting {
+    private static let typeId = typeIdDocument
     static var writableTypeIdentifiersForItemProvider: [String] {
-        return [ typeIdFolder ]
+        return [ typeId ]
     }
 
     func loadData(withTypeIdentifier typeIdentifier: String, forItemProviderCompletionHandler completionHandler: @escaping (Data?, Error?) -> Void) -> Progress? {
-        if typeIdentifier == typeIdFolder {
-            do {
-              let archiver = NSKeyedArchiver(requiringSecureCoding: false)
-              try archiver.encodeEncodable(self, forKey: NSKeyedArchiveRootObjectKey)
-              archiver.finishEncoding()
-              let data = archiver.encodedData
-              completionHandler(data, nil)
-            } catch {
-              completionHandler(nil, nil)
-            }
-        }
-        return nil
+        guard typeIdentifier == FolderBrowserNode.DocumentWrapper.typeId else { return nil }
+        return loadDataI(codee: self, forItemProviderCompletionHandler: completionHandler)
     }
 }
 
-extension FileVM: NSItemProviderWriting {
+extension FolderBrowserNode.DocumentWrapper: NSItemProviderReading {
+    static var readableTypeIdentifiersForItemProvider: [String] {
+        return [ typeId ]
+    }
+
+    static func object(withItemProviderData data: Data, typeIdentifier: String) throws -> Self {
+        guard typeIdentifier == FolderBrowserNode.DocumentWrapper.typeId else {
+            throw EncodingError.invalidData
+        }
+        return try objectI(withItemProviderData: data)
+    }
+}
+
+extension FolderBrowserNode.DirectoryWrapper: NSItemProviderWriting {
+    private static let typeId = typeIdFolder
     static var writableTypeIdentifiersForItemProvider: [String] {
-        return [ typeIdDocument ]
+        return [ typeId ]
     }
 
     func loadData(withTypeIdentifier typeIdentifier: String, forItemProviderCompletionHandler completionHandler: @escaping (Data?, Error?) -> Void) -> Progress? {
-        if typeIdentifier == typeIdDocument {
-            do {
-              let archiver = NSKeyedArchiver(requiringSecureCoding: false)
-              try archiver.encodeEncodable(self, forKey: NSKeyedArchiveRootObjectKey)
-              archiver.finishEncoding()
-              let data = archiver.encodedData
-              completionHandler(data, nil)
-            } catch {
-              completionHandler(nil, nil)
-            }
-        }
-        return nil
+        guard typeIdentifier == FolderBrowserNode.DirectoryWrapper.typeId else { return nil }
+        return loadDataI(codee: self, forItemProviderCompletionHandler: completionHandler)
     }
 }
 
-extension DirectoryVM: NSItemProviderReading {
+extension FolderBrowserNode.DirectoryWrapper: NSItemProviderReading {
     static var readableTypeIdentifiersForItemProvider: [String] {
-        return [ typeIdFolder ]
+        return [ typeId ]
     }
 
     static func object(withItemProviderData data: Data, typeIdentifier: String) throws -> Self {
-        if typeIdentifier == typeIdFolder {
-            do {
-              let unarchiver = try NSKeyedUnarchiver(forReadingFrom: data)
-              guard let folder =
-                try unarchiver.decodeTopLevelDecodable(
-                  DirectoryVM.self, forKey: NSKeyedArchiveRootObjectKey) else {
-                    throw EncodingError.invalidData
-              }
-                return self.init(id: folder.id,
-                                 store: folder.store,
-                                 name: folder.name,
-                                 created: folder.created)
-            } catch {
-                throw EncodingError.invalidData
-            }
-        } else {
+        guard typeIdentifier == FolderBrowserNode.DirectoryWrapper.typeId else {
             throw EncodingError.invalidData
         }
+        return try objectI(withItemProviderData: data)
     }
 }
 
-extension FileVM: NSItemProviderReading {
-    static var readableTypeIdentifiersForItemProvider: [String] {
-        return [ typeIdDocument ]
-    }
 
-    static func object(withItemProviderData data: Data, typeIdentifier: String) throws -> Self {
-        if typeIdentifier == typeIdFolder {
-            do {
-              let unarchiver = try NSKeyedUnarchiver(forReadingFrom: data)
-              guard let document =
-                try unarchiver.decodeTopLevelDecodable(
-                  FileVM.self, forKey: NSKeyedArchiveRootObjectKey) else {
-                    throw EncodingError.invalidData
-              }
-                return self.init(id: document.id,
-                                 store: document.store,
-                                 preview: document.preview.image,
-                                 name: document.name,
-                                 lastModified: document.lastModified)
-            } catch {
-                throw EncodingError.invalidData
-            }
-        } else {
+fileprivate func loadDataI<Codee: Encodable>(
+    codee: Codee,
+    forItemProviderCompletionHandler completionHandler: @escaping (Data?, Error?) -> Void
+) -> Progress? {
+    do {
+      let archiver = NSKeyedArchiver(requiringSecureCoding: false)
+      try archiver.encodeEncodable(codee, forKey: NSKeyedArchiveRootObjectKey)
+      archiver.finishEncoding()
+      let data = archiver.encodedData
+      completionHandler(data, nil)
+    } catch {
+      completionHandler(nil, nil)
+    }
+    return nil
+}
+
+fileprivate func objectI<D: Decodable>(withItemProviderData data: Data) throws -> D {
+    do {
+      let unarchiver = try NSKeyedUnarchiver(forReadingFrom: data)
+      guard let thing =
+        try unarchiver.decodeTopLevelDecodable(D.self, forKey: NSKeyedArchiveRootObjectKey) else {
             throw EncodingError.invalidData
-        }
+      }
+        return thing
+    } catch {
+        throw EncodingError.invalidData
     }
 }

@@ -13,19 +13,20 @@ import Combine
 import CoreData
 
 class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
+    typealias SublevelFactory = (NoteEditorViewModel) -> [NoteChildVM]
     @Published var title: String
     @Published var drawing: PKDrawing
+    @Published var nodes: [NoteChildVM] = []
 
     private let id: NoteLevelID
     private let access: NoteLevelAccess
     private let onUpdateName: (String) -> Void
-    private let sublevels: [NoteChildVM]
 
     private var cancellables: Set<AnyCancellable> = []
 
     init(id: NoteLevelID,
          title: String,
-         sublevels: [NoteChildVM],
+         sublevels: SublevelFactory,
          drawing: PKDrawing,
          access: NoteLevelAccess,
          onUpdateName: @escaping (String) -> Void
@@ -33,60 +34,59 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         self.id = id
         self.title = title
         self.drawing = drawing
-        self.sublevels = sublevels
-
         self.onUpdateName = onUpdateName
 
         self.access = access
+
+        self.nodes = sublevels(self)
 
         self.$title
             .sink { self.onUpdateName($0) }
             .store(in: &cancellables)
     }
 
-    func load(_ use: (NoteChildVM) -> Void) {
-        for sublevel in self.sublevels {
-            use(sublevel)
-        }
-    }
-
     func childViewModel(for id: NoteLevelID) -> AnyPublisher<NoteEditorViewModel?, Error> {
         return access.read(level: id)
             .map { subLevel in
-                    guard let subLevel = subLevel else { return nil }
+                guard let subLevel = subLevel else { return nil }
 
+                let subLevelFactory: SublevelFactory = { vm in
                     let subSubLevels =
                         subLevel.sublevels
                             .map { NoteChildVM(id: UUID(),
                                                preview: $0.preview,
                                                frame: $0.frame,
-                                               commander: NoteLevelCommander(id: $0.id)) }
+                                               commander: NoteLevelCommander(id: $0.id,
+                                                                             editor: vm)) }
 
                     let subSubImages =
                         subLevel.images
                             .map { NoteChildVM(id: UUID(),
                                                preview: $0.preview,
                                                frame: $0.frame,
-                                               commander: NoteImageCommander(id: $0.id)) }
+                                               commander: NoteImageCommander(id: $0.id,
+                                                                             editor: vm)) }
 
-                    return NoteEditorViewModel(id: id,
-                                               title: self.title,
-                                               sublevels: subSubLevels + subSubImages,
-                                               drawing: subLevel.drawing,
-                                               access: self.access,
-                                               onUpdateName: self.onUpdateName)
+                    return subSubLevels + subSubImages
+                }
+                return NoteEditorViewModel(id: id,
+                                           title: self.title,
+                                           sublevels: subLevelFactory,
+                                           drawing: subLevel.drawing,
+                                           access: self.access,
+                                           onUpdateName: self.onUpdateName)
         }.eraseToAnyPublisher()
     }
 
     func imageDetailViewModel(for id: NoteImageID) -> AnyPublisher<ImageDetailViewModel?, Error> {
         access.read(image: id)
             .map { subimage in
-                        guard let subimage = subimage else { return nil }
-                        return ImageDetailViewModel(using: subimage.image, with: subimage.drawing)
+                guard let subimage = subimage else { return nil }
+                return ImageDetailViewModel(using: subimage.image, with: subimage.drawing)
         }.eraseToAnyPublisher()
     }
 
-    func create(id: NoteLevelID, frame: CGRect, preview: UIImage) -> AnyPublisher<Void, Error> {
+    func create(id: NoteLevelID, frame: CGRect, preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
         let description = NoteLevelDescription(preview: preview,
                                                frame: frame,
                                                id: id,
@@ -94,16 +94,36 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
                                                sublevels: [],
                                                images: [])
 
-        return access.append(level: description, to: self.id)
+        return access
+            .append(level: description, to: self.id)
+            .map {
+                let child = NoteChildVM(id: UUID(),
+                                        preview: preview,
+                                        frame: frame,
+                                        commander: NoteLevelCommander(id: id,
+                                                                      editor: self))
+                self.nodes.append(child)
+                return child
+        }.eraseToAnyPublisher()
     }
 
-    func create(id: NoteImageID, frame: CGRect, preview: UIImage) -> AnyPublisher<Void, Error> {
+    func create(id: NoteImageID, frame: CGRect, preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
         let description = NoteImageDescription(id: id,
                                                preview: preview,
                                                drawing: PKDrawing(),
                                                image: preview,
                                                frame: frame)
-        return access.append(image: description, to: self.id)
+        return access
+            .append(image: description, to: self.id)
+            .map {
+                let child = NoteChildVM(id: UUID(),
+                                        preview: preview,
+                                        frame: frame,
+                                        commander: NoteImageCommander(id: description.id,
+                                                                      editor: self))
+                self.nodes.append(child)
+                return child
+        }.eraseToAnyPublisher()
     }
 
     func update(drawing: PKDrawing) {
@@ -116,7 +136,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
     func update(id: NoteImageID, annotation: PKDrawing) {
         access.update(annotation: annotation, image: id)
             .sink(receiveCompletion: { _ in },
-                      receiveValue: { })
+                  receiveValue: { })
             .store(in: &cancellables)
     }
 

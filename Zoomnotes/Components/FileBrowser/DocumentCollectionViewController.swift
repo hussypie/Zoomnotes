@@ -23,8 +23,13 @@ class DocumentCollectionViewController: UICollectionViewController {
         return dateFormatter
     }()
 
-    func deleteAlertController(for node: FolderBrowserViewModel.Node) -> UIAlertController {
-        let alert = UIAlertController(title: "Delete \(node.name)?", message: "Are you sure to delete \(node.name)?", preferredStyle: .alert)
+    func deleteAlertController(for node: FolderBrowserNode) -> UIAlertController {
+        let alert = UIAlertController(
+            title: "Delete \(node.name)?",
+            message: "Are you sure to delete \(node.name)?",
+            preferredStyle: .alert
+        )
+
         alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
         alert.addAction(UIAlertAction(title: "Delete",
                                       style: .destructive,
@@ -56,7 +61,7 @@ class DocumentCollectionViewController: UICollectionViewController {
                     .root(defaults: UserDefaults.standard, access: access)
         }
         .sink(receiveCompletion: { _ in },
-               receiveValue: { folderVM in
+              receiveValue: { folderVM in
                 self.folderVM = folderVM
 
                 folderVM.$title
@@ -96,24 +101,18 @@ class DocumentCollectionViewController: UICollectionViewController {
 
         let node = folderVM.nodes[index]
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: DocumentNodeCell.self),
-                                                      for: indexPath) as? DocumentNodeCell else {
-                                                        fatalError("Unknown cell type dequeued")
+                                                            for: indexPath) as? DocumentNodeCell else {
+                                                                fatalError("Unknown cell type dequeued")
         }
         return nodeCell(using: cell, with: node)
     }
 
     private func nodeCell(using cell: DocumentNodeCell,
-                          with node: FolderBrowserViewModel.Node
+                          with node: FolderBrowserNode
     ) -> DocumentNodeCell {
         cell.nameLabel.text = node.name
-        cell.dateLabel.text = dateLabelFormatter.string(from: node.date)
-
-        switch node {
-        case .file(let doc):
-            cell.image.image = doc.preview.image
-        case .directory:
-            cell.image.image = UIImage(named: "folder")
-        }
+        cell.dateLabel.text = dateLabelFormatter.string(from: node.lastModified)
+        cell.image.image = node.preview.image
 
         cell.detailsIndicator.addGestureRecognizer(ZNTapGestureRecognizer { _ in
             let editor = NodeDetailEditor(name: node.name,
@@ -134,52 +133,51 @@ class DocumentCollectionViewController: UICollectionViewController {
         })
 
         cell.addGestureRecognizer(ZNTapGestureRecognizer { _ in
-            switch node {
-            case .file(let note):
-                self.openNoteEditor(for: note)
-            case .directory(let subFolder):
-                self.navigateTo(folder: subFolder)
+            switch node.store {
+            case .document(let id):
+                self.openNoteEditor(for: id, with: node.name)
+            case .directory(let id):
+                self.navigateTo(folder: id, with: node.name)
             }
         })
 
         return cell
     }
 
-    private func delete(node: FolderBrowserViewModel.Node) {
+    private func delete(node: FolderBrowserNode) {
         let controller = deleteAlertController(for: node)
         self.dismiss(animated: true, completion: nil)
         self.present(controller, animated: true, completion: nil)
     }
 
-    private func navigateTo(folder: DirectoryVM) {
+    private func navigateTo(folder: DirectoryID, with name: String) {
         guard let destinationViewController =
             DocumentCollectionViewController.from(storyboard: self.storyboard) else { return }
-        self.folderVM.subFolderBrowserVM(for: folder)
+        self.folderVM.subFolderBrowserVM(for: folder, with: name)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in return }, // TODO
-                  receiveValue: { folderVM in
+                receiveValue: { folderVM in
                     destinationViewController.folderVM = folderVM
                     self.navigationController?.pushViewController(destinationViewController, animated: true)
             })
             .store(in: &cancellables)
     }
 
-    private func openNoteEditor(for note: FileVM) {
+    private func openNoteEditor(for note: DocumentID, with name: String) {
         guard let destinationViewController = NoteViewController.from(self.storyboard) else { return }
         destinationViewController.transitionManager = NoteTransitionDelegate()
         destinationViewController
             .previewChangedSubject
             .sink(receiveValue: { image in
                 self.folderVM.process(command: .update(note, preview: image))
-                note.preview = CodableImage(wrapping: image)
                 self.collectionView.reloadData()
             })
             .store(in: &cancellables)
 
-        self.folderVM.noteEditorVM(for: note)
+        self.folderVM.noteEditorVM(for: note, with: name)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { _ in return }, // TODO
-                  receiveValue: {
+                receiveValue: {
                     destinationViewController.viewModel = $0
                     self.navigationController?.pushViewController(destinationViewController, animated: true)
             })
@@ -191,13 +189,15 @@ extension DocumentCollectionViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
         guard let index = indexPath.last else { return [] }
         let node = folderVM.nodes[index]
+
         let itemProvider: NSItemProvider
-        switch node {
-        case .file(let doc):
-            itemProvider = NSItemProvider(object: doc)
-        case .directory(let folder):
-            itemProvider = NSItemProvider(object: folder)
+        switch node.store {
+        case .document:
+            itemProvider = NSItemProvider(object: FolderBrowserNode.DocumentWrapper(node: node))
+        case .directory:
+            itemProvider = NSItemProvider(object: FolderBrowserNode.DirectoryWrapper(node: node))
         }
+
         let dragItem = UIDragItem(itemProvider: itemProvider)
         dragItem.localObject = node
         return [ dragItem ]
@@ -218,14 +218,14 @@ extension DocumentCollectionViewController: UICollectionViewDropDelegate {
         guard let index = coordinator.destinationIndexPath?.last else { return }
 
         guard let node =
-            coordinator.items.first?.dragItem.localObject as? FolderBrowserViewModel.Node else {
+            coordinator.items.first?.dragItem.localObject as? FolderBrowserNode else {
                 return
         }
 
         let destination = folderVM.nodes[index]
-        switch destination {
-        case .directory(let folder):
-            folderVM.process(command: .move(node, to: folder))
+        switch destination.store {
+        case .directory(let id):
+            folderVM.process(command: .move(node, to: id))
         default:
             return
         }

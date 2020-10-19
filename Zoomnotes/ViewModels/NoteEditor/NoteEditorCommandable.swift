@@ -17,15 +17,16 @@ enum NoteChildDetailViewController {
 }
 
 protocol NoteChildProtocol {
-    func resize(using editor: NoteEditorProtocol, to: CGRect)
-    func move(using editor: NoteEditorProtocol, to: CGRect)
-    func remove(using editor: NoteEditorProtocol)
+    func resize(to: CGRect)
+    func move(to: CGRect)
+    func remove()
     func detailViewController(from: UIStoryboard?) -> NoteChildDetailViewController?
+    func storeEquals(_ id: UUID) -> Bool
 }
 
 protocol NoteEditorProtocol {
-    func create(id: NoteLevelID, frame: CGRect, preview: UIImage) -> AnyPublisher<Void, Error>
-    func create(id: NoteImageID, frame: CGRect, preview: UIImage) -> AnyPublisher<Void, Error>
+    func create(id: NoteLevelID, frame: CGRect, preview: UIImage) -> AnyPublisher<NoteChildVM, Error>
+    func create(id: NoteImageID, frame: CGRect, preview: UIImage) -> AnyPublisher<NoteChildVM, Error>
     func update(drawing: PKDrawing)
     func refresh(image: UIImage)
     func update(id: NoteImageID, annotation: PKDrawing)

@@ -19,7 +19,7 @@ protocol DirectoryAccess {
     func delete(child: DocumentID, of: DirectoryID) -> AnyPublisher<Void, Error>
     func reparent(from id: DirectoryID, node: DirectoryID, to dest: DirectoryID) -> AnyPublisher<Void, Error>
     func reparent(from id: DirectoryID, node: DocumentID, to dest: DirectoryID) -> AnyPublisher<Void, Error>
-    func children(of parent: DirectoryID) -> AnyPublisher<[FolderBrowserViewModel.Node], Error>
+    func children(of parent: DirectoryID) -> AnyPublisher<[FolderBrowserNode], Error>
     func append(document description: DocumentStoreDescription, to parent: DirectoryID) -> AnyPublisher<Void, Error>
     func append(directory description: DirectoryStoreDescription, to parent: DirectoryID) -> AnyPublisher<Void, Error>
     func noteModel(of id: DocumentID) -> AnyPublisher<NoteLevelDescription?, Error>

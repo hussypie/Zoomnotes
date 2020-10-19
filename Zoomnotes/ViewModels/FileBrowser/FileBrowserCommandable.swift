@@ -12,10 +12,10 @@ import UIKit
 enum FileBrowserCommand {
     case createFile(preview: UIImage)
     case createDirectory
-    case delete(FolderBrowserViewModel.Node)
-    case move(FolderBrowserViewModel.Node, to: DirectoryVM)
-    case rename(FolderBrowserViewModel.Node, to: String)
-    case update(FileVM, preview: UIImage)
+    case delete(FolderBrowserNode)
+    case move(FolderBrowserNode, to: DirectoryID)
+    case rename(FolderBrowserNode, to: String)
+    case update(DocumentID, preview: UIImage)
 }
 
 protocol FileBrowserCommandable {

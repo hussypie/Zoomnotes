@@ -10,22 +10,21 @@ import XCTest
 import CoreData
 @testable import Zoomnotes
 
-extension FileVM {
-    static func fresh(preview: UIImage, name: String, created: Date) -> FileVM {
-        return FileVM(id: UUID(),
-                      store: ID(UUID()),
-                      preview: preview,
-                      name: name,
-                      lastModified: created)
+extension FolderBrowserNode {
+    static func directory(name: String, created: Date) -> FolderBrowserNode {
+        return FolderBrowserNode(id: UUID(),
+                                 store: .directory(ID(UUID())),
+                                 preview: CodableImage(wrapping: .checkmark),
+                                 name: name,
+                                 lastModified: created)
     }
-}
 
-extension DirectoryVM {
-    static func fresh(name: String, created: Date) -> DirectoryVM {
-        return DirectoryVM(id: UUID(),
-                           store: ID(UUID()),
-                           name: name,
-                           created: created)
+    static func document(preview: UIImage, name: String, created: Date) -> FolderBrowserNode {
+        return FolderBrowserNode(id: UUID(),
+                                 store: .document(ID(UUID())),
+                                 preview: CodableImage(wrapping: preview),
+                                 name: name,
+                                 lastModified: created)
     }
 }
 
@@ -37,12 +36,12 @@ class FileBrowserVMTests: XCTestCase {
 
         XCTAssertTrue(vm.nodes.count == 1)
 
-        guard case .file(let newFile) = vm.nodes[0] else {
+        guard case .document = vm.nodes[0].store else {
             XCTFail("Newly created node has to be a file")
             return
         }
 
-        XCTAssertTrue(newFile.name == "Untitled")
+        XCTAssertTrue(vm.nodes[0].name == "Untitled")
     }
 
     func testCreateFolder() {
@@ -52,25 +51,23 @@ class FileBrowserVMTests: XCTestCase {
 
         XCTAssertTrue(vm.nodes.count == 1)
 
-        guard case .directory(let dir) = vm.nodes[0] else {
+        guard case .directory = vm.nodes[0].store else {
             XCTFail("Newly created node has to be a directory")
             return
         }
 
-        XCTAssertTrue(dir.name == "Untitled")
+        XCTAssertTrue(vm.nodes[0].name == "Untitled")
     }
 
     func testDeleteNode() {
-        let node: FolderBrowserViewModel.Node =
-            .file(
-                FileVM.fresh(preview: .remove,
-                             name: "Stuff I'd rather forget",
-                             created: Date().advanced(by: -24*60*60))
-        )
-        let nodes: [FolderBrowserViewModel.Node] = [
+        let node: FolderBrowserNode =
+            FolderBrowserNode.document(preview: .remove,
+                                       name: "Stuff I'd rather forget",
+                                       created: Date().advanced(by: -24*60*60))
+        let nodes: [FolderBrowserNode] = [
             node,
-            .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
-            .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
+            FolderBrowserNode.document(preview: .actions, name: "Best Schwarzenegger Movies", created: Date()),
+            FolderBrowserNode.document(preview: .checkmark, name: "TODOs", created: Date())
         ]
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
 
@@ -80,15 +77,15 @@ class FileBrowserVMTests: XCTestCase {
     }
 
     func testDeleteNodeNonExistentNode() {
-        let node: FolderBrowserViewModel.Node =
-            .file(
-                FileVM.fresh(preview: .remove,
-                             name: "Stuff I'd rather forget",
-                             created: Date().advanced(by: -24*60*60)))
+        let node: FolderBrowserNode =
 
-        let nodes: [FolderBrowserViewModel.Node] = [
-            .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
-            .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
+                FolderBrowserNode.document(preview: .remove,
+                             name: "Stuff I'd rather forget",
+                             created: Date().advanced(by: -24*60*60))
+
+        let nodes: [FolderBrowserNode] = [
+            FolderBrowserNode.document(preview: .actions, name: "Best Schwarzenegger Movies", created: Date()),
+            FolderBrowserNode.document(preview: .checkmark, name: "TODOs", created: Date())
         ]
 
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
@@ -99,16 +96,16 @@ class FileBrowserVMTests: XCTestCase {
     }
 
     func testRenameNode() {
-        let node: FolderBrowserViewModel.Node =
-            .file(
-                FileVM.fresh(preview: .remove,
-                             name: "Stuff I'd rather forget",
-                             created: Date().advanced(by: -24*60*60)))
+        let node: FolderBrowserNode =
 
-        let nodes: [FolderBrowserViewModel.Node] = [
+                FolderBrowserNode.document(preview: .remove,
+                             name: "Stuff I'd rather forget",
+                             created: Date().advanced(by: -24*60*60))
+
+        let nodes: [FolderBrowserNode] = [
             node,
-            .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
-            .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
+            FolderBrowserNode.document(preview: .actions, name: "Best Schwarzenegger Movies", created: Date()),
+            FolderBrowserNode.document(preview: .checkmark, name: "TODOs", created: Date())
         ]
 
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
@@ -122,14 +119,14 @@ class FileBrowserVMTests: XCTestCase {
     }
 
     func testRenameNodeNonExistentNode() {
-        let node: FolderBrowserViewModel.Node = .file(
-            FileVM.fresh(preview: .remove,
+        let node: FolderBrowserNode =
+            FolderBrowserNode.document(preview: .remove,
                          name: "Stuff I'd rather forget",
-                         created: Date().advanced(by: -24*60*60)))
+                         created: Date().advanced(by: -24*60*60))
 
-        let nodes: [FolderBrowserViewModel.Node] = [
-            .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
-            .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
+        let nodes: [FolderBrowserNode] = [
+            FolderBrowserNode.document(preview: .actions, name: "Best Schwarzenegger Movies", created: Date()),
+            FolderBrowserNode.document(preview: .checkmark, name: "TODOs", created: Date())
         ]
 
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
@@ -143,26 +140,33 @@ class FileBrowserVMTests: XCTestCase {
     }
 
     func testMoveNodeToDirectory() {
-        let node: FolderBrowserViewModel.Node =
-            .file(
-                FileVM.fresh(preview: .remove,
+        let node: FolderBrowserNode =
+               FolderBrowserNode.document(preview: .remove,
                              name: "Stuff I'd rather forget",
-                             created: Date().advanced(by: -24*60*60)))
+                             created: Date().advanced(by: -24*60*60))
 
-        let dir: DirectoryVM = DirectoryVM.fresh(name: "Don't look here", created: Date())
+        let dir: FolderBrowserNode = FolderBrowserNode.directory(name: "Don't look here", created: Date())
 
-        let nodes: [FolderBrowserViewModel.Node] = [
+        let nodes: [FolderBrowserNode] = [
             node,
-            .directory(dir),
-            .file(FileVM.fresh(preview: .actions, name: "Best Schwarzenegger Movies", created: Date())),
-            .file(FileVM.fresh(preview: .checkmark, name: "TODOs", created: Date()))
+            dir,
+            FolderBrowserNode.document(preview: .actions, name: "Best Schwarzenegger Movies", created: Date()),
+            FolderBrowserNode.document(preview: .checkmark, name: "TODOs", created: Date())
         ]
 
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
 
         let originalNodeCount = vm.nodes.count
 
-        vm.process(command: .move(node, to: dir))
+        let id: DirectoryID
+        switch dir.store {
+        case .directory(let did):
+            id = did
+        default:
+            XCTFail("Directory id does not refer to directory")
+            return
+        }
+        vm.process(command: .move(node, to: id))
 
         XCTAssert(vm.nodes.count == originalNodeCount - 1)
         XCTAssert(vm.nodes.filter { $0.id == node.id }.isEmpty)
@@ -186,17 +190,18 @@ class FileBrowserVMTests: XCTestCase {
                                             rootDir.id: rootDir,
                                             dir.id: dir ])
 
-        let dirVM = DirectoryVM(id: UUID(),
-                                store: dir.id,
-                                name: dir.name,
-                                created: dir.created)
+        let dirVM = FolderBrowserNode(id: UUID(),
+                                      store: .directory(dir.id),
+                                      preview: CodableImage(wrapping: .checkmark),
+                                      name: dir.name,
+                                      lastModified: dir.created)
 
         let vm = FolderBrowserViewModel(directoryId: rootDir.id,
                                         name: rootDir.name,
-                                        nodes: [ .directory(dirVM) ],
+                                        nodes: [ dirVM ],
                                         access: access)
 
-        _ = vm.subFolderBrowserVM(for: dirVM)
+        _ = vm.subFolderBrowserVM(for: dir.id, with: dirVM.name)
             .sink(receiveDone: { XCTAssertTrue(true, "OK") },
                   receiveError: { XCTFail($0.localizedDescription) },
                   receiveValue: { childVM in
@@ -221,18 +226,18 @@ class FileBrowserVMTests: XCTestCase {
         let access = DirectoryAccessMock(documents: [doc.id: doc],
                                          directories: [rootDir.id: rootDir])
 
-        let file = FileVM(id: UUID(),
-                          store: doc.id,
-                          preview: doc.thumbnail,
-                          name: doc.name,
-                          lastModified: doc.lastModified)
+        let file = FolderBrowserNode(id: UUID(),
+                                     store: .document(doc.id),
+                                     preview: CodableImage(wrapping: doc.thumbnail),
+                                     name: doc.name,
+                                     lastModified: doc.lastModified)
 
         let vm = FolderBrowserViewModel(directoryId: rootDir.id,
                                         name: rootDir.name,
-                                        nodes: [ .file(file) ],
+                                        nodes: [ file ],
                                         access: access)
 
-        _ = vm.noteEditorVM(for: file)
+        _ = vm.noteEditorVM(for: doc.id, with: file.name)
             .sink(receiveDone: { XCTAssertTrue(true, "OK") },
                   receiveError: { XCTFail($0.localizedDescription) },
                   receiveValue: { noteVM in

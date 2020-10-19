@@ -160,10 +160,10 @@ class DirectoryAccessMock: DirectoryAccess {
         return Future { $0(.success(())) }.eraseToAnyPublisher()
     }
 
-    func children(of parent: DirectoryID) -> AnyPublisher<[FolderBrowserViewModel.Node], Error> {
+    func children(of parent: DirectoryID) -> AnyPublisher<[FolderBrowserNode], Error> {
         guard let dir = directories[parent] else { return Future { $0(.success([])) }.eraseToAnyPublisher() }
-        let dirs = dir.directories.map { FolderBrowserViewModel.Node.from($0) }
-        let docs = dir.documents.map { FolderBrowserViewModel.Node.from($0) }
+        let dirs = dir.directories.map { FolderBrowserNode.from($0) }
+        let docs = dir.documents.map { FolderBrowserNode.from($0) }
 
         return Future { $0(.success(dirs + docs)) }.eraseToAnyPublisher()
     }

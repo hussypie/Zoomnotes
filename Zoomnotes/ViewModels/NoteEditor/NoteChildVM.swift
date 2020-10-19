@@ -12,6 +12,7 @@ import Combine
 
 struct NoteLevelCommander: NoteChildProtocol {
     let id: NoteLevelID
+    let editor: NoteEditorViewModel
 
     func detailViewController(from storyboard: UIStoryboard?) -> NoteChildDetailViewController? {
         guard let noteViewController = NoteViewController.from(storyboard) else {
@@ -20,31 +21,36 @@ struct NoteLevelCommander: NoteChildProtocol {
         return .sublevel(noteViewController, id: id)
     }
 
-    func resize(using editor: NoteEditorProtocol, to: CGRect) {
+    func storeEquals(_ id: UUID) -> Bool { self.id == id }
+
+    func resize(to: CGRect) {
         editor.resize(id: id, to: to)
     }
 
-    func move(using editor: NoteEditorProtocol, to: CGRect) {
+    func move(to: CGRect) {
         editor.move(id: id, to: to)
     }
 
-    func remove(using editor: NoteEditorProtocol) {
+    func remove() {
         editor.remove(id: id)
     }
 }
 
 struct NoteImageCommander: NoteChildProtocol {
     let id: NoteImageID
+    let editor: NoteEditorViewModel
 
-    func resize(using editor: NoteEditorProtocol, to: CGRect) {
+    func storeEquals(_ id: UUID) -> Bool { self.id == id }
+
+    func resize(to: CGRect) {
         editor.resize(id: id, to: to)
     }
 
-    func move(using editor: NoteEditorProtocol, to: CGRect) {
+    func move(to: CGRect) {
         editor.move(id: id, to: to)
     }
 
-    func remove(using editor: NoteEditorProtocol) {
+    func remove() {
         editor.remove(id: id)
     }
 

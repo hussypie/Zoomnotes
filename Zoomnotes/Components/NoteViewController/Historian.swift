@@ -23,16 +23,11 @@ class Historian {
     func createImage(id: NoteImageID, frame: CGRect, with preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
         return self.viewModel
             .create(id: id, frame: frame, preview: preview)
-            .map { _ in
-                let childVM = NoteChildVM(id: UUID(),
-                                          preview: preview,
-                                          frame: frame,
-                                          commander: NoteImageCommander(id: id))
-
-                self.undoManager?.registerUndo(withTarget: self) {
-                    childVM.commander.remove(using: $0.viewModel)
+            .map { childVM in
+                self.undoManager?.registerUndo(withTarget: self) { _ in
+                    childVM.commander.remove()
                 }
-                self.undoManager?.setActionName("AddSubimage")
+                self.undoManager?.setActionName("Add Image")
 
                 return childVM
         }.eraseToAnyPublisher()
@@ -41,16 +36,11 @@ class Historian {
     func createLevel(id: NoteLevelID, frame: CGRect, with preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
         self.viewModel
             .create(id: id, frame: frame, preview: preview)
-            .map { _ in
-                let childVM = NoteChildVM(id: UUID(),
-                                            preview: preview,
-                                            frame: frame,
-                                            commander: NoteLevelCommander(id: id))
-
-                self.undoManager?.registerUndo(withTarget: self) {
-                    childVM.commander.remove(using: $0.viewModel)
+            .map { childVM in
+                self.undoManager?.registerUndo(withTarget: self) { _ in
+                    childVM.commander.remove()
                 }
-                self.undoManager?.setActionName("AddSubimage")
+                self.undoManager?.setActionName("Add Sublevel")
                 return childVM
         }.eraseToAnyPublisher()
     }
@@ -62,24 +52,42 @@ class Historian {
                                    width: 0,
                                    height: 0)
         }, completion: { _ in
-            sublevel.commander.remove(using: self.viewModel)
+            sublevel.commander.remove()
             self.undoManager?.registerUndo(withTarget: self) { _ in
                 undo(sublevel)
             }
-            self.undoManager?.setActionName("RemoveSublevel")
+            self.undoManager?.setActionName("Remove")
         })
+    }
+
+    func update(from: PKDrawing, to drawing: PKDrawing) {
+        self.viewModel.update(drawing: drawing)
+        self.undoManager?.registerUndo(withTarget: self) {
+            $0.update(from: drawing, to: from)
+        }
+        self.undoManager?.setActionName("Update Drawing")
     }
 
     func moveChild(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
         UIView.animate(withDuration: 0.15, animations: {
             sublevel.frame = to
         }, completion: { _ in
-            sublevel.commander.move(using: self.viewModel, to: to)
-            self.undoManager?.registerUndo(withTarget: self) {
-                $0.moveChild(sublevel: sublevel, from: to, to: from)
+            sublevel.commander.move(to: to)
+            self.undoManager?.registerUndo(withTarget: sublevel) {
+                $0.commander.move(to: from)
             }
-            self.undoManager?.setActionName("MoveSublevel")
+            self.undoManager?.setActionName("Move Sublevel")
         })
+    }
+
+    func resizePreview(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
+        sublevel.commander.resize(to: to)
+        self.undoManager?.registerUndo(withTarget: self) { _ in
+            UIView.animate(withDuration: 0.1, animations: {
+                sublevel.commander.resize(to: from)
+            })
+        }
+        self.undoManager?.setActionName("Resize")
     }
 
     func moveToDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
@@ -87,7 +95,7 @@ class Historian {
         self.undoManager?.registerUndo(withTarget: self) {
             $0.moveFromDrawer(sublevel: sublevel, from: to, to: from)
         }
-        self.undoManager?.setActionName("MoveToDrawer")
+        self.undoManager?.setActionName("Move To Drawer")
     }
 
     func moveFromDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
@@ -95,16 +103,6 @@ class Historian {
         self.undoManager?.registerUndo(withTarget: self) {
             $0.moveToDrawer(sublevel: sublevel, from: to, to: from)
         }
-        self.undoManager?.setActionName("MoveFromDrawer")
-    }
-
-    func resizePreview(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
-        sublevel.commander.resize(using: self.viewModel, to: to)
-        self.undoManager?.registerUndo(withTarget: self) { sself in
-            UIView.animate(withDuration: 0.1, animations: {
-                sself.resizePreview(sublevel: sublevel, from: to, to: from)
-            })
-        }
-        self.undoManager?.setActionName("ResizePreview")
+        self.undoManager?.setActionName("Move To Canvas")
     }
 }
