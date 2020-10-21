@@ -12,11 +12,18 @@ import PencilKit
 import Combine
 import CoreData
 
+typealias SublevelFactory = (NoteEditorViewModel) -> [NoteChildVM]
+
+enum Drawer {
+    case initd([NoteChildVM])
+    case uninitd(SublevelFactory)
+}
+
 class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
-    typealias SublevelFactory = (NoteEditorViewModel) -> [NoteChildVM]
     @Published var title: String
     @Published var drawing: PKDrawing
     @Published var nodes: [NoteChildVM] = []
+    @Published var drawer: [NoteChildVM] = []
 
     private let id: NoteLevelID
     private let access: NoteLevelAccess
@@ -27,6 +34,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
     init(id: NoteLevelID,
          title: String,
          sublevels: SublevelFactory,
+         drawer: Drawer,
          drawing: PKDrawing,
          access: NoteLevelAccess,
          onUpdateName: @escaping (String) -> Void
@@ -39,6 +47,13 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         self.access = access
 
         self.nodes = sublevels(self)
+
+        switch drawer {
+        case .initd(let children):
+            self.drawer = children
+        case .uninitd(let factory):
+            self.drawer = factory(self)
+        }
 
         self.$title
             .sink { self.onUpdateName($0) }
@@ -69,9 +84,11 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
 
                     return subSubLevels + subSubImages
                 }
+
                 return NoteEditorViewModel(id: id,
                                            title: self.title,
                                            sublevels: subLevelFactory,
+                                           drawer: .initd(self.drawer),
                                            drawing: subLevel.drawing,
                                            access: self.access,
                                            onUpdateName: self.onUpdateName)
@@ -128,90 +145,140 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
 
     func update(drawing: PKDrawing) {
         access.update(drawing: drawing, for: self.id)
-            .sink(receiveCompletion: { _ in  },
+            .sink(receiveCompletion: { _ in /* TODO logging */  },
                   receiveValue: { self.drawing = drawing })
             .store(in: &cancellables)
     }
 
     func update(id: NoteImageID, annotation: PKDrawing) {
         access.update(annotation: annotation, image: id)
-            .sink(receiveCompletion: { _ in },
-                  receiveValue: { })
+            .sink(receiveCompletion: { _ in /* TODO logging */ },
+                  receiveValue: { /* TODO logging */ })
             .store(in: &cancellables)
     }
 
     func update(id: NoteImageID, preview: UIImage) {
         access.update(preview: preview, image: id)
-            .sink(receiveCompletion: { _ in },
-                  receiveValue: { })
+            .sink(receiveCompletion: { _ in /* TODO logging */ },
+                  receiveValue: { /* TODO logging */ })
             .store(in: &cancellables)
 
     }
 
     func refresh(image: UIImage) {
         access.update(preview: image, for: self.id)
-            .sink(receiveCompletion: { _ in },
-                  receiveValue: { })
+            .sink(receiveCompletion: { _ in /* TODO logging */ },
+                  receiveValue: { /* TODO logging */ })
             .store(in: &cancellables)
     }
 
     func move(id: NoteLevelID, to: CGRect) {
         access.update(frame: to, for: id)
-            .sink(receiveCompletion: { _ in },
-                  receiveValue: { })
+            .sink(receiveCompletion: { _ in /* TODO logging */ },
+                  receiveValue: { /* TODO logging */ })
             .store(in: &cancellables)
 
     }
 
     func move(id: NoteImageID, to: CGRect) {
         access.update(frame: to, image: id)
-            .sink(receiveCompletion: { _ in },
-                  receiveValue: { })
+            .sink(receiveCompletion: { _ in /* TODO logging */ },
+                  receiveValue: { /* TODO logging */ })
             .store(in: &cancellables)
     }
 
     func resize(id: NoteLevelID, to frame: CGRect) {
         access.update(frame: frame, for: id)
-            .sink(receiveCompletion: { _ in },
-                  receiveValue: { })
+            .sink(receiveCompletion: { _ in /* TODO logging */ },
+                  receiveValue: { /* TODO logging */ })
             .store(in: &cancellables)
 
     }
 
     func remove(id: NoteLevelID) {
         self.access.remove(level: id, from: self.id)
-            .sink(receiveCompletion: { _ in },
-                  receiveValue: { })
+            .sink(receiveCompletion: { _ in /* TODO logging */ },
+                  receiveValue: { /* TODO logging */ })
             .store(in: &cancellables)
     }
 
     func remove(id: NoteImageID) {
         access.remove(image: id, from: self.id)
-            .sink(receiveCompletion: { _ in },
-                  receiveValue: { })
+            .sink(receiveCompletion: { _ in /* TODO logging */ },
+                  receiveValue: { /* TODO logging */ })
+            .store(in: &cancellables)
+    }
+
+    func restore(id: NoteImageID) {
+        let iid = id
+        access.restore(image: iid, to: self.id)
+            .sink(receiveDone: { /* TODO logging */ },
+               receiveError: { _ in /* TODO logging */ },
+               receiveValue: { _ in /* TODO logging */ })
+            .store(in: &cancellables)
+    }
+
+    func restore(id: NoteLevelID) {
+        let iid = id
+        access.restore(level: iid, to: self.id)
+            .sink(receiveDone: { /* TODO logging */ },
+               receiveError: { _ in /* TODO logging */ },
+               receiveValue: { _ in /* TODO logging */ })
             .store(in: &cancellables)
     }
 
     func resize(id: NoteImageID, to: CGRect) {
         access.update(frame: to, image: id)
-            .sink(receiveCompletion: { _ in },
-                  receiveValue: { })
+            .sink(receiveCompletion: { _ in /* TODO logging */ },
+                  receiveValue: { /* TODO logging */ })
             .store(in: &cancellables)
     }
 
     func moveToDrawer(id: NoteImageID, frame: CGRect) {
-        fatalError("Not implemented")
+        let iid = id
+        access
+            .moveToDrawer(image: iid, from: self.id)
+            .flatMap { _ in
+                self.access.update(frame: frame, image: iid)
+        }.sink(receiveDone: { /* TODO logging */ },
+               receiveError: { _ in /* TODO logging */ },
+               receiveValue: { _ in /* TODO logging */ })
+        .store(in: &cancellables)
     }
 
     func moveFromDrawer(id: NoteImageID, frame: CGRect) {
-        fatalError("Not implemented")
+        let iid = id
+        access
+            .moveFromDrawer(image: iid, to: self.id)
+            .flatMap { _ in
+                self.access.update(frame: frame, image: iid)
+        }.sink(receiveDone: { /* TODO logging */ },
+               receiveError: { _ in /* TODO logging */ },
+               receiveValue: { _ in  /* TODO logging */ })
+        .store(in: &cancellables)
     }
 
     func moveToDrawer(id: NoteLevelID, frame: CGRect) {
-        fatalError("Not implemented")
+        let iid = id
+        access
+            .moveToDrawer(level: iid, from: self.id)
+            .flatMap { _ in
+                self.access.update(frame: frame, for: iid)
+        }.sink(receiveDone: { /* TODO logging */ },
+               receiveError: { _ in /* TODO logging */ },
+               receiveValue: { _ in  /* TODO logging */ })
+        .store(in: &cancellables)
     }
 
     func moveFromDrawer(id: NoteLevelID, frame: CGRect) {
-        fatalError("Not implemented")
+        let iid = id
+        access
+            .moveFromDrawer(level: iid, to: self.id)
+            .flatMap { _ in
+                self.access.update(frame: frame, for: iid)
+        }.sink(receiveDone: { /* TODO logging */ },
+               receiveError: { _ in /* TODO logging */ },
+               receiveValue: { _ in  /* TODO logging */ })
+        .store(in: &cancellables)
     }
 }

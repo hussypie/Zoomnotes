@@ -19,6 +19,37 @@ struct NoteLevelDescription {
     let images: [NoteImageDescription]
 }
 
+struct NoteLevelLookupResult {
+    let id: NoteLevelID
+    let drawing: PKDrawing
+    let sublevels: [SublevelDescription]
+    let images: [SubImageDescription]
+}
+
+struct SublevelDescription {
+    let id: NoteLevelID
+    let preview: UIImage
+    let frame: CGRect
+
+    static func from(_ store: NoteLevelStore) -> SublevelDescription {
+        SublevelDescription(id: ID(store.id!),
+                            preview: UIImage(data: store.preview!)!,
+                            frame: CGRect.from(store.frame!))
+    }
+}
+
+struct SubImageDescription {
+    let id: NoteImageID
+    let preview: UIImage
+    let frame: CGRect
+
+    static func from(_ store: ImageStore) -> SubImageDescription {
+        SubImageDescription(id: ID(store.id!),
+                            preview: UIImage(data: store.preview!)!,
+                            frame: CGRect.from(store.frame!))
+    }
+}
+
 extension NoteLevelDescription {
     static func from(store: NoteLevelStore) throws -> NoteLevelDescription? {
         let frame = CGRect(x: CGFloat(store.frame!.x),

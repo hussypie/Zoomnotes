@@ -17,6 +17,7 @@ extension NoteEditorViewModel {
         return NoteEditorViewModel(id: ID(UUID()),
                                    title: "Note",
                                    sublevels: sublevels,
+                                   drawer: .initd([]),
                                    drawing: PKDrawing(),
                                    access: access,
                                    onUpdateName: onUpdateName)

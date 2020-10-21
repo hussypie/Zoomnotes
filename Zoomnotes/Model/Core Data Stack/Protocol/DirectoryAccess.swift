@@ -22,7 +22,7 @@ protocol DirectoryAccess {
     func children(of parent: DirectoryID) -> AnyPublisher<[FolderBrowserNode], Error>
     func append(document description: DocumentStoreDescription, to parent: DirectoryID) -> AnyPublisher<Void, Error>
     func append(directory description: DirectoryStoreDescription, to parent: DirectoryID) -> AnyPublisher<Void, Error>
-    func noteModel(of id: DocumentID) -> AnyPublisher<NoteLevelDescription?, Error>
+    func noteModel(of id: DocumentID) -> AnyPublisher<DocumentLookupResult?, Error>
     func updateLastModified(of file: DocumentID, with date: Date) -> AnyPublisher<Void, Error>
     func updatePreviewImage(of file: DocumentID, with image: UIImage) -> AnyPublisher<Void, Error>
 }

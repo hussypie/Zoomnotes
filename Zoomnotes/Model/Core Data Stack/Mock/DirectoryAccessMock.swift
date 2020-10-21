@@ -32,8 +32,25 @@ class DirectoryAccessMock: DirectoryAccess {
         return Future { $0(.success(res)) }.eraseToAnyPublisher()
     }
 
-    func noteModel(of id: DocumentID) -> AnyPublisher<NoteLevelDescription?, Error> {
-        return Future { $0(.success(self.documents[id]?.root)) }.eraseToAnyPublisher()
+    func noteModel(of id: DocumentID) -> AnyPublisher<DocumentLookupResult?, Error> {
+        let doc = documents[id]!
+
+        let rootDesc = NoteLevelLookupResult(id: doc.root.id,
+                                             drawing: doc.root.drawing,
+                                             sublevels: doc.root.sublevels.map { SublevelDescription(id: $0.id, preview: $0.preview, frame: $0.frame) },
+                                             images: doc.root.images.map { SubImageDescription(id: $0.id, preview: $0.preview, frame: $0.frame) })
+
+        let result = DocumentLookupResult(id: doc.id,
+                                          lastModified: doc.lastModified,
+                                          name: doc.name,
+                                          imageDrawer: doc.imageDrawer.map { SubImageDescription(id: $0.id, preview: $0.preview, frame: $0.frame) },
+                                          levelDrawer: doc.levelDrawer.map { SublevelDescription(id: $0.id, preview: $0.preview, frame: $0.frame) },
+                                          imageTrash: doc.imageTrash.map { SubImageDescription(id: $0.id, preview: $0.preview, frame: $0.frame) },
+                                          levelTrash: doc.levelDrawer.map { SublevelDescription(id: $0.id, preview: $0.preview, frame: $0.frame) },
+                                          root: rootDesc)
+
+
+        return Future { $0(.success(result)) }.eraseToAnyPublisher()
     }
 
     func updateName(of id: DocumentID, to name: String) -> AnyPublisher<Void, Error> {
@@ -42,6 +59,10 @@ class DirectoryAccessMock: DirectoryAccess {
                                                     lastModified: desc.lastModified,
                                                     name: name,
                                                     thumbnail: desc.thumbnail,
+                                                    imageDrawer: [],
+                                                    levelDrawer: [],
+                                                    imageTrash: [],
+                                                    levelTrash: [],
                                                     root: desc.root)
         return Future { $0(.success(())) }.eraseToAnyPublisher()
     }
@@ -64,6 +85,10 @@ class DirectoryAccessMock: DirectoryAccess {
                                                     lastModified: date,
                                                     name: desc.name,
                                                     thumbnail: desc.thumbnail,
+                                                    imageDrawer: desc.imageDrawer,
+                                                    levelDrawer: desc.levelDrawer,
+                                                    imageTrash: desc.imageTrash,
+                                                    levelTrash: desc.levelTrash,
                                                     root: desc.root)
         return Future { $0(.success(())) }.eraseToAnyPublisher()
     }
@@ -74,6 +99,10 @@ class DirectoryAccessMock: DirectoryAccess {
                                                     lastModified: desc.lastModified,
                                                     name: desc.name,
                                                     thumbnail: image,
+                                                    imageDrawer: desc.imageDrawer,
+                                                    levelDrawer: desc.levelDrawer,
+                                                    imageTrash: desc.imageTrash,
+                                                    levelTrash: desc.levelTrash,
                                                     root: desc.root)
         return Future { $0(.success(())) }.eraseToAnyPublisher()
     }
@@ -82,11 +111,11 @@ class DirectoryAccessMock: DirectoryAccess {
         directories[description.id] = description
 
         for document in description.documents {
-            self.append(document: document, to: description.id)
+            _ = self.append(document: document, to: description.id)
         }
 
         for directory in description.directories {
-            self.append(directory: directory, to: description.id)
+            _ = self.append(directory: directory, to: description.id)
         }
         return Future { $0(.success(())) }.eraseToAnyPublisher()
     }
@@ -100,11 +129,11 @@ class DirectoryAccessMock: DirectoryAccess {
         guard let desc = directories[child] else { return Future { $0(.success(())) }.eraseToAnyPublisher() }
 
         for document in desc.documents {
-            self.delete(child: document.id, of: child)
+            _ = self.delete(child: document.id, of: child)
         }
 
         for directory in desc.directories {
-            self.delete(child: directory.id, of: child)
+            _ = self.delete(child: directory.id, of: child)
         }
 
         directories.removeValue(forKey: child)
@@ -195,11 +224,11 @@ class DirectoryAccessMock: DirectoryAccess {
         directories[description.id] = description
 
         for document in description.documents {
-            self.append(document: document, to: description.id)
+            _ = self.append(document: document, to: description.id)
         }
 
         for directory in description.directories {
-            self.append(directory: directory, to: description.id)
+            _ = self.append(directory: directory, to: description.id)
         }
 
         return Future { $0(.success(())) }.eraseToAnyPublisher()

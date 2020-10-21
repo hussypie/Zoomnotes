@@ -11,15 +11,7 @@ import UIKit
 import Combine
 import PencilKit
 
-class Historian {
-    private let undoManager: UndoManager?
-    private let viewModel: NoteEditorViewModel
-
-    init(undoManager: UndoManager?, viewModel: NoteEditorViewModel) {
-        self.undoManager = undoManager
-        self.viewModel = viewModel
-    }
-
+extension NoteViewController {
     func createImage(id: NoteImageID, frame: CGRect, with preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
         return self.viewModel
             .create(id: id, frame: frame, preview: preview)
@@ -46,18 +38,12 @@ class Historian {
     }
 
     func removeChild(_ sublevel: NoteChildVM, undo: @escaping (NoteChildVM) -> Void) {
-        UIView.animate(withDuration: 0.15, animations: {
-            sublevel.frame = CGRect(x: -sublevel.frame.width,
-                                   y: -sublevel.frame.height,
-                                   width: 0,
-                                   height: 0)
-        }, completion: { _ in
-            sublevel.commander.remove()
-            self.undoManager?.registerUndo(withTarget: self) { _ in
-                undo(sublevel)
-            }
-            self.undoManager?.setActionName("Remove")
-        })
+        sublevel.commander.remove()
+        self.undoManager?.registerUndo(withTarget: self) { _ in
+            sublevel.commander.restore()
+            undo(sublevel)
+        }
+        self.undoManager?.setActionName("Remove")
     }
 
     func update(from: PKDrawing, to drawing: PKDrawing) {
@@ -91,17 +77,17 @@ class Historian {
     }
 
     func moveToDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
-        fatalError("Not implemented")
-        self.undoManager?.registerUndo(withTarget: self) {
-            $0.moveFromDrawer(sublevel: sublevel, from: to, to: from)
+        sublevel.commander.moveToDrawer(to: to)
+        self.undoManager?.registerUndo(withTarget: self) { _ in
+            sublevel.commander.moveFromDrawer(from: from)
         }
         self.undoManager?.setActionName("Move To Drawer")
     }
 
     func moveFromDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
-        fatalError("Not implemented")
-        self.undoManager?.registerUndo(withTarget: self) {
-            $0.moveToDrawer(sublevel: sublevel, from: to, to: from)
+        sublevel.commander.moveFromDrawer(from: from)
+        self.undoManager?.registerUndo(withTarget: self) { _ in
+            sublevel.commander.moveToDrawer(to: to)
         }
         self.undoManager?.setActionName("Move To Canvas")
     }

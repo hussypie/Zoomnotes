@@ -35,8 +35,13 @@ class NoteModelDBAccessTests: XCTestCase {
                                                sublevels: [],
                                                images: [])
 
-        _ = NoteLevelAccessImpl(access: DBAccess(moc: moc))
-            .stubP(with: rootLevel)
+        let document = DocumentStoreDescription(id: ID(UUID()),
+                                                lastModified: Date(),
+                                                name: "Example document",
+                                                thumbnail: .checkmark,
+                                                root: rootLevel)
+
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
             .flatMap { access in
                 access
                     .append(level: description, to: rootLevel.id)
@@ -74,14 +79,19 @@ class NoteModelDBAccessTests: XCTestCase {
                                              sublevels: [description],
                                              images: [])
 
+        let document = DocumentStoreDescription(id: ID(UUID()),
+                                                lastModified: Date(),
+                                                name: "Example document",
+                                                thumbnail: .checkmark,
+                                                root: rootLevel)
+
         let image = NoteImageDescription(id: ID(UUID()),
                                          preview: .checkmark,
                                          drawing: PKDrawing(),
                                          image: .checkmark,
                                          frame: CGRect(x: 0, y: 0, width: 100, height: 100))
 
-        _ = NoteLevelAccessImpl(access: DBAccess(moc: moc))
-            .stubP(with: rootLevel)
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
             .flatMap { access in
                 access.append(image: image, to: rootLevel.id)
                     .flatMap { access.read(image: image.id) }
@@ -110,8 +120,13 @@ class NoteModelDBAccessTests: XCTestCase {
                                              sublevels: [],
                                              images: [image])
 
-        _ = NoteLevelAccessImpl(access: DBAccess(moc: moc))
-            .stubP(with: rootLevel)
+        let document = DocumentStoreDescription(id: ID(UUID()),
+                                                       lastModified: Date(),
+                                                       name: "Example document",
+                                                       thumbnail: .checkmark,
+                                                       root: rootLevel)
+
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
             .flatMap { access in
                 access.remove(image: image.id, from: rootLevel.id)
                 .flatMap { access.read(level: rootLevel.id) }
@@ -137,10 +152,15 @@ class NoteModelDBAccessTests: XCTestCase {
                                              sublevels: [],
                                              images: [image])
 
+        let document = DocumentStoreDescription(id: ID(UUID()),
+                                                lastModified: Date(),
+                                                name: "Example document",
+                                                thumbnail: .checkmark,
+                                                root: rootLevel)
+
         let newAnnotation = PKDrawing()
 
-        _ = NoteLevelAccessImpl(access: DBAccess(moc: moc))
-            .stubP(with: rootLevel)
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
             .flatMap { access in
                 access.update(annotation: newAnnotation, image: image.id)
                     .flatMap { access.read(level: rootLevel.id) }
@@ -167,9 +187,15 @@ class NoteModelDBAccessTests: XCTestCase {
                                              sublevels: [],
                                              images: [image])
 
+        let document = DocumentStoreDescription(id: ID(UUID()),
+                                                lastModified: Date(),
+                                                name: "Example document",
+                                                thumbnail: .checkmark,
+                                                root: rootLevel)
+
         let newFrame = CGRect(x: 100, y: 100, width: 1000, height: 1000)
-        _ = NoteLevelAccessImpl(access: DBAccess(moc: moc))
-            .stubP(with: rootLevel)
+
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
             .flatMap { access in
                 access.update(frame: newFrame, image: image.id)
                     .flatMap { access.read(level: rootLevel.id) }
@@ -197,8 +223,13 @@ class NoteModelDBAccessTests: XCTestCase {
                                              sublevels: [description],
                                              images: [])
 
-        _ = NoteLevelAccessImpl(access: DBAccess(moc: moc))
-            .stubP(with: rootLevel)
+        let document = DocumentStoreDescription(id: ID(UUID()),
+                                                lastModified: Date(),
+                                                name: "Example document",
+                                                thumbnail: .checkmark,
+                                                root: rootLevel)
+
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
             .flatMap { access in
                 access.remove(level: description.id, from: rootLevel.id)
                     .flatMap { access.read(level: description.id) }
@@ -224,8 +255,13 @@ class NoteModelDBAccessTests: XCTestCase {
 
         let newDrawing = PKDrawing()
 
-        _ = NoteLevelAccessImpl(access: DBAccess(moc: moc))
-            .stubP(with: rootLevel)
+        let document = DocumentStoreDescription(id: ID(UUID()),
+                                                lastModified: Date(),
+                                                name: "Example document",
+                                                thumbnail: .checkmark,
+                                                root: rootLevel)
+
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
             .flatMap { access in
                 access.update(drawing: newDrawing, for: rootLevel.id)
                 .flatMap { access.read(level: rootLevel.id) }
@@ -240,27 +276,32 @@ class NoteModelDBAccessTests: XCTestCase {
     }
 
     func testUpdateFrame() {
-        let description = NoteLevelDescription(preview: .checkmark,
+        let rootLevel = NoteLevelDescription(preview: .checkmark,
                                                frame: CGRect(x: 0, y: 0, width: 100, height: 100),
                                                id: ID(UUID()),
                                                drawing: PKDrawing(),
                                                sublevels: [],
                                                images: [])
 
+        let document = DocumentStoreDescription(id: ID(UUID()),
+                                                lastModified: Date(),
+                                                name: "Example document",
+                                                thumbnail: .checkmark,
+                                                root: rootLevel)
+
         let newFrame = CGRect(x: 10, y: 10, width: 200, height: 300)
 
-        _ = NoteLevelAccessImpl(access: DBAccess(moc: moc))
-            .stubP(with: description)
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
             .flatMap { access  in
-                access.update(frame: newFrame, for: description.id)
-                    .flatMap { access.read(level: description.id) }
+                access.update(frame: newFrame, for: rootLevel.id)
+                    .flatMap { access.read(level: rootLevel.id) }
         }.sink(receiveDone: { XCTAssertTrue(true, "OK") },
                receiveError: { XCTFail($0.localizedDescription) },
                receiveValue: { descriptionFromDB in
                 XCTAssertNotNil(descriptionFromDB)
-                XCTAssertEqual(descriptionFromDB!.id, description.id)
+                XCTAssertEqual(descriptionFromDB!.id, rootLevel.id)
                 XCTAssertEqual(descriptionFromDB!.frame, newFrame)
-                XCTAssertEqual(descriptionFromDB!.drawing, description.drawing)
+                XCTAssertEqual(descriptionFromDB!.drawing, rootLevel.drawing)
         })
     }
 }

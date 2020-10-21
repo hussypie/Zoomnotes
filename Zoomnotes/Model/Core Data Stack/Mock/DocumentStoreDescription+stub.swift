@@ -27,6 +27,10 @@ extension DocumentStoreDescription {
                                         lastModified: Date(),
                                         name: stubNames.randomElement()!,
                                         thumbnail: thumbnail,
+                                        imageDrawer: [],
+                                        levelDrawer: [],
+                                        imageTrash: [],
+                                        levelTrash: [],
                                         root: rootLevel)
     }
 }

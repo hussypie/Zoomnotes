@@ -84,16 +84,17 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
     func noteEditorVM(for note: DocumentID, with name: String) -> AnyPublisher<NoteEditorViewModel?, Error> {
         // swiftlint:disable:next force_cast
-        let noteLevelAccess = (UIApplication.shared.delegate as! AppDelegate).noteLevelAccess
+        let dbaccess = (UIApplication.shared.delegate as! AppDelegate).access
+        let noteLevelAccess = NoteLevelAccessImpl(access: dbaccess, document: note)
 
         return self.cdaccess
             .noteModel(of: note)
-            .map { noteModel in
-                guard let noteModel = noteModel else { return nil }
+            .map { lookupResult in
+                guard let lookupResult = lookupResult else { return nil }
 
-                let sublevelFactory: NoteEditorViewModel.SublevelFactory = { vm in
+                let sublevelFactory: SublevelFactory = { vm in
                     let subLevels =
-                        noteModel.sublevels
+                        lookupResult.root.sublevels
                             .map { NoteChildVM(id: UUID(),
                                                preview: $0.preview,
                                                frame: $0.frame,
@@ -101,7 +102,27 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                                                              editor: vm)) }
 
                     let images =
-                        noteModel.images
+                        lookupResult.root.images
+                            .map { NoteChildVM(id: UUID(),
+                                               preview: $0.preview,
+                                               frame: $0.frame,
+                                               commander: NoteImageCommander(id: $0.id,
+                                                                             editor: vm)) }
+
+                    return subLevels + images
+                }
+
+                let drawerFactory: SublevelFactory = { vm in
+                    let subLevels =
+                        lookupResult.levelDrawer
+                            .map { NoteChildVM(id: UUID(),
+                                               preview: $0.preview,
+                                               frame: $0.frame,
+                                               commander: NoteLevelCommander(id: $0.id,
+                                                                             editor: vm)) }
+
+                    let images =
+                        lookupResult.imageDrawer
                             .map { NoteChildVM(id: UUID(),
                                                preview: $0.preview,
                                                frame: $0.frame,
@@ -112,10 +133,11 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                 }
 
                 return NoteEditorViewModel(
-                    id: noteModel.id,
+                    id: lookupResult.root.id,
                     title: name,
                     sublevels: sublevelFactory,
-                    drawing: noteModel.drawing,
+                    drawer: .uninitd(drawerFactory),
+                    drawing: lookupResult.root.drawing,
                     access: noteLevelAccess,
                     onUpdateName: {
                         self.cdaccess
@@ -207,6 +229,10 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                        lastModified: lastModified,
                                        name: name,
                                        thumbnail: preview,
+                                       imageDrawer: [],
+                                       levelDrawer: [],
+                                       imageTrash: [],
+                                       levelTrash: [],
                                        root: rootData)
 
         return self.cdaccess

@@ -223,30 +223,35 @@ struct DirectoryAccessImpl: DirectoryAccess {
         }.eraseToAnyPublisher()
     }
 
-    func noteModel(of id: DocumentID) -> AnyPublisher<NoteLevelDescription?, Error> {
+    func noteModel(of id: DocumentID) -> AnyPublisher<DocumentLookupResult?, Error> {
         self.access.accessing(to: .read, id: id) { (store: NoteStore?) in
             guard let store = store else { return nil }
             guard let root = store.root else { return nil }
             guard let sublevels = root.sublevels as? Set<NoteLevelStore> else { return nil }
             guard let images = root.images as? Set<ImageStore> else { return nil }
 
-            let frame = CGRect(x: CGFloat(root.frame!.x),
-                               y: CGFloat(root.frame!.y),
-                               width: CGFloat(root.frame!.width),
-                               height: CGFloat(root.frame!.height))
+            let subLevelDescs = sublevels.map(SublevelDescription.from)
+            let imageDescs = images.map(SubImageDescription.from)
 
-            let subLevelDescs = sublevels.compactMap {
-                try? NoteLevelDescription.from(store: $0)
-            }
+            let rootDesc = NoteLevelLookupResult(id: ID(root.id!),
+                                                 drawing: try PKDrawing(data: root.drawing!),
+                                                 sublevels: subLevelDescs,
+                                                 images: imageDescs)
 
-            let imageDescs = images.map { NoteImageDescription.from($0) }
+            let imageDrawer = (store.imageDrawer as? Set<ImageStore>)?.map(SubImageDescription.from) ?? []
+            let levelDrawer = (store.drawer as? Set<NoteLevelStore>)?.map(SublevelDescription.from) ?? []
 
-            return NoteLevelDescription(preview: UIImage(data: root.preview!)!,
-                                        frame: frame,
-                                        id: ID(root.id!),
-                                        drawing: try PKDrawing(data: root.drawing!),
-                                        sublevels: subLevelDescs,
-                                        images: imageDescs)
+            let imageTrash = (store.imageDrawer as? Set<ImageStore>)?.map(SubImageDescription.from) ?? []
+            let levelTrash = (store.drawer as? Set<NoteLevelStore>)?.map(SublevelDescription.from) ?? []
+
+            return DocumentLookupResult(id: ID(store.id!),
+                                        lastModified: store.lastModified!,
+                                        name: store.name!,
+                                        imageDrawer: imageDrawer,
+                                        levelDrawer: levelDrawer,
+                                        imageTrash: imageTrash,
+                                        levelTrash: levelTrash,
+                                        root: rootDesc)
         }
     }
 

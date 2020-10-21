@@ -56,9 +56,10 @@ class DocumentCollectionViewController: UICollectionViewController {
 
                 }
                 // swiftlint:disable:next force_cast
-                let access = (UIApplication.shared.delegate as! AppDelegate).fileBrowserAccess
+                let access = (UIApplication.shared.delegate as! AppDelegate).access
+                let directoryAccess = DirectoryAccessImpl(access: access)
                 return FolderBrowserViewModel
-                    .root(defaults: UserDefaults.standard, access: access)
+                    .root(defaults: UserDefaults.standard, access: directoryAccess)
         }
         .sink(receiveCompletion: { _ in },
               receiveValue: { folderVM in

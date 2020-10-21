@@ -68,14 +68,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return DBAccess(moc: privateContext)
     }()
 
-    lazy var fileBrowserAccess: DirectoryAccess = {
-        return DirectoryAccessImpl(access: access)
-    }()
-
-    lazy var noteLevelAccess: NoteLevelAccess = {
-        return NoteLevelAccessImpl(access: access)
-    }()
-
     // MARK: - Core Data Saving support
 
     func saveContext () {

@@ -29,7 +29,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     var transitionManager: NoteTransitionDelegate!
 
     var viewModel: NoteEditorViewModel!
-    var historian: Historian!
 
     private var drawerViewTopOffset: Constraint!
 
@@ -84,10 +83,9 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 let id: NoteImageID = ID(UUID())
                 self.view.addSubview(preview)
 
-                self.historian
-                    .createImage(id: id, frame: actualFrame, with: image)
-                    .sink(receiveDone: { },
-                          receiveError: { _ in /* TODO */ },
+                self.createImage(id: id, frame: actualFrame, with: image)
+                    .sink(receiveDone: { /* TODO logging */ },
+                          receiveError: { _ in /* TODO logging */ },
                           receiveValue: { vm in preview.viewModel = vm })
                     .store(in: &self.cancellables)
 
@@ -130,8 +128,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 if catapult.tryFling(velocity, magnitude, state.currentlyDraggedPreview) { return }
 
                 let id: NoteLevelID = ID(UUID())
-                self.historian
-                    .createLevel(id: id,
+                self.createLevel(id: id,
                                  frame: state.currentlyDraggedPreview.frame,
                                  with: state.currentlyDraggedPreview.image!)
                     .sink(receiveDone: { /* TODO */ },
@@ -199,7 +196,13 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         let title: Binding<String> = .init(get: { self.viewModel.title },
                                            set: { self.viewModel.title = $0 })
 
-        self.drawerView = DrawerView(title: title, onCameraButtonTapped: { /* NOP */})
+        self.drawerView = DrawerView(title: title)
+
+        for child in viewModel.drawer {
+            let sublevelView = sublevelPreview(frame: child.frame, preview: child.preview)
+            sublevelView.viewModel = child
+            self.drawerView?.addSubview(sublevelView)
+        }
 
         self.view.addSubview(drawerView!)
         self.view.bringSubviewToFront(drawerView!)
@@ -216,9 +219,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        self.historian = Historian(undoManager: self.undoManager,
-                                   viewModel: self.viewModel)
 
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
 
@@ -262,6 +262,8 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
         updateContentSizeForDrawing()
         canvasView.contentOffset = CGPoint(x: 0, y: -canvasView.adjustedContentInset.top)
     }
@@ -419,7 +421,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
 extension NoteViewController: PKCanvasViewDelegate {
     func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
-        self.historian.update(from: self.viewModel.drawing, to: canvasView.drawing)
+        self.update(from: self.viewModel.drawing, to: canvasView.drawing)
         updateContentSizeForDrawing()
     }
 
@@ -489,10 +491,19 @@ extension NoteViewController {
         let magnitude: CGFloat = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
 
         let catapult = Catapult(threshold: 4000, in: self.view) {
-            self.historian.removeChild(vm, undo: { _ in fatalError("Not implemented") })
+            self.removeChild(vm, undo: { _ in fatalError("Not implemented") })
         }
 
-        if catapult.tryFling(velocity, magnitude, state.dragging) { return }
+        if catapult.tryFling(velocity, magnitude, state.dragging) {
+            state.dragging.removeFromSuperview()
+            self.removeChild(vm) { undidvm in
+                let preview = self.sublevelPreview(frame: undidvm.frame,
+                                                   preview: undidvm.preview)
+                preview.viewModel = undidvm
+                self.canvasView.addSubview(preview)
+            }
+            return
+        }
 
         if self.drawerView!.frame.contains(state.dragging.frame) {
             let locInDrawer = rec.location(in: self.drawerView)
@@ -504,11 +515,14 @@ extension NoteViewController {
 
             let originalFrame = state.originalFrame
             if state.origin == .canvas {
-                self.historian.moveToDrawer(sublevel: vm,
+                self.moveToDrawer(sublevel: vm,
                                             from: originalFrame,
                                             to: frameInDrawer)
+                state.dragging.removeFromSuperview()
+                self.drawerView?.addSubview(state.dragging)
+                state.dragging.frame = frameInDrawer
             } else {
-                self.historian.moveChild(sublevel: vm,
+                self.moveChild(sublevel: vm,
                                          from: originalFrame,
                                          to: frameInDrawer)
             }
@@ -522,9 +536,13 @@ extension NoteViewController {
             let originalFrame = state.originalFrame
 
             if state.origin == .drawer {
-                self.historian.moveFromDrawer(sublevel: vm, from: originalFrame, to: newFrame)
+                self.moveFromDrawer(sublevel: vm, from: originalFrame, to: newFrame)
+
+                state.dragging.removeFromSuperview()
+                self.canvasView.addSubview(state.dragging)
+                state.dragging.frame = newFrame
             } else {
-                self.historian.moveChild(sublevel: vm, from: originalFrame, to: newFrame)
+                self.moveChild(sublevel: vm, from: originalFrame, to: newFrame)
             }
         }
     }
@@ -563,8 +581,7 @@ extension NoteViewController {
                 return state
         },
             end: { _, state in
-                self.historian
-                    .createLevel(id: ID(UUID()),
+                self.createLevel(id: ID(UUID()),
                                  frame: state.dragging.frame,
                                  with: state.dragging.image!)
                     .sink(receiveDone: { /* TODO */ },
@@ -580,7 +597,7 @@ extension NoteViewController {
             preview: preview,
             resizeEnded: { vm, oframe, frame in
                 guard let vm = vm else { return }
-                self.historian.resizePreview(sublevel: vm, from: oframe, to: frame)
+                self.resizePreview(sublevel: vm, from: oframe, to: frame)
         })
 
         preview.copyIndicator.addGestureRecognizer(cloneGesture(for: preview))

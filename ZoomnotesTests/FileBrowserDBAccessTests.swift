@@ -37,10 +37,10 @@ class FileBrowserDBAccessTests: XCTestCase {
                                      thumbnail: .checkmark,
                                      root: rootLevel)
 
-        let appendAction = access.append(document: fileToBeCreated, to: root.id)
-        let noteLevelAccess = NoteLevelAccessImpl(access: DBAccess(moc: moc))
+        let noteLevelAccess = NoteLevelAccessImpl(access: DBAccess(moc: moc), document: fileToBeCreated.id)
 
-        _ = appendAction
+        _ = access
+            .append(document: fileToBeCreated, to: root.id)
             .flatMap({ access.children(of: root.id) })
             .flatMap { result -> AnyPublisher<NoteLevelDescription?, Error> in
                 XCTAssertEqual(result.count, 1)

@@ -14,14 +14,14 @@ struct NoteLevelCommander: NoteChildProtocol {
     let id: NoteLevelID
     let editor: NoteEditorViewModel
 
+    func storeEquals(_ id: UUID) -> Bool { self.id == id }
+
     func detailViewController(from storyboard: UIStoryboard?) -> NoteChildDetailViewController? {
         guard let noteViewController = NoteViewController.from(storyboard) else {
                 return nil
         }
         return .sublevel(noteViewController, id: id)
     }
-
-    func storeEquals(_ id: UUID) -> Bool { self.id == id }
 
     func resize(to: CGRect) {
         editor.resize(id: id, to: to)
@@ -33,6 +33,18 @@ struct NoteLevelCommander: NoteChildProtocol {
 
     func remove() {
         editor.remove(id: id)
+    }
+
+    func moveToDrawer(to frame: CGRect) {
+        editor.moveToDrawer(id: id, frame: frame)
+    }
+
+    func moveFromDrawer(from frame: CGRect) {
+        editor.moveFromDrawer(id: id, frame: frame)
+    }
+
+    func restore() {
+        editor.restore(id: id)
     }
 }
 
@@ -42,6 +54,13 @@ struct NoteImageCommander: NoteChildProtocol {
 
     func storeEquals(_ id: UUID) -> Bool { self.id == id }
 
+    func detailViewController(from storyboard: UIStoryboard?) -> NoteChildDetailViewController? {
+        guard let imageDetailViewController = ImageDetailViewController.from(storyboard) else {
+                return nil
+        }
+        return .image(imageDetailViewController, id: id)
+    }
+
     func resize(to: CGRect) {
         editor.resize(id: id, to: to)
     }
@@ -54,11 +73,16 @@ struct NoteImageCommander: NoteChildProtocol {
         editor.remove(id: id)
     }
 
-    func detailViewController(from storyboard: UIStoryboard?) -> NoteChildDetailViewController? {
-        guard let imageDetailViewController = ImageDetailViewController.from(storyboard) else {
-                return nil
-        }
-        return .image(imageDetailViewController, id: id)
+    func moveToDrawer(to frame: CGRect) {
+        editor.moveToDrawer(id: id, frame: frame)
+    }
+
+    func moveFromDrawer(from frame: CGRect) {
+        editor.moveFromDrawer(id: id, frame: frame)
+    }
+
+    func restore() {
+        editor.restore(id: id)
     }
 }
 

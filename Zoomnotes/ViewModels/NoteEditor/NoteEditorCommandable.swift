@@ -20,6 +20,9 @@ protocol NoteChildProtocol {
     func resize(to: CGRect)
     func move(to: CGRect)
     func remove()
+    func restore()
+    func moveToDrawer(to frame: CGRect)
+    func moveFromDrawer(from frame: CGRect)
     func detailViewController(from: UIStoryboard?) -> NoteChildDetailViewController?
     func storeEquals(_ id: UUID) -> Bool
 }
@@ -37,6 +40,8 @@ protocol NoteEditorProtocol {
     func resize(id: NoteImageID, to: CGRect)
     func remove(id: NoteImageID)
     func remove(id: NoteLevelID)
+    func restore(id: NoteImageID)
+    func restore(id: NoteLevelID)
     func moveToDrawer(id: NoteLevelID, frame: CGRect)
     func moveToDrawer(id: NoteImageID, frame: CGRect)
     func moveFromDrawer(id: NoteLevelID, frame: CGRect)

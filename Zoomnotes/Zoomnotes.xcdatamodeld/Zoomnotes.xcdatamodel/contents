@@ -27,7 +27,11 @@
         <attribute name="lastModified" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="name" attributeType="String"/>
         <attribute name="thumbnail" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <relationship name="drawer" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="NoteLevelStore"/>
+        <relationship name="imageDrawer" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageStore"/>
+        <relationship name="imageTrash" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageStore"/>
         <relationship name="root" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NoteLevelStore"/>
+        <relationship name="trash" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="NoteLevelStore"/>
     </entity>
     <entity name="RectStore" representedClassName="RectStore" syncable="YES" codeGenerationType="class">
         <attribute name="height" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -39,7 +43,7 @@
         <element name="DirectoryStore" positionX="-54" positionY="18" width="128" height="118"/>
         <element name="ImageStore" positionX="-54" positionY="54" width="128" height="118"/>
         <element name="NoteLevelStore" positionX="-54" positionY="27" width="128" height="133"/>
-        <element name="NoteStore" positionX="-63" positionY="-18" width="128" height="118"/>
+        <element name="NoteStore" positionX="-63" positionY="-18" width="128" height="178"/>
         <element name="RectStore" positionX="-45" positionY="36" width="128" height="103"/>
     </elements>
 </model>

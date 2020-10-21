@@ -1,13 +1,18 @@
 //
-//  CGRect+Quadrant.swift
+//  CGRect+center.swift
 //  Zoomnotes
 //
-//  Created by Berci on 2020. 09. 07..
+//  Created by Berci on 2020. 08. 26..
 //  Copyright © 2020. Berci. All rights reserved.
 //
 
-import Foundation
 import UIKit
+
+extension CGRect {
+    var center: CGPoint {
+        return CGPoint(x: self.midX, y: self.midY)
+    }
+}
 
 enum Half {
     case left
@@ -34,5 +39,14 @@ extension CGRect {
             return .left
         }
         return .right
+    }
+}
+
+extension CGRect {
+    static func from(_ store: RectStore) -> CGRect {
+        CGRect(x: CGFloat(store.x),
+               y: CGFloat(store.y),
+               width: CGFloat(store.width),
+               height: CGFloat(store.height))
     }
 }

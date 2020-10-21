@@ -16,8 +16,6 @@ class DrawerView: UIView {
 
     var contents: [UUID: NoteLevelPreview] = [:]
 
-    private var onCameraButtonTapped: () -> Void
-
     lazy var titleTextField: UITextField = {
         let textField = UITextField()
 
@@ -40,16 +38,8 @@ class DrawerView: UIView {
         return textField
     }()
 
-    lazy var imagePickerButton: UIButton = {
-        let button = UIButton(type: .roundedRect)
-        button.setImage(UIImage(systemName: "camera"), for: .normal)
-        button.addTarget(self, action: #selector(cameraButtonTapped), for: .touchUpInside)
-        return button
-    }()
-
-    init(title: Binding<String>, onCameraButtonTapped: @escaping () -> Void) {
+    init(title: Binding<String>) {
         self.title = title
-        self.onCameraButtonTapped = onCameraButtonTapped
         super.init(frame: CGRect.zero)
 
         let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .prominent))
@@ -69,14 +59,6 @@ class DrawerView: UIView {
             make.left.equalTo(self).offset(20)
             make.width.equalTo(200)
             make.height.equalTo(30)
-        }
-
-        self.addSubview(imagePickerButton)
-        self.bringSubviewToFront(imagePickerButton)
-
-        imagePickerButton.snp.makeConstraints { make in
-            make.leading.equalTo(titleTextField.snp.trailing)
-            make.top.equalTo(self).offset(10)
         }
 
         let nc = NotificationCenter.default
@@ -113,10 +95,6 @@ class DrawerView: UIView {
                                     height: view.frame.height / 2)
             }
         }
-    }
-
-    @objc func cameraButtonTapped(_ sender: UIButton) {
-        self.onCameraButtonTapped()
     }
 
     required init?(coder: NSCoder) {

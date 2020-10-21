@@ -10,13 +10,19 @@ import Foundation
 import PencilKit
 import Combine
 import UIKit
-import Combine
 
 class NoteLevelAccessMock: NoteLevelAccess {
     typealias LevelTable = [NoteLevelID: NoteLevelDescription]
     typealias ImageTable = [NoteImageID: NoteImageDescription]
+
     var levels: LevelTable
     var images: ImageTable
+
+    var levelDrawer: LevelTable = [:]
+    var imageDrawer: ImageTable = [:]
+
+    var levelTrash: LevelTable = [:]
+    var imageTrash: ImageTable = [:]
 
     init(levels: LevelTable, images: ImageTable) {
         self.levels = levels
@@ -57,7 +63,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
         guard let subject = levels[id] else { return Future { $0(.success(())) }.eraseToAnyPublisher() }
 
         for sublevel in subject.sublevels {
-            self.remove(level: sublevel.id, from: subject.id)
+            _ = self.remove(level: sublevel.id, from: subject.id)
         }
 
         levels[desc.id] = NoteLevelDescription(preview: desc.preview,
@@ -68,6 +74,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
                                                images: desc.images)
 
         levels.removeValue(forKey: id)
+        levelTrash[id] = subject
 
         return Future { $0(.success(())) }.eraseToAnyPublisher()
     }
@@ -82,7 +89,10 @@ class NoteLevelAccessMock: NoteLevelAccess {
                                                sublevels: desc.sublevels,
                                                images: desc.images.filter { $0.id != id })
 
+        let subject = images[id]
         images.removeValue(forKey: id)
+        imageTrash[id] = subject
+
         return Future { $0(.success(())) }.eraseToAnyPublisher()
     }
 
@@ -90,7 +100,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
         guard let desc = levels[id] else { return Future { $0(.success(())) }.eraseToAnyPublisher() }
         for sublevel in desc.sublevels {
             // swiftlint:disable:next force_try
-            self.delete(level: sublevel.id)
+            _ = self.delete(level: sublevel.id)
         }
         levels.removeValue(forKey: id)
         return Future { $0(.success(())) }.eraseToAnyPublisher()
@@ -165,5 +175,108 @@ class NoteLevelAccessMock: NoteLevelAccess {
                                                image: desc.image,
                                                frame: frame)
         return Future { $0(.success(())) }.eraseToAnyPublisher()
+    }
+
+    func emptyTrash() -> AnyPublisher<Void, Error> {
+        self.levelTrash.removeAll()
+        self.imageTrash.removeAll()
+
+        return Future { $0(.success(())) }.eraseToAnyPublisher()
+    }
+
+    func moveToDrawer(image id: NoteImageID, from parent: NoteLevelID) -> AnyPublisher<Void, Error> {
+        let desc = levels[parent]!
+        levels[parent] = NoteLevelDescription(preview: desc.preview,
+                                              frame: desc.frame,
+                                              id: desc.id,
+                                              drawing: desc.drawing,
+                                              sublevels: desc.sublevels,
+                                              images: desc.images.filter { $0.id != id })
+
+        imageDrawer[id] = images[id]!
+        images.removeValue(forKey: id)
+
+        return Future { $0(.success(())) }.eraseToAnyPublisher()
+    }
+
+    func moveToDrawer(level id: NoteLevelID, from parent: NoteLevelID) -> AnyPublisher<Void, Error> {
+        let desc = levels[parent]!
+        levels[parent] = NoteLevelDescription(preview: desc.preview,
+                                              frame: desc.frame,
+                                              id: desc.id,
+                                              drawing: desc.drawing,
+                                              sublevels: desc.sublevels.filter { $0.id != id },
+                                              images: desc.images)
+
+        levelDrawer[id] = levels[id]!
+        levels.removeValue(forKey: id)
+
+        return Future { $0(.success(())) }.eraseToAnyPublisher()
+    }
+
+    func moveFromDrawer(image id: NoteImageID, to parent: NoteLevelID) -> AnyPublisher<Void, Error> {
+        let image = imageDrawer[id]!
+        let desc = levels[parent]!
+        levels[parent] = NoteLevelDescription(preview: desc.preview,
+                                              frame: desc.frame,
+                                              id: desc.id,
+                                              drawing: desc.drawing,
+                                              sublevels: desc.sublevels,
+                                              images: desc.images + [image])
+
+        imageDrawer.removeValue(forKey: id)
+
+        return Future { $0(.success(())) }.eraseToAnyPublisher()
+    }
+
+    func moveFromDrawer(level id: NoteLevelID, to parent: NoteLevelID) -> AnyPublisher<Void, Error> {
+        let level = levelDrawer[id]!
+        let desc = levels[parent]!
+        levels[parent] = NoteLevelDescription(preview: desc.preview,
+                                              frame: desc.frame,
+                                              id: desc.id,
+                                              drawing: desc.drawing,
+                                              sublevels: desc.sublevels + [level],
+                                              images: desc.images)
+
+        levelDrawer.removeValue(forKey: id)
+
+        return Future { $0(.success(())) }.eraseToAnyPublisher()
+    }
+
+    func restore(image id: NoteImageID, to parent: NoteLevelID) -> AnyPublisher<SubImageDescription, Error> {
+        let image = imageDrawer[id]!
+        let desc = levels[parent]!
+        levels[parent] = NoteLevelDescription(preview: desc.preview,
+                                              frame: desc.frame,
+                                              id: desc.id,
+                                              drawing: desc.drawing,
+                                              sublevels: desc.sublevels,
+                                              images: desc.images + [image])
+
+        imageTrash.removeValue(forKey: id)
+        let subDesc = SubImageDescription(id: image.id,
+                                          preview: image.preview,
+                                          frame: image.frame)
+
+        return Future { $0(.success(subDesc)) }.eraseToAnyPublisher()
+    }
+
+    func restore(level id: NoteLevelID, to parent: NoteLevelID) -> AnyPublisher<SublevelDescription, Error> {
+        let level = levelTrash[id]!
+        let desc = levels[parent]!
+        levels[parent] = NoteLevelDescription(preview: desc.preview,
+                                              frame: desc.frame,
+                                              id: desc.id,
+                                              drawing: desc.drawing,
+                                              sublevels: desc.sublevels + [level],
+                                              images: desc.images)
+
+        levelTrash.removeValue(forKey: id)
+        let subdesc = SublevelDescription(id: level.id,
+                                          preview: level.preview,
+                                          frame: level.frame)
+
+        return Future { $0(.success(subdesc)) }.eraseToAnyPublisher()
     }
 }
