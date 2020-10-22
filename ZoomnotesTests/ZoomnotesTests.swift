@@ -87,13 +87,13 @@ class ZoomnotesUtilsTests: XCTestCase {
         // swiftlint:disable:next nesting
         enum TestError: Error { case error }
         _ = Just(3).sink(receiveDone: { XCTAssertTrue(true, "OK")},
-                                       receiveError: { _ in },
+                                       receiveError: { _ in XCTFail("Should not receive error") },
                                        receiveValue: { XCTAssertEqual($0, 3)})
 
         _ = Fail<Never, TestError>(error: TestError.error)
             .sink(receiveDone: { XCTAssertTrue(true, "OK") },
                receiveError: { XCTAssertEqual($0, TestError.error) },
-               receiveValue: { _ in })
+               receiveValue: { _ in XCTFail("Should not receive value") })
 
     }
 }
