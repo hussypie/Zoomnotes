@@ -215,6 +215,10 @@ class FileBrowserVMTests: XCTestCase {
                                            lastModified: Date(),
                                            name: "Best Schwarzenegger movies",
                                            thumbnail: .actions,
+                                           imageDrawer: [],
+                                           levelDrawer: [],
+                                           imageTrash: [],
+                                           levelTrash: [],
                                            root: NoteLevelDescription.stub(parent: nil))
 
         let rootDir = DirectoryStoreDescription(id: ID(UUID()),

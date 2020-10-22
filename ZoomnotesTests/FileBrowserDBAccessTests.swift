@@ -35,6 +35,10 @@ class FileBrowserDBAccessTests: XCTestCase {
                                      lastModified: Date(),
                                      name: "New file",
                                      thumbnail: .checkmark,
+                                     imageDrawer: [],
+                                     levelDrawer: [],
+                                     imageTrash: [],
+                                     levelTrash: [],
                                      root: rootLevel)
 
         let noteLevelAccess = NoteLevelAccessImpl(access: DBAccess(moc: moc), document: fileToBeCreated.id)

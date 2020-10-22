@@ -58,6 +58,10 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                      lastModified: Date(),
                                      name: "CV",
                                      thumbnail: .checkmark,
+                                     imageDrawer: [],
+                                     levelDrawer: [],
+                                     imageTrash: [],
+                                     levelTrash: [],
                                      root: NoteLevelDescription.stub(parent: nil))
 
         let rootDirId = UUID()
@@ -90,6 +94,10 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                                 lastModified: Date(),
                                                 name: "Women on Mars",
                                                 thumbnail: .checkmark,
+                                                imageDrawer: [],
+                                                levelDrawer: [],
+                                                imageTrash: [],
+                                                levelTrash: [],
                                                 root: rootLevel)
 
         let rootId = UUID()
@@ -103,9 +111,8 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                   receiveError: { XCTFail($0.localizedDescription) },
                   receiveValue: { data in
                     XCTAssertNotNil(data)
-                    XCTAssertEqual(data!.id, rootLevel.id)
-                    XCTAssertEqual(data!.drawing, rootLevel.drawing)
-                    XCTAssertEqual(data!.frame, rootLevel.frame)
+                    XCTAssertEqual(data!.root.id, rootLevel.id)
+                    XCTAssertEqual(data!.root.drawing, rootLevel.drawing)
             })
     }
 
@@ -158,6 +165,10 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                            lastModified: Date(),
                                            name: "Integration tests",
                                            thumbnail: .checkmark,
+                                           imageDrawer: [],
+                                           levelDrawer: [],
+                                           imageTrash: [],
+                                           levelTrash: [],
                                            root: NoteLevelDescription.stub(parent: nil))
 
         let root = DirectoryStoreDescription(id: ID(UUID()),
@@ -287,6 +298,10 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                            lastModified: Date(),
                                            name: "Integration tests",
                                            thumbnail: .checkmark,
+                                           imageDrawer: [],
+                                           levelDrawer: [],
+                                           imageTrash: [],
+                                           levelTrash: [],
                                            root: NoteLevelDescription.stub(parent: nil))
 
         let dir2 = DirectoryStoreDescription(id: ID(UUID()),
@@ -335,6 +350,10 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                            lastModified: Date(),
                                            name: "Integration tests",
                                            thumbnail: .checkmark,
+                                           imageDrawer: [],
+                                           levelDrawer: [],
+                                           imageTrash: [],
+                                           levelTrash: [],
                                            root: NoteLevelDescription.stub(parent: nil))
 
         let root = DirectoryStoreDescription(id: ID(UUID()),

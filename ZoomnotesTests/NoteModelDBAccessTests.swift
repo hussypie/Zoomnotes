@@ -39,6 +39,10 @@ class NoteModelDBAccessTests: XCTestCase {
                                                 lastModified: Date(),
                                                 name: "Example document",
                                                 thumbnail: .checkmark,
+                                                imageDrawer: [],
+                                                levelDrawer: [],
+                                                imageTrash: [],
+                                                levelTrash: [],
                                                 root: rootLevel)
 
         _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
@@ -83,6 +87,10 @@ class NoteModelDBAccessTests: XCTestCase {
                                                 lastModified: Date(),
                                                 name: "Example document",
                                                 thumbnail: .checkmark,
+                                                imageDrawer: [],
+                                                levelDrawer: [],
+                                                imageTrash: [],
+                                                levelTrash: [],
                                                 root: rootLevel)
 
         let image = NoteImageDescription(id: ID(UUID()),
@@ -124,6 +132,10 @@ class NoteModelDBAccessTests: XCTestCase {
                                                        lastModified: Date(),
                                                        name: "Example document",
                                                        thumbnail: .checkmark,
+                                                       imageDrawer: [],
+                                                       levelDrawer: [],
+                                                       imageTrash: [],
+                                                       levelTrash: [],
                                                        root: rootLevel)
 
         _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
@@ -156,6 +168,10 @@ class NoteModelDBAccessTests: XCTestCase {
                                                 lastModified: Date(),
                                                 name: "Example document",
                                                 thumbnail: .checkmark,
+                                                imageDrawer: [],
+                                                levelDrawer: [],
+                                                imageTrash: [],
+                                                levelTrash: [],
                                                 root: rootLevel)
 
         let newAnnotation = PKDrawing()
@@ -191,6 +207,10 @@ class NoteModelDBAccessTests: XCTestCase {
                                                 lastModified: Date(),
                                                 name: "Example document",
                                                 thumbnail: .checkmark,
+                                                imageDrawer: [],
+                                                levelDrawer: [],
+                                                imageTrash: [],
+                                                levelTrash: [],
                                                 root: rootLevel)
 
         let newFrame = CGRect(x: 100, y: 100, width: 1000, height: 1000)
@@ -227,6 +247,10 @@ class NoteModelDBAccessTests: XCTestCase {
                                                 lastModified: Date(),
                                                 name: "Example document",
                                                 thumbnail: .checkmark,
+                                                imageDrawer: [],
+                                                levelDrawer: [],
+                                                imageTrash: [],
+                                                levelTrash: [],
                                                 root: rootLevel)
 
         _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
@@ -259,6 +283,10 @@ class NoteModelDBAccessTests: XCTestCase {
                                                 lastModified: Date(),
                                                 name: "Example document",
                                                 thumbnail: .checkmark,
+                                                imageDrawer: [],
+                                                levelDrawer: [],
+                                                imageTrash: [],
+                                                levelTrash: [],
                                                 root: rootLevel)
 
         _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
@@ -287,6 +315,10 @@ class NoteModelDBAccessTests: XCTestCase {
                                                 lastModified: Date(),
                                                 name: "Example document",
                                                 thumbnail: .checkmark,
+                                                imageDrawer: [],
+                                                levelDrawer: [],
+                                                imageTrash: [],
+                                                levelTrash: [],
                                                 root: rootLevel)
 
         let newFrame = CGRect(x: 10, y: 10, width: 200, height: 300)
@@ -303,5 +335,33 @@ class NoteModelDBAccessTests: XCTestCase {
                 XCTAssertEqual(descriptionFromDB!.frame, newFrame)
                 XCTAssertEqual(descriptionFromDB!.drawing, rootLevel.drawing)
         })
+    }
+
+    func testDeleteSublevel() {
+        XCTFail("Not implemented")
+    }
+
+    func testDeleteSubImage() {
+        XCTFail("Not implemented")
+    }
+
+    func testRestoreSubLevelAfterDelete() {
+        XCTFail("Not implemented")
+    }
+
+    func testRestoreSubImageAfterDelete() {
+        XCTFail("Not implemented")
+    }
+
+    func testEmptyTrash() {
+        XCTFail("Not implemented")
+    }
+
+    func testMoveToDrawer() {
+        XCTFail("Not implemented")
+    }
+
+    func testMpveFromDrawer() {
+        XCTFail("Not implemented")
     }
 }

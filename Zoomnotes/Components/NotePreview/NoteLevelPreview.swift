@@ -23,7 +23,7 @@ class NoteLevelPreview: UIImageView {
         let imageView = UIImageView(image: UIImage(systemName: systemName))
         imageView.isUserInteractionEnabled = true
         imageView.contentMode = .scaleAspectFill
-        imageView.layer.cornerRadius = 15
+        imageView.layer.cornerRadius = 50
         imageView.layer.borderColor = UIColor.systemBlue.cgColor
         imageView.layer.borderWidth = 1
         imageView.backgroundColor = UIColor.white
@@ -129,16 +129,16 @@ class NoteLevelPreview: UIImageView {
         self.addSubview(resizeIndicator)
 
         self.copyIndicator.snp.makeConstraints { make in
-            make.width.equalTo(10)
-            make.height.equalTo(10)
+            make.width.equalTo(30)
+            make.height.equalTo(30)
             make.centerX.equalTo(xOffset)
             make.centerY.equalTo(0)
         }
         self.resizeIndicator.snp.makeConstraints { make in
+            make.width.equalTo(30)
+            make.height.equalTo(30)
             make.centerX.equalTo(xOffset)
             make.centerY.equalTo(self.frame.height)
-            make.width.equalTo(10)
-            make.height.equalTo(10)
         }
     }
 
