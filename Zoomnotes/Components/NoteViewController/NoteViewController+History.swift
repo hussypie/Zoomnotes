@@ -12,34 +12,28 @@ import Combine
 import PencilKit
 
 extension NoteViewController {
-    func createImage(id: NoteImageID, frame: CGRect, with preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
+    func create(id: NoteChildStore, frame: CGRect, with preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
         return self.viewModel
             .create(id: id, frame: frame, preview: preview)
             .map { childVM in
                 self.undoManager?.registerUndo(withTarget: self) { _ in
-                    childVM.commander.remove()
+                    self.viewModel.remove(child: childVM)
                 }
-                self.undoManager?.setActionName("Add Image")
+                switch id {
+                case .level:
+                    self.undoManager?.setActionName("Add Level")
+                case .image:
+                    self.undoManager?.setActionName("Add Image")
+                }
                 return childVM
         }.eraseToAnyPublisher()
     }
 
-    func createLevel(id: NoteLevelID, frame: CGRect, with preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
-        self.viewModel
-            .create(id: id, frame: frame, preview: preview)
-            .map { childVM in
-                self.undoManager?.registerUndo(withTarget: self) { _ in
-                    childVM.commander.remove()
-                }
-                self.undoManager?.setActionName("Add Sublevel")
-                return childVM
-        }.eraseToAnyPublisher()
-    }
 
     func removeChild(_ sublevel: NoteChildVM, undo: @escaping (NoteChildVM) -> Void) {
-        sublevel.commander.remove()
+        self.viewModel.remove(child: sublevel)
         self.undoManager?.registerUndo(withTarget: self) { _ in
-            sublevel.commander.restore()
+            self.viewModel.restore(child: sublevel)
             undo(sublevel)
         }
         self.undoManager?.setActionName("Remove")
@@ -56,7 +50,7 @@ extension NoteViewController {
     func moveChild(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
         UIView.animate(withDuration: 0.15, animations: {
             sublevel.frame = to
-            sublevel.commander.move(to: to)
+            self.viewModel.move(child: sublevel, to: to)
         }, completion: { _ in
             self.undoManager?.registerUndo(withTarget: self) {
                 $0.moveChild(sublevel: sublevel, from: to, to: from)
@@ -66,7 +60,7 @@ extension NoteViewController {
     }
 
     func resizePreview(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
-        sublevel.commander.resize(to: to)
+        self.viewModel.resize(child: sublevel, to: to)
         self.undoManager?.registerUndo(withTarget: self) {
             $0.resizePreview(sublevel: sublevel, from: to, to: from)
         }
@@ -74,7 +68,7 @@ extension NoteViewController {
     }
 
     func moveToDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
-        sublevel.commander.moveToDrawer(to: to)
+        self.viewModel.moveToDrawer(child: sublevel, frame: to)
         self.undoManager?.registerUndo(withTarget: self) { _ in
             self.moveFromDrawer(sublevel: sublevel, from: to, to: from)
         }
@@ -82,7 +76,7 @@ extension NoteViewController {
     }
 
     func moveFromDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
-        sublevel.commander.moveFromDrawer(from: from)
+        self.viewModel.moveToDrawer(child: sublevel, frame: to)
         self.undoManager?.registerUndo(withTarget: self) { _ in
             self.moveToDrawer(sublevel: sublevel, from: to, to: from)
         }

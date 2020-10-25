@@ -26,7 +26,7 @@ struct NoteLevelAccessImpl: NoteLevelAccess {
         case cannotGetSublevels
     }
 
-    func append(level description: NoteLevelDescription, to parent: NoteLevelID) -> AnyPublisher<Void, Error> {
+    func sublevel(from description: NoteLevelDescription) -> AnyPublisher<NoteLevelStore?, Error> {
         access.build(prepare: { (store: RectStore) -> RectStore in
             store.x = Float(description.frame.minX)
             store.y = Float(description.frame.minY)
@@ -35,28 +35,18 @@ struct NoteLevelAccessImpl: NoteLevelAccess {
 
             return store
         }).flatMap { rect in
-            return self.access.build(id: description.id, prepare: { (entity: NoteLevelStore) -> NoteLevelStore in
+            self.access.build(id: description.id, prepare: { (entity: NoteLevelStore) -> NoteLevelStore in
                 entity.preview = description.preview.pngData()!
                 entity.frame = rect
                 entity.drawing = description.drawing.dataRepresentation()
 
                 return entity
             })
-        }.flatMap { sublevel in
-            return self.access.accessing(to: .write, id: parent) { (store: NoteLevelStore?) -> Void in
-                guard let store = store else { throw AccessError.cannotCreateLevelStore }
-                guard let sublevel = sublevel else { throw AccessError.cannotCreateLevelStore }
-                store.addToSublevels(sublevel)
-            }
-        }.flatMap { _ in
-            Publishers.Sequence(sequence: description.sublevels)
-                .flatMap { sublevel in self.append(level: sublevel, to: description.id) }
-                .collect()
-        }.map { _ in return }.eraseToAnyPublisher()
+        }.eraseToAnyPublisher()
     }
 
-    func append(image description: NoteImageDescription, to parent: NoteLevelID) -> AnyPublisher<Void, Error> {
-       return access.build(prepare: { (store: RectStore) -> RectStore in
+    func subimage(from description: NoteImageDescription) -> AnyPublisher<ImageStore?, Error> {
+        return access.build(prepare: { (store: RectStore) -> RectStore in
             store.x = Float(description.frame.minX)
             store.y = Float(description.frame.minY)
             store.width = Float(description.frame.width)
@@ -72,7 +62,27 @@ struct NoteLevelAccessImpl: NoteLevelAccess {
 
                 return store
             })
-        }.flatMap { image in
+        }.eraseToAnyPublisher()
+    }
+
+    func append(level description: NoteLevelDescription, to parent: NoteLevelID) -> AnyPublisher<Void, Error> {
+        sublevel(from: description)
+            .flatMap { sublevel in
+            return self.access.accessing(to: .write, id: parent) { (store: NoteLevelStore?) -> Void in
+                guard let store = store else { throw AccessError.cannotCreateLevelStore }
+                guard let sublevel = sublevel else { throw AccessError.cannotCreateLevelStore }
+                store.addToSublevels(sublevel)
+            }
+        }.flatMap { _ in
+            Publishers.Sequence(sequence: description.sublevels)
+                .flatMap { sublevel in self.append(level: sublevel, to: description.id) }
+                .collect()
+        }.map { _ in return }.eraseToAnyPublisher()
+    }
+
+    func append(image description: NoteImageDescription, to parent: NoteLevelID) -> AnyPublisher<Void, Error> {
+        subimage(from: description)
+            .flatMap { image in
             self.access.accessing(to: .write, id: parent) { (store: NoteLevelStore?) in
                 guard let store = store else { throw AccessError.cannotCreateImageStore }
                 guard let image = image else { throw AccessError.cannotCreateImageStore }
@@ -133,6 +143,13 @@ struct NoteLevelAccessImpl: NoteLevelAccess {
 
                 return imageStore
             }
+        }.flatMap { (imageStore: ImageStore) in
+            self.access.accessing(to: .write, id: parent) { (parentLevel: NoteLevelStore?) in
+                guard let parentLevel = parentLevel else { throw AccessError.cannotFindReferencedEntity }
+                parentLevel.addToImages(imageStore)
+
+                return imageStore
+            }
         }.map { (imageStore: ImageStore) in
             SubImageDescription(id: ID(imageStore.id!),
                                 preview: UIImage(data: imageStore.preview!)!,
@@ -152,6 +169,13 @@ struct NoteLevelAccessImpl: NoteLevelAccess {
                     throw AccessError.cannotFindReferencedEntity
                 }
                 noteStore.removeFromTrash(levelStore)
+                return levelStore
+            }
+        }.flatMap { (levelStore: NoteLevelStore) in
+            self.access.accessing(to: .write, id: parent) { (parentLevel: NoteLevelStore?) in
+                guard let parentLevel = parentLevel else { throw AccessError.cannotFindReferencedEntity }
+                parentLevel.addToSublevels(levelStore)
+
                 return levelStore
             }
         }.map { (levelStore: NoteLevelStore) in
@@ -248,11 +272,13 @@ struct NoteLevelAccessImpl: NoteLevelAccess {
     func emptyTrash() -> AnyPublisher<Void, Error> {
         access.accessing(to: .write, id: document) { (noteStore: NoteStore?) in
             guard let noteStore = noteStore else { throw AccessError.cannotFindReferencedEntity }
-            guard let imageDrawer = noteStore.imageDrawer as? Set<ImageStore> else { return }
-            imageDrawer.forEach { self.access.delete($0) }
+            guard let imageTrash = noteStore.imageTrash as? Set<ImageStore> else { return }
+            imageTrash.forEach { self.access.delete($0) }
+            noteStore.imageTrash = NSSet()
 
-            guard let levelDrawer = noteStore.drawer as? Set<NoteLevelStore> else { return }
-            levelDrawer.forEach { self.access.delete($0) }
+            guard let trash = noteStore.trash as? Set<NoteLevelStore> else { return }
+            trash.forEach { self.access.delete($0) }
+            noteStore.trash = NSSet()
         }
     }
 

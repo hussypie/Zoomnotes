@@ -45,22 +45,23 @@ class NoteEditorTests: XCTestCase {
 
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note Title",
-                                     sublevels: { _ in [] },
-                                     drawer: .initd([]),
+                                     sublevels: [],
+                                     drawer: [],
                                      drawing: PKDrawing(),
                                      access: mockDB,
                                      onUpdateName: { _ in })
 
         let originalNumberOfLevelsInDB = mockDB.levels.count
 
-        _ = vm.create(id: newLevelDescription.id,
+        let newId: NoteChildStore = .level(newLevelDescription.id)
+        _ = vm.create(id: newId,
                       frame: newLevelDescription.frame,
                       preview: newLevelDescription.preview)
             .sink(receiveDone: { XCTAssert(true, "OK")},
                   receiveError: { XCTFail($0.localizedDescription) },
                   receiveValue: { _ in
                     XCTAssert(vm.nodes.count == 1)
-                    XCTAssertNotNil(vm.nodes.first { $0.commander.storeEquals(descId) })
+                    XCTAssertNotNil(vm.nodes.first { $0.store == newId })
 
                     XCTAssertEqual(mockDB.levels.count, originalNumberOfLevelsInDB + 1)
                     XCTAssertNotNil(mockDB.levels[newLevelDescription.id])
@@ -93,29 +94,33 @@ class NoteEditorTests: XCTestCase {
             images: [:]
         )
 
-        let sublevelFactory: SublevelFactory = { editor in
-            [NoteChildVM(id: UUID(),
-                         preview: sublevel.preview,
-                         frame: sublevel.frame,
-                         commander: NoteLevelCommander(id: sublevel.id,
-                                                       editor: editor))]
-        }
+        let sublevels = [
+            NoteChildVM(id: UUID(),
+                        preview: sublevel.preview,
+                        frame: sublevel.frame,
+                        store: .level(sublevel.id))
+        ]
 
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Notes",
-                                     sublevels: sublevelFactory,
-                                     drawer: .initd([]),
+                                     sublevels: sublevels,
+                                     drawer: [],
                                      drawing: root.drawing,
                                      access: mockDB,
                                      onUpdateName: { _ in })
 
         let numberOfLevelsInDBBeforeCommand = mockDB.levels.count
-        vm.remove(id: sublevel.id)
+        vm.remove(child: sublevels.first!)
 
         XCTAssert(vm.nodes.isEmpty)
 
         XCTAssertEqual(mockDB.levels.count, numberOfLevelsInDBBeforeCommand - 1)
-        assertDrawerTrashEmpty(db: mockDB)
+
+        XCTAssert(mockDB.imageTrash.isEmpty)
+        XCTAssert(mockDB.imageDrawer.isEmpty)
+        XCTAssert(mockDB.levelDrawer.isEmpty)
+        XCTAssertEqual(mockDB.levelTrash.count, 1)
+
     }
 
     func testMove() {
@@ -127,28 +132,25 @@ class NoteEditorTests: XCTestCase {
                                         images: [])
 
         let childId = UUID()
-        let sublevelFactory: SublevelFactory = { vm in
-            [NoteChildVM(id: childId,
-                         preview: .checkmark,
-                         frame: note.frame,
-                         commander: NoteLevelCommander(id: note.id,
-                                                       editor: vm))]
-        }
+        let sublevels = [NoteChildVM(id: childId,
+                                     preview: .checkmark,
+                                     frame: note.frame,
+                                     store: .level(note.id))]
 
         let mockDB = NoteLevelAccessMock(levels: [note.id: note],
                                          images: [:])
 
         let vm = NoteEditorViewModel(id: ID(UUID()),
                                      title: "Note Title",
-                                     sublevels: sublevelFactory,
-                                     drawer: .initd([]),
+                                     sublevels: sublevels,
+                                     drawer: [],
                                      drawing: PKDrawing(),
                                      access: mockDB,
                                      onUpdateName: { _ in })
 
         let newFrame = CGRect(x: 10, y: 10, width: 300, height: 300)
 
-        vm.move(id: note.id, to: newFrame)
+        vm.move(child: sublevels.first!, to: newFrame)
 
         XCTAssertEqual(vm.nodes.count, 1)
         XCTAssertNotNil(vm.nodes.first { $0.id == childId })
@@ -173,30 +175,27 @@ class NoteEditorTests: XCTestCase {
                                         images: [])
 
         let childId = UUID()
-        let sublevelFactory: SublevelFactory = { vm in
-            [
-                NoteChildVM(id: childId,
-                            preview: .checkmark,
-                            frame: note.frame,
-                            commander: NoteLevelCommander(id: note.id,
-                                                          editor: vm))
-            ]
-        }
+        let sublevels = [
+            NoteChildVM(id: childId,
+                        preview: .checkmark,
+                        frame: note.frame,
+                        store: .level(note.id))
+        ]
 
         let mockDB = NoteLevelAccessMock(levels: [note.id: note],
                                          images: [:])
 
         let vm = NoteEditorViewModel(id: ID(UUID()),
                                      title: "Note Title",
-                                     sublevels: sublevelFactory,
-                                     drawer: .initd([]),
+                                     sublevels: sublevels,
+                                     drawer: [],
                                      drawing: PKDrawing(),
                                      access: mockDB,
                                      onUpdateName: { _ in })
 
         let newFrame = CGRect(x: 10, y: 10, width: 300, height: 300)
 
-        vm.resize(id: note.id, to: newFrame)
+        vm.resize(child: sublevels.first!, to: newFrame)
 
         XCTAssertEqual(vm.nodes.count, 1)
         XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
@@ -213,8 +212,8 @@ class NoteEditorTests: XCTestCase {
 
         let vm = NoteEditorViewModel(id: ID(UUID()),
                                      title: "Note Title",
-                                     sublevels: { _ in [] },
-                                     drawer: .initd([]),
+                                     sublevels: [],
+                                     drawer: [],
                                      drawing: PKDrawing(),
                                      access: access,
                                      onUpdateName: { _ in })
@@ -240,27 +239,26 @@ class NoteEditorTests: XCTestCase {
 
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note",
-                                     sublevels: { _ in [] },
-                                     drawer: .initd([]),
+                                     sublevels: [],
+                                     drawer: [],
                                      drawing: root.drawing,
                                      access: mockDB,
                                      onUpdateName: { _ in })
 
-        let imageId = UUID()
-        let imageTagId: NoteImageID = ID(UUID())
+        let imageId: NoteImageID = ID(UUID())
         let imageFrame = CGRect(x: 10, y: 10, width: 100, height: 100)
         _ = vm
-            .create(id: imageTagId, frame: CGRect(x: 10, y: 10, width: 100, height: 100), preview: .checkmark)
+            .create(id: .image(imageId), frame: CGRect(x: 10, y: 10, width: 100, height: 100), preview: .checkmark)
             .sink(receiveDone: { },
                   receiveError: { XCTFail($0.localizedDescription) },
                   receiveValue: { (cvm: NoteChildVM) in
                     XCTAssertEqual(vm.nodes.count, 1)
                     XCTAssertEqual(cvm.frame, imageFrame)
-                    XCTAssert(cvm.commander.storeEquals(imageId))
+                    XCTAssert(cvm.store == .image(imageId))
 
                     XCTAssertEqual(mockDB.images.count, 1)
-                    XCTAssertNotNil(mockDB.images[imageTagId])
-                    XCTAssertEqual(mockDB.images[imageTagId]!.frame, imageFrame)
+                    XCTAssertNotNil(mockDB.images[imageId])
+                    XCTAssertEqual(mockDB.images[imageId]!.frame, imageFrame)
             })
     }
 
@@ -282,26 +280,23 @@ class NoteEditorTests: XCTestCase {
                                          images: [image.id: image])
 
         let childId = UUID()
-        let sublevelFactory: SublevelFactory = { vm in
-            [
-                NoteChildVM(id: childId,
-                            preview: image.preview,
-                            frame: image.frame,
-                            commander: NoteImageCommander(id: image.id,
-                                                          editor: vm))
-            ]
-        }
+        let sublevels = [
+            NoteChildVM(id: childId,
+                        preview: image.preview,
+                        frame: image.frame,
+                        store: .image(image.id))
+        ]
 
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note",
-                                     sublevels: sublevelFactory,
-                                     drawer: .initd([]),
+                                     sublevels: sublevels,
+                                     drawer: [],
                                      drawing: root.drawing,
                                      access: mockDB,
                                      onUpdateName: { _ in })
 
         let newFrame = CGRect(x: 100, y: 100, width: 100, height: 100)
-        vm.move(id: image.id, to: newFrame)
+        vm.move(child: sublevels.first!, to: newFrame)
 
         XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
         XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, newFrame)
@@ -330,26 +325,23 @@ class NoteEditorTests: XCTestCase {
                                          images: [image.id: image])
 
         let childId = UUID()
-        let sublevelFactory: SublevelFactory = { vm in
-            [
-                NoteChildVM(id: childId,
-                            preview: image.preview,
-                            frame: image.frame,
-                            commander: NoteImageCommander(id: image.id,
-                                                          editor: vm))
-            ]
-        }
+        let sublevels = [
+            NoteChildVM(id: childId,
+                        preview: image.preview,
+                        frame: image.frame,
+                        store: .image(image.id))
+        ]
 
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note",
-                                     sublevels: sublevelFactory,
-                                     drawer: .initd([]),
+                                     sublevels: sublevels,
+                                     drawer: [],
                                      drawing: root.drawing,
                                      access: mockDB,
                                      onUpdateName: { _ in })
 
         let newFrame = CGRect(x: 100, y: 100, width: 100, height: 100)
-        vm.resize(id: image.id, to: newFrame)
+        vm.resize(child: sublevels.first!, to: newFrame)
 
         XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
         XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, newFrame)
@@ -377,27 +369,24 @@ class NoteEditorTests: XCTestCase {
         let mockDB = NoteLevelAccessMock(levels: [root.id: root],
                                          images: [image.id: image])
         let childId = UUID()
-        let sublevelFactory: SublevelFactory = { vm in
-            [
-                NoteChildVM(id: childId,
-                            preview: image.preview,
-                            frame: image.frame,
-                            commander: NoteImageCommander(id: image.id,
-                                                          editor: vm))
-            ]
-        }
+        let sublevels = [
+            NoteChildVM(id: childId,
+                        preview: image.preview,
+                        frame: image.frame,
+                        store: .image(image.id))
+        ]
 
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note",
-                                     sublevels: sublevelFactory,
-                                     drawer: .initd([]),
+                                     sublevels: sublevels,
+                                     drawer: [],
                                      drawing: root.drawing,
                                      access: mockDB,
                                      onUpdateName: { _ in })
 
-        vm.remove(id: image.id)
+        vm.remove(child: sublevels.first!)
 
-        XCTAssertNil(vm.nodes.first(where: { $0.id == childId}))
+        XCTAssertNil(vm.nodes.first(where: { $0.id == childId }))
         XCTAssertNil(mockDB.images[image.id])
         XCTAssertEqual(mockDB.imageTrash.count, 1)
         XCTAssertNotNil(mockDB.imageTrash[image.id])
@@ -406,6 +395,7 @@ class NoteEditorTests: XCTestCase {
         XCTAssert(mockDB.levelTrash.isEmpty)
         XCTAssert(mockDB.imageDrawer.isEmpty)
         XCTAssert(mockDB.levelDrawer.isEmpty)
+        XCTAssertEqual(mockDB.imageTrash.count, 1)
     }
 
     func testMoveToDrawer() {
@@ -416,28 +406,37 @@ class NoteEditorTests: XCTestCase {
                                         sublevels: [],
                                         images: [])
 
+        let parent = NoteLevelDescription(preview: .actions,
+                                          frame: CGRect(x: 0, y: 0, width: 200, height: 200),
+                                          id: ID(UUID()),
+                                          drawing: PKDrawing(),
+                                          sublevels: [ note ],
+                                          images: [])
+
         let childId = UUID()
-        let sublevelFactory: SublevelFactory = { vm in
-            [NoteChildVM(id: childId,
-                         preview: .checkmark,
-                         frame: note.frame,
-                         commander: NoteLevelCommander(id: note.id,
-                                                       editor: vm))]
-        }
+        let sublevels = [NoteChildVM(id: childId,
+                                     preview: .checkmark,
+                                     frame: note.frame,
+                                     store: .level(note.id))]
 
-        let mockDB = NoteLevelAccessMock(levels: [note.id: note],
-                                         images: [:])
+        let mockDB = NoteLevelAccessMock(
+            levels: [
+                note.id: note,
+                parent.id: parent
+            ],
+            images: [:]
+        )
 
-        let vm = NoteEditorViewModel(id: ID(UUID()),
+        let vm = NoteEditorViewModel(id: parent.id,
                                      title: "Note Title",
-                                     sublevels: sublevelFactory,
-                                     drawer: .initd([]),
+                                     sublevels: sublevels,
+                                     drawer: [],
                                      drawing: PKDrawing(),
                                      access: mockDB,
                                      onUpdateName: { _ in })
 
         let frameWithinDrawer = CGRect(x: 10, y: 10, width: 50, height: 50)
-        vm.moveToDrawer(id: note.id, frame: frameWithinDrawer)
+        vm.moveToDrawer(child: sublevels.first!, frame: frameWithinDrawer)
 
         XCTAssert(vm.nodes.isEmpty)
         XCTAssertEqual(vm.drawer.count, 1)
@@ -448,7 +447,7 @@ class NoteEditorTests: XCTestCase {
         XCTAssertNotNil(mockDB.levelDrawer[note.id])
         XCTAssert(mockDB.imageDrawer.isEmpty)
         XCTAssert(mockDB.levelTrash.isEmpty)
-        XCTAssert(mockDB.levelDrawer.isEmpty)
+        XCTAssertEqual(mockDB.levels.count, 1)
     }
 
     func testMoveFromDrawer() {
@@ -459,29 +458,38 @@ class NoteEditorTests: XCTestCase {
                                         sublevels: [],
                                         images: [])
 
+        let parent = NoteLevelDescription(preview: .actions,
+                                          frame: CGRect(x: 0, y: 0, width: 200, height: 200),
+                                          id: ID(UUID()),
+                                          drawing: PKDrawing(),
+                                          sublevels: [ ],
+                                          images: [])
+
         let childId = UUID()
-        let sublevelFactory: SublevelFactory = { vm in
-            [NoteChildVM(id: childId,
-                         preview: .checkmark,
-                         frame: note.frame,
-                         commander: NoteLevelCommander(id: note.id,
-                                                       editor: vm))]
-        }
+        let drawer = [
+            NoteChildVM(id: childId,
+                        preview: .checkmark,
+                        frame: note.frame,
+                        store: .level(note.id))
+        ]
 
-        let mockDB = NoteLevelAccessMock(levels: [note.id: note],
-                                         images: [:])
+        let mockDB = NoteLevelAccessMock(
+            levels: [parent.id: parent],
+            images: [:]
+        )
+            .drawer(levels: [note.id: note],
+                    images: [:])
 
-        let vm = NoteEditorViewModel(id: ID(UUID()),
+        let vm = NoteEditorViewModel(id: parent.id,
                                      title: "Note Title",
-                                     sublevels: { _ in [] },
-                                     drawer: .uninitd(sublevelFactory),
+                                     sublevels: [],
+                                     drawer: drawer,
                                      drawing: PKDrawing(),
                                      access: mockDB,
                                      onUpdateName: { _ in })
 
-
         let frameWithinCanvas = CGRect(x: 10, y: 10, width: 50, height: 50)
-        vm.moveFromDrawer(id: note.id, frame: frameWithinCanvas)
+        vm.moveFromDrawer(child: drawer.first!, frame: frameWithinCanvas)
 
         XCTAssert(vm.drawer.isEmpty)
         XCTAssertEqual(vm.nodes.count, 1)

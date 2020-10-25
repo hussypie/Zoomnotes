@@ -29,6 +29,20 @@ class NoteLevelAccessMock: NoteLevelAccess {
         self.images = images
     }
 
+    func drawer(levels: LevelTable, images: ImageTable) -> NoteLevelAccessMock {
+        self.levelDrawer = levels
+        self.imageDrawer = images
+
+        return self
+    }
+
+    func trash(levels: LevelTable, images: ImageTable) -> NoteLevelAccessMock {
+        self.levelTrash = levels
+        self.imageTrash = images
+
+        return self
+    }
+
     func append(level description: NoteLevelDescription, to parent: NoteLevelID) -> AnyPublisher<Void, Error> {
         guard let desc = levels[parent] else { return Future { $0(.success(())) }.eraseToAnyPublisher() }
         levels[desc.id] = NoteLevelDescription(preview: desc.preview,
@@ -225,6 +239,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
                                               images: desc.images + [image])
 
         imageDrawer.removeValue(forKey: id)
+        images[image.id] = image
 
         return Future { $0(.success(())) }.eraseToAnyPublisher()
     }
@@ -240,6 +255,7 @@ class NoteLevelAccessMock: NoteLevelAccess {
                                               images: desc.images)
 
         levelDrawer.removeValue(forKey: id)
+        levels[level.id] = level
 
         return Future { $0(.success(())) }.eraseToAnyPublisher()
     }

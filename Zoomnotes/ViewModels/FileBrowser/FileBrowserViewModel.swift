@@ -92,51 +92,39 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
             .map { lookupResult in
                 guard let lookupResult = lookupResult else { return nil }
 
-                let sublevelFactory: SublevelFactory = { vm in
-                    let subLevels =
-                        lookupResult.root.sublevels
-                            .map { NoteChildVM(id: UUID(),
-                                               preview: $0.preview,
-                                               frame: $0.frame,
-                                               commander: NoteLevelCommander(id: $0.id,
-                                                                             editor: vm)) }
+                let subLevels =
+                lookupResult.root.sublevels
+                    .map { NoteChildVM(id: UUID(),
+                                       preview: $0.preview,
+                                       frame: $0.frame,
+                                       store: .level($0.id)) }
 
-                    let images =
-                        lookupResult.root.images
-                            .map { NoteChildVM(id: UUID(),
-                                               preview: $0.preview,
-                                               frame: $0.frame,
-                                               commander: NoteImageCommander(id: $0.id,
-                                                                             editor: vm)) }
+                let images =
+                lookupResult.root.images
+                    .map { NoteChildVM(id: UUID(),
+                                       preview: $0.preview,
+                                       frame: $0.frame,
+                                       store: .image($0.id)) }
 
-                    return subLevels + images
-                }
+                let drawerSubLevels =
+                    lookupResult.levelDrawer
+                        .map { NoteChildVM(id: UUID(),
+                                           preview: $0.preview,
+                                           frame: $0.frame,
+                                           store: .level($0.id)) }
 
-                let drawerFactory: SublevelFactory = { vm in
-                    let subLevels =
-                        lookupResult.levelDrawer
-                            .map { NoteChildVM(id: UUID(),
-                                               preview: $0.preview,
-                                               frame: $0.frame,
-                                               commander: NoteLevelCommander(id: $0.id,
-                                                                             editor: vm)) }
-
-                    let images =
-                        lookupResult.imageDrawer
-                            .map { NoteChildVM(id: UUID(),
-                                               preview: $0.preview,
-                                               frame: $0.frame,
-                                               commander: NoteImageCommander(id: $0.id,
-                                                                             editor: vm)) }
-
-                    return subLevels + images
-                }
+                let drawerImages =
+                    lookupResult.imageDrawer
+                        .map { NoteChildVM(id: UUID(),
+                                           preview: $0.preview,
+                                           frame: $0.frame,
+                                           store: .image($0.id)) }
 
                 return NoteEditorViewModel(
                     id: lookupResult.root.id,
                     title: name,
-                    sublevels: sublevelFactory,
-                    drawer: .uninitd(drawerFactory),
+                    sublevels: subLevels + images,
+                    drawer: drawerSubLevels + drawerImages,
                     drawing: lookupResult.root.drawing,
                     access: noteLevelAccess,
                     onUpdateName: {

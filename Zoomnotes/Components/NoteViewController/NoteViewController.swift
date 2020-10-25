@@ -80,10 +80,9 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                                          height: height)
 
                 let preview = self.sublevelPreview(frame: actualFrame, preview: image)
-                let id: NoteImageID = ID(UUID())
                 self.view.addSubview(preview)
 
-                self.createImage(id: id, frame: actualFrame, with: image)
+                self.create(id: .image(ID(UUID())), frame: actualFrame, with: image)
                     .sink(receiveDone: { /* TODO logging */ },
                           receiveError: { _ in /* TODO logging */ },
                           receiveValue: { vm in preview.viewModel = vm })
@@ -127,8 +126,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
                 if catapult.tryFling(velocity, magnitude, state.currentlyDraggedPreview) { return }
 
-                let id: NoteLevelID = ID(UUID())
-                self.createLevel(id: id,
+                self.create(id: .level(ID(UUID())),
                                  frame: state.currentlyDraggedPreview.frame,
                                  with: state.currentlyDraggedPreview.image!)
                     .sink(receiveDone: { /* TODO */ },
@@ -311,12 +309,27 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         if rec.state == .began {
             self.transitionManager = transitionManager.down(animator: ZoomDownTransitionAnimator(destinationRect: frameInView))
 
-            guard let destinationVC = vm.commander.detailViewController(from: storyboard) else {
-                return
-            }
+            switch vm.store {
+            case .level(let id):
+                guard let sublevelVC = NoteViewController.from(self.storyboard) else { return }
+                sublevelVC.transitionManager =
+                        NoteTransitionDelegate()
+                            .up(animator: ZoomUpTransitionAnimator(with: vm.frame))
 
-            switch destinationVC {
-            case .image(let imageVC, id: let id):
+                    sublevelVC
+                        .previewChangedSubject
+                        .sink { vm.preview = $0 }
+                        .store(in: &cancellables)
+
+                    self.viewModel.childViewModel(for: id)
+                        .receive(on: DispatchQueue.main)
+                        .sink(receiveCompletion: { _ in return }, // TODO: log
+                              receiveValue: { viewModel in
+                                sublevelVC.viewModel = viewModel
+                                self.navigationController?.pushViewController(sublevelVC, animated: true)
+                        }).store(in: &cancellables)
+            case .image(let id):
+                guard let imageVC = ImageDetailViewController.from(self.storyboard) else { return }
                 imageVC
                     .previewChanged
                     .sink { image in
@@ -343,24 +356,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                             self.navigationController?.pushViewController(imageVC, animated: true)
                     })
                     .store(in: &self.cancellables)
-
-            case .sublevel(let sublevelVC, id: let id):
-                sublevelVC.transitionManager =
-                    NoteTransitionDelegate()
-                        .up(animator: ZoomUpTransitionAnimator(with: vm.frame))
-
-                sublevelVC
-                    .previewChangedSubject
-                    .sink { vm.preview = $0 }
-                    .store(in: &cancellables)
-
-                self.viewModel.childViewModel(for: id)
-                    .receive(on: DispatchQueue.main)
-                    .sink(receiveCompletion: { _ in return }, // TODO: log
-                          receiveValue: { viewModel in
-                            sublevelVC.viewModel = viewModel
-                            self.navigationController?.pushViewController(sublevelVC, animated: true)
-                    }).store(in: &cancellables)
             }
         }
 
@@ -581,9 +576,19 @@ extension NoteViewController {
                 return state
         },
             end: { _, state in
-                self.createLevel(id: ID(UUID()),
-                                 frame: state.dragging.frame,
-                                 with: state.dragging.image!)
+                guard let childVM = state.dragging.viewModel else { return }
+                let id: NoteChildStore
+
+                switch childVM.store {
+                case .level:
+                    id = .level(ID(UUID()))
+                case .image:
+                    id = .image(ID(UUID()))
+                }
+
+                self.create(id: id,
+                            frame: state.dragging.frame,
+                            with: state.dragging.image!)
                     .sink(receiveDone: { /* TODO */ },
                           receiveError: {  _ in /* TODO */ },
                           receiveValue: { vm in state.dragging.viewModel = vm })

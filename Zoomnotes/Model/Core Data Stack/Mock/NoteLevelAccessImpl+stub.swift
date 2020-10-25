@@ -10,6 +10,31 @@ import Foundation
 import Combine
 
 extension NoteLevelAccessImpl {
+    func appendToTrash(store: ImageStore, to id: DocumentID) -> AnyPublisher<Void, Error> {
+        access.accessing(to: .write, id: id) { (noteStore: NoteStore?) in
+                noteStore!.addToImageTrash(store)
+        }
+    }
+    func appendToTrash(store: NoteLevelStore, to id: DocumentID) -> AnyPublisher<Void, Error> {
+        access.accessing(to: .write, id: id) { (noteStore: NoteStore?) in
+                noteStore!.addToTrash(store)
+        }
+    }
+
+    func appendToDrawer(store: ImageStore, to id: DocumentID) -> AnyPublisher<Void, Error> {
+        access.accessing(to: .write, id: id) { (noteStore: NoteStore?) in
+                noteStore!.addToImageDrawer(store)
+        }
+    }
+
+    func appendToDrawer(store: NoteLevelStore, to id: DocumentID) -> AnyPublisher<Void, Error> {
+        access.accessing(to: .write, id: id) { (noteStore: NoteStore?) in
+                noteStore!.addToDrawer(store)
+        }
+    }
+}
+
+extension NoteLevelAccessImpl {
     static func stubP(
         using access: DBAccess,
         with document: DocumentStoreDescription
@@ -45,12 +70,45 @@ extension NoteLevelAccessImpl {
         }.flatMap { (noteAccess: NoteLevelAccessImpl) -> AnyPublisher<NoteLevelAccessImpl, Error> in
             Publishers.Zip(
                 Publishers.Sequence(sequence: document.root.sublevels)
-                    .flatMap { sublevel in noteAccess.append(level: sublevel, to: document.root.id) }
+                    .flatMap { sublevel in noteAccess.append(level: sublevel, to: document.root.id)}
                     .collect(),
                 Publishers.Sequence(sequence: document.root.images)
                     .flatMap { image in noteAccess.append(image: image, to: document.root.id) }
                     .collect()
-                ).map { _ in noteAccess }.eraseToAnyPublisher()
+                )
+                .flatMap { _ in
+                    Publishers.Zip4(
+                        Publishers.Sequence(sequence: document.imageTrash)
+                            .flatMap { image in
+                                noteAccess.subimage(from: image)
+                                    .flatMap { (store: ImageStore?) in
+                                        noteAccess.appendToTrash(store: store!, to: document.id)
+                                }
+                            }
+                            .collect(),
+                        Publishers.Sequence(sequence: document.levelTrash)
+                            .flatMap { level in
+                                noteAccess.sublevel(from: level)
+                                    .flatMap { noteAccess.appendToTrash(store: $0!, to: document.id)
+                                }
+                        }.collect(),
+                        Publishers.Sequence(sequence: document.levelDrawer)
+                            .flatMap { level in
+                                noteAccess.sublevel(from: level)
+                                    .flatMap {
+                                        noteAccess.appendToDrawer(store: $0!, to: document.id)
+                                }
+                        }.collect(),
+                        Publishers.Sequence(sequence: document.imageDrawer)
+                            .flatMap { image in
+                                noteAccess.subimage(from: image)
+                                    .flatMap {
+                                        noteAccess.appendToDrawer(store: $0!, to: document.id)
+                                }
+                        }.collect()
+                    )
+
+            }.map { _ in noteAccess }.eraseToAnyPublisher()
         }.eraseToAnyPublisher()
     }
 

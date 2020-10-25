@@ -12,13 +12,6 @@ import PencilKit
 import Combine
 import CoreData
 
-typealias SublevelFactory = (NoteEditorViewModel) -> [NoteChildVM]
-
-enum Drawer {
-    case initd([NoteChildVM])
-    case uninitd(SublevelFactory)
-}
-
 class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
     @Published var title: String
     @Published var drawing: PKDrawing
@@ -33,8 +26,8 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
 
     init(id: NoteLevelID,
          title: String,
-         sublevels: SublevelFactory,
-         drawer: Drawer,
+         sublevels: [NoteChildVM],
+         drawer: [NoteChildVM],
          drawing: PKDrawing,
          access: NoteLevelAccess,
          onUpdateName: @escaping (String) -> Void
@@ -46,14 +39,9 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
 
         self.access = access
 
-        self.nodes = sublevels(self)
+        self.nodes = sublevels
 
-        switch drawer {
-        case .initd(let children):
-            self.drawer = children
-        case .uninitd(let factory):
-            self.drawer = factory(self)
-        }
+        self.drawer = drawer
 
         self.$title
             .sink { self.onUpdateName($0) }
@@ -65,30 +53,24 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
             .map { subLevel in
                 guard let subLevel = subLevel else { return nil }
 
-                let subLevelFactory: SublevelFactory = { vm in
-                    let subSubLevels =
-                        subLevel.sublevels
-                            .map { NoteChildVM(id: UUID(),
-                                               preview: $0.preview,
-                                               frame: $0.frame,
-                                               commander: NoteLevelCommander(id: $0.id,
-                                                                             editor: vm)) }
+                let subSubLevels =
+                    subLevel.sublevels
+                        .map { NoteChildVM(id: UUID(),
+                                           preview: $0.preview,
+                                           frame: $0.frame,
+                                           store: .level($0.id)) }
 
-                    let subSubImages =
-                        subLevel.images
-                            .map { NoteChildVM(id: UUID(),
-                                               preview: $0.preview,
-                                               frame: $0.frame,
-                                               commander: NoteImageCommander(id: $0.id,
-                                                                             editor: vm)) }
-
-                    return subSubLevels + subSubImages
-                }
+                let subSubImages =
+                    subLevel.images
+                        .map { NoteChildVM(id: UUID(),
+                                           preview: $0.preview,
+                                           frame: $0.frame,
+                                           store: .image($0.id)) }
 
                 return NoteEditorViewModel(id: id,
                                            title: self.title,
-                                           sublevels: subLevelFactory,
-                                           drawer: .initd(self.drawer),
+                                           sublevels: subSubLevels + subSubImages,
+                                           drawer: self.drawer,
                                            drawing: subLevel.drawing,
                                            access: self.access,
                                            onUpdateName: self.onUpdateName)
@@ -103,7 +85,82 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         }.eraseToAnyPublisher()
     }
 
-    func create(id: NoteLevelID, frame: CGRect, preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
+    func create(id: NoteChildStore, frame: CGRect, preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
+        switch id {
+        case .level(let lid):
+            return self.create(id: lid, frame: frame, preview: preview)
+        case .image(let iid):
+            return self.create(id: iid, frame: frame, preview: preview)
+
+        }
+    }
+
+    func move(child: NoteChildVM, to: CGRect) {
+        switch child.store {
+        case .level(let lid):
+            self.move(id: lid, to: to)
+        case .image(let iid):
+            self.move(id: iid, to: to)
+
+        }
+        child.frame = to
+    }
+
+    func resize(child: NoteChildVM, to: CGRect) {
+        switch child.store {
+        case .level(let id):
+            self.resize(id: id, to: to)
+        case .image(let id):
+            self.resize(id: id, to: to)
+        }
+        child.frame = to
+    }
+
+    func remove(child: NoteChildVM) {
+        switch child.store {
+        case .level(let id):
+            self.remove(id: id)
+        case .image(let id):
+            self.remove(id: id)
+        }
+        self.nodes = self.nodes.filter { $0.id != child.id }
+    }
+
+    func restore(child: NoteChildVM) {
+        switch child.store {
+        case .level(let id):
+            self.restore(id: id)
+        case .image(let id):
+            self.restore(id: id)
+        }
+        self.nodes.append(child)
+    }
+
+    func moveToDrawer(child: NoteChildVM, frame: CGRect) {
+        switch child.store {
+        case .level(let id):
+            self.moveToDrawer(id: id, frame: frame)
+        case .image(let id):
+            self.moveToDrawer(id: id, frame: frame)
+        }
+        self.nodes = self.nodes.filter { $0.id != child.id }
+        self.drawer.append(child)
+        child.frame = frame
+    }
+
+    func moveFromDrawer(child: NoteChildVM, frame: CGRect) {
+        switch child.store {
+        case .level(let id):
+            self.moveFromDrawer(id: id, frame: frame)
+        case .image(let id):
+            self.moveFromDrawer(id: id, frame: frame)
+        }
+        self.drawer = self.drawer.filter { $0.id != child.id }
+        self.nodes.append(child)
+        child.frame = frame
+    }
+
+    private func create(id: NoteLevelID, frame: CGRect, preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
         let description = NoteLevelDescription(preview: preview,
                                                frame: frame,
                                                id: id,
@@ -117,14 +174,13 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
                 let child = NoteChildVM(id: UUID(),
                                         preview: preview,
                                         frame: frame,
-                                        commander: NoteLevelCommander(id: id,
-                                                                      editor: self))
+                                        store: .level(id))
                 self.nodes.append(child)
                 return child
         }.eraseToAnyPublisher()
     }
 
-    func create(id: NoteImageID, frame: CGRect, preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
+    private func create(id: NoteImageID, frame: CGRect, preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
         let description = NoteImageDescription(id: id,
                                                preview: preview,
                                                drawing: PKDrawing(),
@@ -136,8 +192,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
                 let child = NoteChildVM(id: UUID(),
                                         preview: preview,
                                         frame: frame,
-                                        commander: NoteImageCommander(id: description.id,
-                                                                      editor: self))
+                                        store: .image(id))
                 self.nodes.append(child)
                 return child
         }.eraseToAnyPublisher()
@@ -172,7 +227,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
             .store(in: &cancellables)
     }
 
-    func move(id: NoteLevelID, to: CGRect) {
+    private func move(id: NoteLevelID, to: CGRect) {
         access.update(frame: to, for: id)
             .sink(receiveCompletion: { _ in /* TODO logging */ },
                   receiveValue: { /* TODO logging */ })
@@ -180,14 +235,14 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
 
     }
 
-    func move(id: NoteImageID, to: CGRect) {
+    private func move(id: NoteImageID, to: CGRect) {
         access.update(frame: to, image: id)
             .sink(receiveCompletion: { _ in /* TODO logging */ },
                   receiveValue: { /* TODO logging */ })
             .store(in: &cancellables)
     }
 
-    func resize(id: NoteLevelID, to frame: CGRect) {
+    private func resize(id: NoteLevelID, to frame: CGRect) {
         access.update(frame: frame, for: id)
             .sink(receiveCompletion: { _ in /* TODO logging */ },
                   receiveValue: { /* TODO logging */ })
@@ -195,21 +250,21 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
 
     }
 
-    func remove(id: NoteLevelID) {
+    private func remove(id: NoteLevelID) {
         self.access.remove(level: id, from: self.id)
             .sink(receiveCompletion: { _ in /* TODO logging */ },
                   receiveValue: { /* TODO logging */ })
             .store(in: &cancellables)
     }
 
-    func remove(id: NoteImageID) {
+    private func remove(id: NoteImageID) {
         access.remove(image: id, from: self.id)
             .sink(receiveCompletion: { _ in /* TODO logging */ },
                   receiveValue: { /* TODO logging */ })
             .store(in: &cancellables)
     }
 
-    func restore(id: NoteImageID) {
+    private func restore(id: NoteImageID) {
         let iid = id
         access.restore(image: iid, to: self.id)
             .sink(receiveDone: { /* TODO logging */ },
@@ -218,7 +273,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
             .store(in: &cancellables)
     }
 
-    func restore(id: NoteLevelID) {
+    private func restore(id: NoteLevelID) {
         let iid = id
         access.restore(level: iid, to: self.id)
             .sink(receiveDone: { /* TODO logging */ },
@@ -227,14 +282,14 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
             .store(in: &cancellables)
     }
 
-    func resize(id: NoteImageID, to: CGRect) {
+    private func resize(id: NoteImageID, to: CGRect) {
         access.update(frame: to, image: id)
             .sink(receiveCompletion: { _ in /* TODO logging */ },
                   receiveValue: { /* TODO logging */ })
             .store(in: &cancellables)
     }
 
-    func moveToDrawer(id: NoteImageID, frame: CGRect) {
+    private func moveToDrawer(id: NoteImageID, frame: CGRect) {
         let iid = id
         access
             .moveToDrawer(image: iid, from: self.id)
@@ -246,7 +301,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         .store(in: &cancellables)
     }
 
-    func moveFromDrawer(id: NoteImageID, frame: CGRect) {
+    private func moveFromDrawer(id: NoteImageID, frame: CGRect) {
         let iid = id
         access
             .moveFromDrawer(image: iid, to: self.id)
@@ -258,7 +313,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         .store(in: &cancellables)
     }
 
-    func moveToDrawer(id: NoteLevelID, frame: CGRect) {
+    private func moveToDrawer(id: NoteLevelID, frame: CGRect) {
         let iid = id
         access
             .moveToDrawer(level: iid, from: self.id)
@@ -270,7 +325,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         .store(in: &cancellables)
     }
 
-    func moveFromDrawer(id: NoteLevelID, frame: CGRect) {
+    private func moveFromDrawer(id: NoteLevelID, frame: CGRect) {
         let iid = id
         access
             .moveFromDrawer(level: iid, to: self.id)

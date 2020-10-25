@@ -241,8 +241,8 @@ struct DirectoryAccessImpl: DirectoryAccess {
             let imageDrawer = (store.imageDrawer as? Set<ImageStore>)?.map(SubImageDescription.from) ?? []
             let levelDrawer = (store.drawer as? Set<NoteLevelStore>)?.map(SublevelDescription.from) ?? []
 
-            let imageTrash = (store.imageDrawer as? Set<ImageStore>)?.map(SubImageDescription.from) ?? []
-            let levelTrash = (store.drawer as? Set<NoteLevelStore>)?.map(SublevelDescription.from) ?? []
+            let imageTrash = (store.imageTrash as? Set<ImageStore>)?.map(SubImageDescription.from) ?? []
+            let levelTrash = (store.trash as? Set<NoteLevelStore>)?.map(SublevelDescription.from) ?? []
 
             return DocumentLookupResult(id: ID(store.id!),
                                         lastModified: store.lastModified!,
