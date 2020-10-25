@@ -76,9 +76,9 @@ extension NoteViewController {
     }
 
     func moveFromDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
-        self.viewModel.moveToDrawer(child: sublevel, frame: to)
+        self.viewModel.moveFromDrawer(child: sublevel, frame: to)
         self.undoManager?.registerUndo(withTarget: self) { _ in
-            self.moveToDrawer(sublevel: sublevel, from: to, to: from)
+            self.moveFromDrawer(sublevel: sublevel, from: to, to: from)
         }
         self.undoManager?.setActionName("Move To Canvas")
     }
