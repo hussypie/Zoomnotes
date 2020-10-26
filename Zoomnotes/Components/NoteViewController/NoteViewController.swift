@@ -196,7 +196,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         self.drawerView = DrawerView(title: title)
 
-        for child in viewModel.drawer {
+        for child in viewModel.drawer.nodes {
             let sublevelView = sublevelPreview(frame: child.frame, preview: child.preview)
             sublevelView.viewModel = child
             self.drawerView?.addSubview(sublevelView)
@@ -318,7 +318,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
                     sublevelVC
                         .previewChangedSubject
-                        .sink { vm.preview = $0 }
+                        .sink { preview in vm.preview = preview }
                         .store(in: &cancellables)
 
                     self.viewModel.childViewModel(for: id)
@@ -332,9 +332,9 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 guard let imageVC = ImageDetailViewController.from(self.storyboard) else { return }
                 imageVC
                     .previewChanged
-                    .sink { image in
+                    .sink { [weak self] image in
                         vm.preview = image
-                        self.viewModel.update(id: id, preview: image)
+                        self?.viewModel.update(id: id, preview: image)
 
                 }
                     .store(in: &cancellables)

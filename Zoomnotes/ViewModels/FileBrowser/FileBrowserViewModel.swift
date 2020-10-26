@@ -124,7 +124,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                     id: lookupResult.root.id,
                     title: name,
                     sublevels: subLevels + images,
-                    drawer: drawerSubLevels + drawerImages,
+                    drawer: DrawerVM(nodes: drawerSubLevels + drawerImages),
                     drawing: lookupResult.root.drawing,
                     access: noteLevelAccess,
                     onUpdateName: {

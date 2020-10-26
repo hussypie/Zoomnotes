@@ -13,25 +13,32 @@
         <attribute name="image" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
         <attribute name="preview" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
         <relationship name="frame" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="RectStore"/>
+        <relationship name="inDrawerOf" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NoteStore" inverseName="imageDrawer" inverseEntity="NoteStore"/>
+        <relationship name="inTrashOf" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NoteStore" inverseName="imageTrash" inverseEntity="NoteStore"/>
+        <relationship name="parent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NoteLevelStore" inverseName="images" inverseEntity="NoteLevelStore"/>
     </entity>
     <entity name="NoteLevelStore" representedClassName="NoteLevelStore" syncable="YES" codeGenerationType="class">
         <attribute name="drawing" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="preview" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
         <relationship name="frame" maxCount="1" deletionRule="Cascade" destinationEntity="RectStore"/>
-        <relationship name="images" toMany="YES" deletionRule="Nullify" destinationEntity="ImageStore"/>
-        <relationship name="sublevels" toMany="YES" deletionRule="Cascade" destinationEntity="NoteLevelStore"/>
+        <relationship name="images" toMany="YES" deletionRule="Nullify" destinationEntity="ImageStore" inverseName="parent" inverseEntity="ImageStore"/>
+        <relationship name="inDrawerOf" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NoteStore" inverseName="drawer" inverseEntity="NoteStore"/>
+        <relationship name="inTrashOf" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NoteStore" inverseName="trash" inverseEntity="NoteStore"/>
+        <relationship name="parentLevel" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NoteLevelStore" inverseName="sublevels" inverseEntity="NoteLevelStore"/>
+        <relationship name="rootOf" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NoteStore" inverseName="root" inverseEntity="NoteStore"/>
+        <relationship name="sublevels" toMany="YES" deletionRule="Cascade" destinationEntity="NoteLevelStore" inverseName="parentLevel" inverseEntity="NoteLevelStore"/>
     </entity>
     <entity name="NoteStore" representedClassName="NoteStore" syncable="YES" codeGenerationType="class">
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="lastModified" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="name" attributeType="String"/>
         <attribute name="thumbnail" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
-        <relationship name="drawer" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="NoteLevelStore"/>
-        <relationship name="imageDrawer" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageStore"/>
-        <relationship name="imageTrash" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageStore"/>
-        <relationship name="root" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NoteLevelStore"/>
-        <relationship name="trash" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="NoteLevelStore"/>
+        <relationship name="drawer" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="NoteLevelStore" inverseName="inDrawerOf" inverseEntity="NoteLevelStore"/>
+        <relationship name="imageDrawer" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageStore" inverseName="inDrawerOf" inverseEntity="ImageStore"/>
+        <relationship name="imageTrash" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ImageStore" inverseName="inTrashOf" inverseEntity="ImageStore"/>
+        <relationship name="root" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="NoteLevelStore" inverseName="rootOf" inverseEntity="NoteLevelStore"/>
+        <relationship name="trash" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="NoteLevelStore" inverseName="inTrashOf" inverseEntity="NoteLevelStore"/>
     </entity>
     <entity name="RectStore" representedClassName="RectStore" syncable="YES" codeGenerationType="class">
         <attribute name="height" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -41,8 +48,8 @@
     </entity>
     <elements>
         <element name="DirectoryStore" positionX="-54" positionY="18" width="128" height="118"/>
-        <element name="ImageStore" positionX="-54" positionY="54" width="128" height="118"/>
-        <element name="NoteLevelStore" positionX="-54" positionY="27" width="128" height="133"/>
+        <element name="ImageStore" positionX="-54" positionY="54" width="128" height="163"/>
+        <element name="NoteLevelStore" positionX="-54" positionY="27" width="128" height="193"/>
         <element name="NoteStore" positionX="-63" positionY="-18" width="128" height="178"/>
         <element name="RectStore" positionX="-45" positionY="36" width="128" height="103"/>
     </elements>

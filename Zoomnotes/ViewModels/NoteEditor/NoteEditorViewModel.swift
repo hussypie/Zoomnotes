@@ -16,7 +16,8 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
     @Published var title: String
     @Published var drawing: PKDrawing
     @Published var nodes: [NoteChildVM] = []
-    @Published var drawer: [NoteChildVM] = []
+
+    let drawer: DrawerVM
 
     private let id: NoteLevelID
     private let access: NoteLevelAccess
@@ -27,7 +28,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
     init(id: NoteLevelID,
          title: String,
          sublevels: [NoteChildVM],
-         drawer: [NoteChildVM],
+         drawer: DrawerVM,
          drawing: PKDrawing,
          access: NoteLevelAccess,
          onUpdateName: @escaping (String) -> Void
@@ -144,7 +145,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
             self.moveToDrawer(id: id, frame: frame)
         }
         self.nodes = self.nodes.filter { $0.id != child.id }
-        self.drawer.append(child)
+        self.drawer.nodes.append(child)
         child.frame = frame
     }
 
@@ -155,7 +156,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         case .image(let id):
             self.moveFromDrawer(id: id, frame: frame)
         }
-        self.drawer = self.drawer.filter { $0.id != child.id }
+        self.drawer.nodes = self.drawer.nodes.filter { $0.id != child.id }
         self.nodes.append(child)
         child.frame = frame
     }
