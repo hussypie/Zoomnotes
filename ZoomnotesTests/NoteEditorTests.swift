@@ -46,7 +46,7 @@ class NoteEditorTests: XCTestCase {
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note Title",
                                      sublevels: [],
-                                     drawer: [],
+                                     drawer: DrawerVM(nodes: []),
                                      drawing: PKDrawing(),
                                      access: mockDB,
                                      onUpdateName: { _ in })
@@ -104,7 +104,7 @@ class NoteEditorTests: XCTestCase {
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Notes",
                                      sublevels: sublevels,
-                                     drawer: [],
+                                     drawer: DrawerVM(nodes: []),
                                      drawing: root.drawing,
                                      access: mockDB,
                                      onUpdateName: { _ in })
@@ -143,7 +143,7 @@ class NoteEditorTests: XCTestCase {
         let vm = NoteEditorViewModel(id: ID(UUID()),
                                      title: "Note Title",
                                      sublevels: sublevels,
-                                     drawer: [],
+                                     drawer: DrawerVM(nodes: []),
                                      drawing: PKDrawing(),
                                      access: mockDB,
                                      onUpdateName: { _ in })
@@ -155,7 +155,7 @@ class NoteEditorTests: XCTestCase {
         XCTAssertEqual(vm.nodes.count, 1)
         XCTAssertNotNil(vm.nodes.first { $0.id == childId })
         XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, newFrame)
-        XCTAssertEqual(vm.drawer.count, 0)
+        XCTAssertEqual(vm.drawer.nodes.count, 0)
 
         XCTAssertEqual(mockDB.levels.count, 1)
         XCTAssertNotNil(mockDB.levels[note.id])
@@ -188,7 +188,7 @@ class NoteEditorTests: XCTestCase {
         let vm = NoteEditorViewModel(id: ID(UUID()),
                                      title: "Note Title",
                                      sublevels: sublevels,
-                                     drawer: [],
+                                     drawer: DrawerVM(nodes: []),
                                      drawing: PKDrawing(),
                                      access: mockDB,
                                      onUpdateName: { _ in })
@@ -200,7 +200,7 @@ class NoteEditorTests: XCTestCase {
         XCTAssertEqual(vm.nodes.count, 1)
         XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
         XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, newFrame)
-        XCTAssertEqual(vm.drawer.count, 0)
+        XCTAssertEqual(vm.drawer.nodes.count, 0)
 
         XCTAssertEqual(mockDB.levels.count, 1)
         XCTAssertNotNil(mockDB.levels[note.id])
@@ -213,7 +213,7 @@ class NoteEditorTests: XCTestCase {
         let vm = NoteEditorViewModel(id: ID(UUID()),
                                      title: "Note Title",
                                      sublevels: [],
-                                     drawer: [],
+                                     drawer: DrawerVM(nodes: []),
                                      drawing: PKDrawing(),
                                      access: access,
                                      onUpdateName: { _ in })
@@ -222,7 +222,7 @@ class NoteEditorTests: XCTestCase {
         vm.update(drawing: newDrawing)
 
         XCTAssert(vm.nodes.isEmpty)
-        XCTAssert(vm.drawer.isEmpty)
+        XCTAssert(vm.drawer.nodes.isEmpty)
         XCTAssertEqual(vm.drawing, newDrawing)
     }
 
@@ -240,7 +240,7 @@ class NoteEditorTests: XCTestCase {
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note",
                                      sublevels: [],
-                                     drawer: [],
+                                     drawer: DrawerVM(nodes: []),
                                      drawing: root.drawing,
                                      access: mockDB,
                                      onUpdateName: { _ in })
@@ -290,7 +290,7 @@ class NoteEditorTests: XCTestCase {
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note",
                                      sublevels: sublevels,
-                                     drawer: [],
+                                     drawer: DrawerVM(nodes: []),
                                      drawing: root.drawing,
                                      access: mockDB,
                                      onUpdateName: { _ in })
@@ -335,7 +335,7 @@ class NoteEditorTests: XCTestCase {
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note",
                                      sublevels: sublevels,
-                                     drawer: [],
+                                     drawer: DrawerVM(nodes: []),
                                      drawing: root.drawing,
                                      access: mockDB,
                                      onUpdateName: { _ in })
@@ -379,7 +379,7 @@ class NoteEditorTests: XCTestCase {
         let vm = NoteEditorViewModel(id: root.id,
                                      title: "Note",
                                      sublevels: sublevels,
-                                     drawer: [],
+                                     drawer: DrawerVM(nodes: []),
                                      drawing: root.drawing,
                                      access: mockDB,
                                      onUpdateName: { _ in })
@@ -430,7 +430,7 @@ class NoteEditorTests: XCTestCase {
         let vm = NoteEditorViewModel(id: parent.id,
                                      title: "Note Title",
                                      sublevels: sublevels,
-                                     drawer: [],
+                                     drawer: DrawerVM(nodes: []),
                                      drawing: PKDrawing(),
                                      access: mockDB,
                                      onUpdateName: { _ in })
@@ -439,9 +439,9 @@ class NoteEditorTests: XCTestCase {
         vm.moveToDrawer(child: sublevels.first!, frame: frameWithinDrawer)
 
         XCTAssert(vm.nodes.isEmpty)
-        XCTAssertEqual(vm.drawer.count, 1)
-        XCTAssertNotNil(vm.drawer.first(where: { $0.id == childId }))
-        XCTAssertEqual(vm.drawer.first(where: { $0.id == childId })!.frame, frameWithinDrawer)
+        XCTAssertEqual(vm.drawer.nodes.count, 1)
+        XCTAssertNotNil(vm.drawer.nodes.first(where: { $0.id == childId }))
+        XCTAssertEqual(vm.drawer.nodes.first(where: { $0.id == childId })!.frame, frameWithinDrawer)
 
         XCTAssertEqual(mockDB.levelDrawer.count, 1)
         XCTAssertNotNil(mockDB.levelDrawer[note.id])
@@ -483,7 +483,7 @@ class NoteEditorTests: XCTestCase {
         let vm = NoteEditorViewModel(id: parent.id,
                                      title: "Note Title",
                                      sublevels: [],
-                                     drawer: drawer,
+                                     drawer: DrawerVM(nodes: drawer),
                                      drawing: PKDrawing(),
                                      access: mockDB,
                                      onUpdateName: { _ in })
@@ -491,7 +491,7 @@ class NoteEditorTests: XCTestCase {
         let frameWithinCanvas = CGRect(x: 10, y: 10, width: 50, height: 50)
         vm.moveFromDrawer(child: drawer.first!, frame: frameWithinCanvas)
 
-        XCTAssert(vm.drawer.isEmpty)
+        XCTAssert(vm.drawer.nodes.isEmpty)
         XCTAssertEqual(vm.nodes.count, 1)
         XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
         XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, frameWithinCanvas)
