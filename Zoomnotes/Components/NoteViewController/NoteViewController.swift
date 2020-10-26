@@ -196,7 +196,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         self.drawerView = DrawerView(title: title)
 
-        for child in viewModel.drawer {
+        for child in viewModel.drawer.nodes {
             let sublevelView = sublevelPreview(frame: child.frame, preview: child.preview)
             sublevelView.viewModel = child
             self.drawerView?.addSubview(sublevelView)
