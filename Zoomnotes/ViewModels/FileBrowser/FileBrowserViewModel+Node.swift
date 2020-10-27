@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-enum FolderBrowserNodeStoreID: Codable {
+enum FolderBrowserNodeStoreID: Codable, Equatable {
     case directory(DirectoryID)
     case document(DocumentID)
 

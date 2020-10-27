@@ -33,7 +33,7 @@ class DocumentCollectionViewController: UICollectionViewController {
         alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
         alert.addAction(UIAlertAction(title: "Delete",
                                       style: .destructive,
-                                      handler: { _ in self.folderVM.process(command: .delete(node)) }))
+                                      handler: { _ in self.folderVM.delete(node: node) }))
         return alert
     }
 
@@ -118,7 +118,7 @@ class DocumentCollectionViewController: UICollectionViewController {
         cell.detailsIndicator.addGestureRecognizer(ZNTapGestureRecognizer { _ in
             let editor = NodeDetailEditor(name: node.name,
                                           onTextfieldEdtitingChanged: {
-                                            self.folderVM.process(command: .rename(node, to: $0))
+                                            self.folderVM.rename(node: node, to: $0)
                                             self.dismiss(animated: true, completion: nil)
             },
                                           onDelete: { self.delete(node: node) })
@@ -170,7 +170,7 @@ class DocumentCollectionViewController: UICollectionViewController {
         destinationViewController
             .previewChangedSubject
             .sink(receiveValue: { image in
-                self.folderVM.process(command: .update(note, preview: image))
+                self.folderVM.update(doc: note, preview: image)
                 self.collectionView.reloadData()
             })
             .store(in: &cancellables)
@@ -226,7 +226,7 @@ extension DocumentCollectionViewController: UICollectionViewDropDelegate {
         let destination = folderVM.nodes[index]
         switch destination.store {
         case .directory(let id):
-            folderVM.process(command: .move(node, to: id))
+            folderVM.move(node: node, to: id)
         default:
             return
         }
@@ -248,12 +248,18 @@ extension DocumentCollectionViewController {
             UIAlertAction(title: "Note",
                           style: .default) { _ in
                             let preview = UIImage.from(size: self.view.frame.size).withBackground(color: .white)
-                            self.folderVM.process(command: .createFile(preview: preview))
+                            self.folderVM.createFile(id: ID(UUID()),
+                                                     name: "Untitled",
+                                                     preview: preview,
+                                                     lastModified: Date())
         })
         adderSheet.addAction(
             UIAlertAction(title: "Folder",
                           style: .default) { _ in
-                            self.folderVM.process(command: .createDirectory)
+                            self.folderVM.createFile(id: ID(UUID()),
+                                                     name: "Untitled",
+                                                     preview: UIImage.folder(),
+                                                     lastModified: Date())
         })
 
         adderSheet.popoverPresentationController?.barButtonItem = addButton

@@ -32,31 +32,47 @@ class FileBrowserVMTests: XCTestCase {
     func testCreateFile() {
         let vm = FolderBrowserViewModel.stub
 
-        vm.process(command: .createFile(preview: .checkmark))
+        let id: DocumentID = ID(UUID())
+        let name = "Untitled"
+        let preview: UIImage = .checkmark
+        let lastModified = Date()
+        _ = vm.createFile(id: id, name: name, preview: preview, lastModified: lastModified)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: { _ in
+                    XCTAssertTrue(vm.nodes.count == 1)
 
-        XCTAssertTrue(vm.nodes.count == 1)
+                    guard case .document = vm.nodes[0].store else {
+                        XCTFail("Newly created node has to be a file")
+                        return
+                    }
 
-        guard case .document = vm.nodes[0].store else {
-            XCTFail("Newly created node has to be a file")
-            return
-        }
-
-        XCTAssertTrue(vm.nodes[0].name == "Untitled")
+                    XCTAssertTrue(vm.nodes[0].name == name)
+            })
     }
 
     func testCreateFolder() {
         let vm = FolderBrowserViewModel.stub
 
-        vm.process(command: .createDirectory)
+        let id: DirectoryID = ID(UUID())
+        let name = "Untitled"
+        let lastModified = Date()
+        _ = vm.createFolder(id: id, created: lastModified, name: name)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: { _ in
+                    XCTAssertTrue(vm.nodes.count == 1)
 
-        XCTAssertTrue(vm.nodes.count == 1)
+                    guard case .directory = vm.nodes[0].store else {
+                        XCTFail("Newly created node has to be a directory")
+                        return
+                    }
 
-        guard case .directory = vm.nodes[0].store else {
-            XCTFail("Newly created node has to be a directory")
-            return
-        }
+                    XCTAssertEqual(vm.nodes.first!.store, .directory(id))
+                    XCTAssertEqual(vm.nodes.first!.lastModified, lastModified)
+                    XCTAssertTrue(vm.nodes[0].name == name)
 
-        XCTAssertTrue(vm.nodes[0].name == "Untitled")
+            })
     }
 
     func testDeleteNode() {
@@ -71,7 +87,12 @@ class FileBrowserVMTests: XCTestCase {
         ]
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
 
-        vm.process(command: .delete(node))
+        _ = vm.delete(node: node)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: { _ in
+                    XCTAssert(vm.nodes.filter { $0.id == node.id }.isEmpty)
+            })
 
         XCTAssert(vm.nodes.filter { $0.id == node.id }.isEmpty)
     }
@@ -90,9 +111,12 @@ class FileBrowserVMTests: XCTestCase {
 
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
 
-        vm.process(command: .delete(node))
-
-        XCTAssert(vm.nodes.filter { $0.id == node.id }.isEmpty)
+        _ = vm.delete(node: node)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: { _ in
+                    XCTAssert(vm.nodes.filter { $0.id == node.id }.isEmpty)
+            })
     }
 
     func testRenameNode() {
@@ -110,12 +134,15 @@ class FileBrowserVMTests: XCTestCase {
 
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
 
-        vm.process(command: .rename(node, to: "Stuff I can live with"))
-
-        vm.nodes
-            .filter { $0.id == node.id }
-            .first
-            .map { XCTAssert($0.name == "Stuff I can live with") }
+        _ = vm.rename(node: node, to: "Stuff I can live with")
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: { _ in
+                    vm.nodes
+                        .filter { $0.id == node.id }
+                        .first
+                        .map { XCTAssert($0.name == "Stuff I can live with") }
+            })
     }
 
     func testRenameNodeNonExistentNode() {
@@ -131,12 +158,15 @@ class FileBrowserVMTests: XCTestCase {
 
         let vm = FolderBrowserViewModel.stub(nodes: nodes)
 
-        vm.process(command: .rename(node, to: "Stuff I can live with"))
-
-        vm.nodes
-            .filter { $0.id == node.id }
-            .first
-            .map { XCTAssert($0.name == "Stuff I can live with") }
+        _ = vm.rename(node: node, to: "Stuff I can live with")
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: { _ in
+                    vm.nodes
+                        .filter { $0.id == node.id }
+                        .first
+                        .map { XCTAssert($0.name == "Stuff I can live with") }
+            })
     }
 
     func testMoveNodeToDirectory() {
@@ -166,10 +196,14 @@ class FileBrowserVMTests: XCTestCase {
             XCTFail("Directory id does not refer to directory")
             return
         }
-        vm.process(command: .move(node, to: id))
 
-        XCTAssert(vm.nodes.count == originalNodeCount - 1)
-        XCTAssert(vm.nodes.filter { $0.id == node.id }.isEmpty)
+        _ = vm.move(node: node, to: id)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: { _ in
+                    XCTAssert(vm.nodes.count == originalNodeCount - 1)
+                    XCTAssert(vm.nodes.filter { $0.id == node.id }.isEmpty)
+            })
     }
 
     func testProduceCorrectSubfolderVM() {

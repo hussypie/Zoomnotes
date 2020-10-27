@@ -41,7 +41,7 @@ class FileBrowserDBAccessTests: XCTestCase {
                                      levelTrash: [],
                                      root: rootLevel)
 
-        let noteLevelAccess = NoteLevelAccessImpl(access: DBAccess(moc: moc), document: fileToBeCreated.id)
+        let noteLevelAccess = NoteLevelAccessImpl(access: DBAccess(moc: moc), document: fileToBeCreated.id, logger: TestLogger())
 
         _ = access
             .append(document: fileToBeCreated, to: root.id)

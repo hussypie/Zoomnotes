@@ -48,7 +48,7 @@ class NoteModelDBAccessTests: XCTestCase {
 
         let access = DBAccess(moc: moc)
 
-        _ = NoteLevelAccessImpl.stubP(using: access, with: document)
+        _ = NoteLevelAccessImpl.stubP(using: access, with: document, logger: TestLogger())
             .flatMap { levelDB in
                 return levelDB
                     .append(level: description, to: rootLevel.id)
@@ -102,7 +102,7 @@ class NoteModelDBAccessTests: XCTestCase {
                                          image: .checkmark,
                                          frame: CGRect(x: 0, y: 0, width: 100, height: 100))
 
-        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document, logger: TestLogger())
             .flatMap { access in
                 access.append(image: image, to: rootLevel.id)
                     .flatMap { access.read(image: image.id) }
@@ -143,7 +143,7 @@ class NoteModelDBAccessTests: XCTestCase {
 
         let dbaccess = DBAccess(moc: moc)
 
-        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document)
+        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document, logger: TestLogger())
             .flatMap { access -> AnyPublisher<NoteLevelDescription?, Error> in
                 access.remove(image: image.id, from: rootLevel.id)
                     .flatMap { access.read(level: rootLevel.id) }
@@ -198,7 +198,7 @@ class NoteModelDBAccessTests: XCTestCase {
 
         let newAnnotation = PKDrawing()
 
-        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document, logger: TestLogger())
             .flatMap { access in
                 access.update(annotation: newAnnotation, image: image.id)
                     .flatMap { access.read(level: rootLevel.id) }
@@ -237,7 +237,7 @@ class NoteModelDBAccessTests: XCTestCase {
 
         let newFrame = CGRect(x: 100, y: 100, width: 1000, height: 1000)
 
-        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document, logger: TestLogger())
             .flatMap { access in
                 access.update(frame: newFrame, image: image.id)
                     .flatMap { access.read(level: rootLevel.id) }
@@ -276,7 +276,7 @@ class NoteModelDBAccessTests: XCTestCase {
                                                 root: rootLevel)
 
         let dbaccess = DBAccess(moc: moc)
-        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document)
+        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document, logger: TestLogger())
             .flatMap { access in
                 access.remove(level: description.id, from: rootLevel.id)
                     .flatMap { access.read(level: rootLevel.id) }
@@ -325,7 +325,7 @@ class NoteModelDBAccessTests: XCTestCase {
                                                 levelTrash: [],
                                                 root: rootLevel)
 
-        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document, logger: TestLogger())
             .flatMap { access in
                 access.update(drawing: newDrawing, for: rootLevel.id)
                     .flatMap { access.read(level: rootLevel.id) }
@@ -359,7 +359,7 @@ class NoteModelDBAccessTests: XCTestCase {
 
         let newFrame = CGRect(x: 10, y: 10, width: 200, height: 300)
 
-        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document)
+        _ = NoteLevelAccessImpl.stubP(using: DBAccess(moc: moc), with: document, logger: TestLogger())
             .flatMap { access  in
                 access.update(frame: newFrame, for: rootLevel.id)
                     .flatMap { access.read(level: rootLevel.id) }
@@ -400,7 +400,7 @@ class NoteModelDBAccessTests: XCTestCase {
 
         let dbaccess = DBAccess(moc: moc)
 
-        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document)
+        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document, logger: TestLogger())
             .flatMap { access -> AnyPublisher<NoteLevelDescription?, Error> in
                 access.restore(level: description.id, to: rootLevel.id)
                     .map { sublevel in
@@ -459,7 +459,7 @@ class NoteModelDBAccessTests: XCTestCase {
 
         let dbaccess = DBAccess(moc: moc)
 
-        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document)
+        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document, logger: TestLogger())
             .flatMap { access -> AnyPublisher<NoteLevelDescription?, Error> in
                 access.restore(image: image.id, to: rootLevel.id)
                     .map { subimage in
@@ -525,7 +525,7 @@ class NoteModelDBAccessTests: XCTestCase {
 
         let dbaccess = DBAccess(moc: moc)
 
-        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document)
+        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document, logger: TestLogger())
             .flatMap { access in access.emptyTrash() }
             .flatMap { _ -> AnyPublisher<DocumentLookupResult?, Error> in
                 return DirectoryAccessImpl(access: dbaccess)
@@ -569,7 +569,7 @@ class NoteModelDBAccessTests: XCTestCase {
                                                 root: rootLevel)
 
         let dbaccess = DBAccess(moc: moc)
-        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document)
+        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document, logger: TestLogger())
             .flatMap { access in
                 access.moveToDrawer(level: description.id, from: rootLevel.id)
                     .flatMap { access.read(level: rootLevel.id) }
@@ -626,7 +626,7 @@ class NoteModelDBAccessTests: XCTestCase {
 
         let dbaccess = DBAccess(moc: moc)
 
-        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document)
+        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document, logger: TestLogger())
             .flatMap { access -> AnyPublisher<NoteLevelDescription?, Error> in
                 access.moveFromDrawer(level: description.id, to: rootLevel.id)
                 .flatMap { _ -> AnyPublisher<Void, Error> in
@@ -681,7 +681,7 @@ class NoteModelDBAccessTests: XCTestCase {
 
         let dbaccess = DBAccess(moc: moc)
 
-        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document)
+        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document, logger: TestLogger())
             .flatMap { access -> AnyPublisher<NoteLevelDescription?, Error> in
                 access.moveToDrawer(image: image.id, from: rootLevel.id)
                     .flatMap { access.read(level: rootLevel.id) }
@@ -737,7 +737,7 @@ class NoteModelDBAccessTests: XCTestCase {
 
         let dbaccess = DBAccess(moc: moc)
 
-        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document)
+        _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document, logger: TestLogger())
             .flatMap { access -> AnyPublisher<NoteLevelDescription?, Error> in
                 access.moveFromDrawer(image: image.id, to: rootLevel.id)
                 .flatMap { _ -> AnyPublisher<Void, Error> in
