@@ -4,6 +4,7 @@ PODS:
   - SnapKit (5.0.1)
   - SwiftCheck (0.12.0)
   - SwiftLint (0.40.1)
+  - Willow (5.2.1)
 
 DEPENDENCIES:
   - Introspect
@@ -11,6 +12,7 @@ DEPENDENCIES:
   - SnapKit (~> 5.0.0)
   - SwiftCheck
   - SwiftLint
+  - Willow (~> 5.0)
 
 SPEC REPOS:
   trunk:
@@ -19,6 +21,7 @@ SPEC REPOS:
     - SnapKit
     - SwiftCheck
     - SwiftLint
+    - Willow
 
 SPEC CHECKSUMS:
   Introspect: ad32f2b7b9e7ac2c008b9dfec3d5325fbd3660fa
@@ -26,7 +29,8 @@ SPEC CHECKSUMS:
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   SwiftCheck: d1dd04d955cc76620b0f84e087536bd059a11c24
   SwiftLint: bbfed21bf4451dcbd0f5cdbee44a18e06cf91b12
+  Willow: a6310f9aedcb6f4de8c35b94fd3416a660ae9280
 
-PODFILE CHECKSUM: 7a44438820a3c9c204c2e9e2e3b3f9ac1aea61c0
+PODFILE CHECKSUM: 75d3b037bc31c6ae363503a71dee60c9fc6f5f67
 
 COCOAPODS: 1.8.4
