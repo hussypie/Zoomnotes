@@ -84,8 +84,10 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
     func noteEditorVM(for note: DocumentID, with name: String) -> AnyPublisher<NoteEditorViewModel?, Error> {
         // swiftlint:disable:next force_cast
-        let dbaccess = (UIApplication.shared.delegate as! AppDelegate).access
-        let noteLevelAccess = NoteLevelAccessImpl(access: dbaccess, document: note)
+        let appdelegate = (UIApplication.shared.delegate as! AppDelegate)
+        let noteLevelAccess = NoteLevelAccessImpl(access: appdelegate.access,
+                                                  document: note,
+                                                  logger: appdelegate.logger)
 
         return self.cdaccess
             .noteModel(of: note)

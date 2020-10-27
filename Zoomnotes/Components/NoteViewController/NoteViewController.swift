@@ -23,7 +23,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var redoButton: UIBarButtonItem!
 
     var drawerView: DrawerView? = nil
-    private var imagePicker: UIHostingController<ImagePickerDrawer>? = nil
 
     fileprivate var toolPicker: PKToolPicker!
     var transitionManager: NoteTransitionDelegate!
@@ -376,41 +375,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
             transitionManager.finish()
             self.view.transform = .identity
         }
-    }
-
-    private func showImagePicker() {
-        self.drawerViewTopOffset.update(offset: 0)
-        self.drawerView!.layoutIfNeeded()
-
-        self.imagePicker =
-            UIHostingController(rootView: ImagePickerDrawer(onDismiss: self.hideImagePicker))
-
-        self.view.addSubview(imagePicker!.view)
-
-        imagePicker!.view.snp.makeConstraints { make in
-            make.leading.equalTo(self.view)
-            make.trailing.equalTo(self.view)
-            make.width.equalTo(self.view.snp.width)
-            make.height.equalTo(self.view.frame.height / 3)
-            make.bottom.equalTo(self.view.snp.bottom)
-        }
-    }
-
-    private func hideImagePicker() {
-        guard let view = self.imagePicker?.view else { return }
-        view.removeFromSuperview()
-
-        self.view.addSubview(drawerView!)
-        self.view.bringSubviewToFront(drawerView!)
-
-        drawerView!.snp.makeConstraints { make in
-            make.leading.equalTo(self.view)
-            make.trailing.equalTo(self.view)
-            make.width.equalTo(self.view.snp.width)
-            make.height.equalTo(self.view.frame.height / 3)
-            self.drawerViewTopOffset = make.top.equalTo(self.view.snp.bottom).offset(-50).constraint
-        }
-
     }
 }
 

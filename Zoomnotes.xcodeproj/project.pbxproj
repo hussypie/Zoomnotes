@@ -52,12 +52,10 @@
 		313BFDF62520E4F100EBF70F /* DirectoryAccess+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313BFDF52520E4F100EBF70F /* DirectoryAccess+stub.swift */; };
 		3142FE86250B59AF00002DD8 /* NoteEditorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3142FE85250B59AF00002DD8 /* NoteEditorTests.swift */; };
 		314CA94F252B811F00FE9B73 /* NoteEditorDropDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 314CA94E252B811F00FE9B73 /* NoteEditorDropDelegate.swift */; };
-		314CA951252BB2FA00FE9B73 /* ImageDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 314CA950252BB2FA00FE9B73 /* ImageDetailViewController.swift */; };
 		314CA953252BB4D300FE9B73 /* NoteTransitionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 314CA952252BB4D300FE9B73 /* NoteTransitionDelegate.swift */; };
 		314CA955252BB86800FE9B73 /* ZoomDownTransitionAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 314CA954252BB86800FE9B73 /* ZoomDownTransitionAnimator.swift */; };
 		314CA957252E06AD00FE9B73 /* ImageDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 314CA956252E06AD00FE9B73 /* ImageDetailViewModel.swift */; };
 		3166F0D3252F9F7E006FE84A /* DBAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3166F0D2252F9F7E006FE84A /* DBAccess.swift */; };
-		3168B034252609740092B817 /* ImagePickerDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3168B033252609740092B817 /* ImagePickerDrawer.swift */; };
 		3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */; };
 		318EEA6525247BCE00CDB95C /* NoteImageDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 318EEA6425247BCE00CDB95C /* NoteImageDescription.swift */; };
 		319C008025460690004CB3CF /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319C007F25460690004CB3CF /* Logger.swift */; };
@@ -160,12 +158,10 @@
 		313BFDF52520E4F100EBF70F /* DirectoryAccess+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DirectoryAccess+stub.swift"; sourceTree = "<group>"; };
 		3142FE85250B59AF00002DD8 /* NoteEditorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorTests.swift; sourceTree = "<group>"; };
 		314CA94E252B811F00FE9B73 /* NoteEditorDropDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEditorDropDelegate.swift; sourceTree = "<group>"; };
-		314CA950252BB2FA00FE9B73 /* ImageDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailViewController.swift; sourceTree = "<group>"; };
 		314CA952252BB4D300FE9B73 /* NoteTransitionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTransitionDelegate.swift; sourceTree = "<group>"; };
 		314CA954252BB86800FE9B73 /* ZoomDownTransitionAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomDownTransitionAnimator.swift; sourceTree = "<group>"; };
 		314CA956252E06AD00FE9B73 /* ImageDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailViewModel.swift; sourceTree = "<group>"; };
 		3166F0D2252F9F7E006FE84A /* DBAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBAccess.swift; sourceTree = "<group>"; };
-		3168B033252609740092B817 /* ImagePickerDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePickerDrawer.swift; sourceTree = "<group>"; };
 		3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNTapGestureRecognizer.swift; sourceTree = "<group>"; };
 		318EEA6425247BCE00CDB95C /* NoteImageDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteImageDescription.swift; sourceTree = "<group>"; };
 		319C007F25460690004CB3CF /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
@@ -329,7 +325,6 @@
 			children = (
 				3101756424E52FED007D3589 /* ZoomNotesNavigationController.swift */,
 				31B1AA3524FD3AE4007DAF4D /* SettingsView.swift */,
-				314CA950252BB2FA00FE9B73 /* ImageDetailViewController.swift */,
 				313B6CE925155ADD00789595 /* SwiftUI */,
 				31AD9BD82507CDE300C193CF /* FileBrowser */,
 				31362A5524F831D70002FD98 /* NoteViewController */,
@@ -456,7 +451,6 @@
 			children = (
 				313B6CEB25155B0300789595 /* NodeDetailEditor.swift */,
 				313B6CED2515629100789595 /* OkayableTextfield.swift */,
-				3168B033252609740092B817 /* ImagePickerDrawer.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -826,7 +820,6 @@
 				318EEA6525247BCE00CDB95C /* NoteImageDescription.swift in Sources */,
 				31AD9BC52507700900C193CF /* NoteViewController+History.swift in Sources */,
 				31AD9BE525094D9C00C193CF /* AlertController+closure.swift in Sources */,
-				314CA951252BB2FA00FE9B73 /* ImageDetailViewController.swift in Sources */,
 				3101753824E5211D007D3589 /* Zoomnotes.xcdatamodeld in Sources */,
 				31074D6E251D1B4A00F8A11D /* FileBrowserViewModel+Node.swift in Sources */,
 				31AD9BC72507759400C193CF /* NoteViewController+utils.swift in Sources */,
@@ -834,7 +827,6 @@
 				31AD9BC12506849400C193CF /* NoteViewController+Preferences.swift in Sources */,
 				31D6648D24EC53890062AF8D /* CodableImage.swift in Sources */,
 				312820CF24F69A2700338E28 /* Graphics.swift in Sources */,
-				3168B034252609740092B817 /* ImagePickerDrawer.swift in Sources */,
 				31AD9BCF2507937300C193CF /* ZNStatefulGestureManager.swift in Sources */,
 				31AD9BE12509499100C193CF /* DirectoryAccessImpl.swift in Sources */,
 				3101756524E52FED007D3589 /* ZoomNotesNavigationController.swift in Sources */,

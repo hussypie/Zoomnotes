@@ -37,7 +37,8 @@ extension NoteLevelAccessImpl {
 extension NoteLevelAccessImpl {
     static func stubP(
         using access: DBAccess,
-        with document: DocumentStoreDescription
+        with document: DocumentStoreDescription,
+        logger: LoggerProtocol
     ) -> AnyPublisher<NoteLevelAccessImpl, Error> {
         access.build(prepare: { (store: RectStore) -> RectStore in // build root rect
             store.x = Float(document.root.frame.minX)
@@ -66,7 +67,7 @@ extension NoteLevelAccessImpl {
                 return doc
             })
         }.map { _ in
-            NoteLevelAccessImpl(access: access, document: document.id)
+            NoteLevelAccessImpl(access: access, document: document.id, logger: logger)
         }.flatMap { (noteAccess: NoteLevelAccessImpl) -> AnyPublisher<NoteLevelAccessImpl, Error> in
             Publishers.Zip(
                 Publishers.Sequence(sequence: document.root.sublevels)
