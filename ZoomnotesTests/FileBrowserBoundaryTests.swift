@@ -25,7 +25,7 @@ class FileBrowserDBIntegrationTests: XCTestCase {
     func testCreateRootFoleBrowserVMIfNotExists() {
         let defaults = UserDefaults.mock(name: #file)
 
-        let access = DirectoryAccessImpl(access: DBAccess(moc: moc))
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger())
 
         _ = FolderBrowserViewModel.root(defaults: defaults, access: access)
             .flatMap { vm -> AnyPublisher<DirectoryStoreLookupResult?, Error> in
@@ -74,7 +74,7 @@ class FileBrowserDBIntegrationTests: XCTestCase {
         defaults.set(rootDirId, forKey: UserDefaultsKey.rootDirectoryId.rawValue)
 
         _ =
-            DirectoryAccessImpl(access: DBAccess(moc: moc))
+            DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger())
                 .stubF(root: defaultRootDir)
                 .flatMap { access in
                     FolderBrowserViewModel.root(defaults: defaults, access: access)
@@ -102,7 +102,7 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                                 root: rootLevel)
 
         let rootId = UUID()
-        _ =  DirectoryAccessImpl(access: DBAccess(moc: self.moc))
+        _ =  DirectoryAccessImpl(access: DBAccess(moc: self.moc), logger: TestLogger())
             .stubF(root: DirectoryStoreDescription.stub(id: rootId,
                                                         documents: [ document ],
                                                         directories: []))

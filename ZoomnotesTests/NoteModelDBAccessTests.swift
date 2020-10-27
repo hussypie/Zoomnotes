@@ -148,7 +148,7 @@ class NoteModelDBAccessTests: XCTestCase {
                 access.remove(image: image.id, from: rootLevel.id)
                     .flatMap { access.read(level: rootLevel.id) }
                     .flatMap { (desc: NoteLevelDescription?) -> AnyPublisher<NoteLevelDescription?, Error> in
-                        return DirectoryAccessImpl(access: dbaccess)
+                        return DirectoryAccessImpl(access: dbaccess, logger: TestLogger())
                             .noteModel(of: document.id)
                             .map { (docFromDB: DocumentLookupResult?) -> NoteLevelDescription? in
                                 XCTAssertNotNil(docFromDB)
@@ -281,7 +281,7 @@ class NoteModelDBAccessTests: XCTestCase {
                 access.remove(level: description.id, from: rootLevel.id)
                     .flatMap { access.read(level: rootLevel.id) }
                     .flatMap { (desc: NoteLevelDescription?) -> AnyPublisher<NoteLevelDescription?, Error> in
-                        return DirectoryAccessImpl(access: dbaccess)
+                        return DirectoryAccessImpl(access: dbaccess, logger: TestLogger())
                             .noteModel(of: document.id)
                             .map { (docFromDB: DocumentLookupResult?) -> NoteLevelDescription? in
                                 XCTAssertNotNil(docFromDB)
@@ -408,7 +408,7 @@ class NoteModelDBAccessTests: XCTestCase {
                         XCTAssertEqual(sublevel.frame, description.frame)
                 }
                 .flatMap { _ -> AnyPublisher<Void, Error> in
-                    return DirectoryAccessImpl(access: dbaccess)
+                    return DirectoryAccessImpl(access: dbaccess, logger: TestLogger())
                         .noteModel(of: document.id)
                         .map { (docFromDB: DocumentLookupResult?) -> Void in
                             XCTAssertNotNil(docFromDB)
@@ -467,7 +467,7 @@ class NoteModelDBAccessTests: XCTestCase {
                         XCTAssertEqual(subimage.frame, image.frame)
                 }
                 .flatMap { _ -> AnyPublisher<Void, Error> in
-                    return DirectoryAccessImpl(access: dbaccess)
+                    return DirectoryAccessImpl(access: dbaccess, logger: TestLogger())
                         .noteModel(of: document.id)
                         .map { (docFromDB: DocumentLookupResult?) -> Void in
                             XCTAssertNotNil(docFromDB)
@@ -528,7 +528,7 @@ class NoteModelDBAccessTests: XCTestCase {
         _ = NoteLevelAccessImpl.stubP(using: dbaccess, with: document, logger: TestLogger())
             .flatMap { access in access.emptyTrash() }
             .flatMap { _ -> AnyPublisher<DocumentLookupResult?, Error> in
-                return DirectoryAccessImpl(access: dbaccess)
+                return DirectoryAccessImpl(access: dbaccess, logger: TestLogger())
                     .noteModel(of: document.id)
         }.sink(receiveDone: { XCTAssert(true, "OK") },
                receiveError: { XCTFail($0.localizedDescription) },
@@ -574,7 +574,7 @@ class NoteModelDBAccessTests: XCTestCase {
                 access.moveToDrawer(level: description.id, from: rootLevel.id)
                     .flatMap { access.read(level: rootLevel.id) }
                     .flatMap { (desc: NoteLevelDescription?) -> AnyPublisher<NoteLevelDescription?, Error> in
-                        return DirectoryAccessImpl(access: dbaccess)
+                        return DirectoryAccessImpl(access: dbaccess, logger: TestLogger())
                             .noteModel(of: document.id)
                             .map { (docFromDB: DocumentLookupResult?) -> NoteLevelDescription? in
                                 XCTAssertNotNil(docFromDB)
@@ -630,7 +630,7 @@ class NoteModelDBAccessTests: XCTestCase {
             .flatMap { access -> AnyPublisher<NoteLevelDescription?, Error> in
                 access.moveFromDrawer(level: description.id, to: rootLevel.id)
                 .flatMap { _ -> AnyPublisher<Void, Error> in
-                    return DirectoryAccessImpl(access: dbaccess)
+                    return DirectoryAccessImpl(access: dbaccess, logger: TestLogger())
                         .noteModel(of: document.id)
                         .map { (docFromDB: DocumentLookupResult?) -> Void in
                             XCTAssertNotNil(docFromDB)
@@ -686,7 +686,7 @@ class NoteModelDBAccessTests: XCTestCase {
                 access.moveToDrawer(image: image.id, from: rootLevel.id)
                     .flatMap { access.read(level: rootLevel.id) }
                     .flatMap { (desc: NoteLevelDescription?) -> AnyPublisher<NoteLevelDescription?, Error> in
-                        return DirectoryAccessImpl(access: dbaccess)
+                        return DirectoryAccessImpl(access: dbaccess, logger: TestLogger())
                             .noteModel(of: document.id)
                             .map { (docFromDB: DocumentLookupResult?) -> NoteLevelDescription? in
                                 XCTAssertNotNil(docFromDB)
@@ -741,7 +741,7 @@ class NoteModelDBAccessTests: XCTestCase {
             .flatMap { access -> AnyPublisher<NoteLevelDescription?, Error> in
                 access.moveFromDrawer(image: image.id, to: rootLevel.id)
                 .flatMap { _ -> AnyPublisher<Void, Error> in
-                    return DirectoryAccessImpl(access: dbaccess)
+                    return DirectoryAccessImpl(access: dbaccess, logger: TestLogger())
                         .noteModel(of: document.id)
                         .map { (docFromDB: DocumentLookupResult?) -> Void in
                             XCTAssertNotNil(docFromDB)

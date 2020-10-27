@@ -27,7 +27,7 @@ class FileBrowserDBAccessTests: XCTestCase {
                                              documents: [],
                                              directories: [])
 
-        let access = DirectoryAccessImpl(access: DBAccess(moc: moc)).stub(root: root)
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger()).stub(root: root)
 
         let rootLevel = NoteLevelDescription.stub(parent: nil)
         let fileToBeCreated =
@@ -78,7 +78,7 @@ class FileBrowserDBAccessTests: XCTestCase {
 
         let newDate = Date().advanced(by: 24*68*60)
 
-        _ = DirectoryAccessImpl(access: DBAccess(moc: moc))
+        _ = DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger())
             .stubF(root: root)
             .flatMap { access in
                 access.updateLastModified(of: fileToBeUpdated.id, with: newDate)
@@ -107,7 +107,7 @@ class FileBrowserDBAccessTests: XCTestCase {
 
         let newName = "This name is surely better than the prevoius one"
 
-        _ = DirectoryAccessImpl(access: DBAccess(moc: moc))
+        _ = DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger())
             .stubF(root: root)
             .flatMap { access in
                 access.updateName(of: fileToBeUpdated.id, to: newName)
@@ -126,7 +126,7 @@ class FileBrowserDBAccessTests: XCTestCase {
         let rootId = UUID()
         let newName = "This name is surely better than the previous one"
 
-        _ = DirectoryAccessImpl(access: DBAccess(moc: moc))
+        _ = DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger())
             .stubF(root: DirectoryStoreDescription.stub(
                 id: rootId,
                 documents: [],
@@ -157,7 +157,7 @@ class FileBrowserDBAccessTests: XCTestCase {
             directories: [ destinationDirectory ]
         )
 
-        _ = DirectoryAccessImpl(access: DBAccess(moc: moc))
+        _ = DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger())
             .stubF(root: parentDirectory)
             .flatMap { access in
                 access.reparent(from: parentDirectory.id,
@@ -173,7 +173,7 @@ class FileBrowserDBAccessTests: XCTestCase {
     }
 
     func testCreateDirectory() {
-        let access = DirectoryAccessImpl(access: DBAccess(moc: moc))
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger())
         let dirToBeCreated = DirectoryStoreDescription.stub
 
         _ = access.root(from: dirToBeCreated)
@@ -204,7 +204,7 @@ class FileBrowserDBAccessTests: XCTestCase {
             directories: []
         )
 
-        _ = DirectoryAccessImpl(access: DBAccess(moc: moc))
+        _ = DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger())
             .stubF(root: parent)
             .flatMap { access in
                 access.delete(child: fileToBeDeleted.id, of: parent.id)
@@ -241,7 +241,7 @@ class FileBrowserDBAccessTests: XCTestCase {
                 unaffectedDirectory2
         ])
 
-        _ = DirectoryAccessImpl(access: DBAccess(moc: moc))
+        _ = DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger())
             .stubF(root: parent)
             .flatMap { access -> AnyPublisher<DirectoryStoreLookupResult?, Error> in
                 access.delete(child: directoryToBeDeleted.id, of: parent.id)
@@ -277,7 +277,7 @@ class FileBrowserDBAccessTests: XCTestCase {
             documents: [ ],
             directories: [ newParent, child ])
 
-        _ = DirectoryAccessImpl(access: DBAccess(moc: moc))
+        _ = DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger())
             .stubF(root: parent)
             .flatMap { access in
                 return access.reparent(from: parent.id, node: child.id, to: newParent.id)
