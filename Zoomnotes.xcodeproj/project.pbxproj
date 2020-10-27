@@ -86,6 +86,7 @@
 		31CD5213251D118E00561D27 /* DirectoryStoreDescription+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31CD5212251D118E00561D27 /* DirectoryStoreDescription+stub.swift */; };
 		31D6648D24EC53890062AF8D /* CodableImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D6648C24EC53890062AF8D /* CodableImage.swift */; };
 		31D6648F24ED1D470062AF8D /* NoteLevelPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D6648E24ED1D470062AF8D /* NoteLevelPreview.swift */; };
+		31F2FB972548CBBE00735258 /* ImageDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31F2FB962548CBBE00735258 /* ImageDetailViewController.swift */; };
 		F7F6F47D55BB5C37777B55B9 /* Pods_Zoomnotes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41CA6B1C7B18B29005E678AC /* Pods_Zoomnotes.framework */; };
 		F885CBA636E12959C8D6828F /* Pods_ZoomnotesTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE82804B11FC6B424862CD52 /* Pods_ZoomnotesTests.framework */; };
 /* End PBXBuildFile section */
@@ -192,6 +193,7 @@
 		31CD5212251D118E00561D27 /* DirectoryStoreDescription+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DirectoryStoreDescription+stub.swift"; sourceTree = "<group>"; };
 		31D6648C24EC53890062AF8D /* CodableImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CodableImage.swift; path = ../Model/NoteModel/CodableImage.swift; sourceTree = "<group>"; };
 		31D6648E24ED1D470062AF8D /* NoteLevelPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteLevelPreview.swift; sourceTree = "<group>"; };
+		31F2FB962548CBBE00735258 /* ImageDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageDetailViewController.swift; path = ../../../../Desktop/ImageDetailViewController.swift; sourceTree = "<group>"; };
 		41CA6B1C7B18B29005E678AC /* Pods_Zoomnotes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Zoomnotes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		485C114CAEE2DCFC02846656 /* Pods-ZoomnotesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZoomnotesTests.release.xcconfig"; path = "Target Support Files/Pods-ZoomnotesTests/Pods-ZoomnotesTests.release.xcconfig"; sourceTree = "<group>"; };
 		4E0ECA886B165C66AEA4C374 /* Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig"; path = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -323,6 +325,7 @@
 		3101756624E530D1007D3589 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				31F2FB962548CBBE00735258 /* ImageDetailViewController.swift */,
 				3101756424E52FED007D3589 /* ZoomNotesNavigationController.swift */,
 				31B1AA3524FD3AE4007DAF4D /* SettingsView.swift */,
 				313B6CE925155ADD00789595 /* SwiftUI */,
@@ -837,6 +840,7 @@
 				31074D72251E293F00F8A11D /* FileBrowserViewModel+stub.swift in Sources */,
 				312B3A082523C97D0020E1CF /* DirectoryAccess.swift in Sources */,
 				313414C62517F32D005B49D1 /* FileBrowserCommandable.swift in Sources */,
+				31F2FB972548CBBE00735258 /* ImageDetailViewController.swift in Sources */,
 				310F03D32510DF1D000CF0F0 /* ManagedContext+inMemory.swift in Sources */,
 				310A5C6D24F40A44006394A0 /* ZNPanGestureRecognizer.swift in Sources */,
 				314CA957252E06AD00FE9B73 /* ImageDetailViewModel.swift in Sources */,
