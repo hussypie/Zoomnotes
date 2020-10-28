@@ -244,8 +244,10 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
             id: node.store,
             directory: { [unowned self] in self.cdaccess.reparent(from: directoryId, node: $0, to: dest) },
             document: { [unowned self] in self.cdaccess.reparent(from: directoryId, node: $0, to: dest) }
-        ).map { [unowned self] in self.nodes = self.nodes.filter { $0.id != node.id } }
-            .eraseToAnyPublisher()
+        ).map { [unowned self] in
+            self.nodes = self.nodes.filter { $0.id != node.id }
+
+        }.eraseToAnyPublisher()
     }
 
     func rename(node: FolderBrowserNode, to name: String) -> AnyPublisher<Void, Error> {
@@ -253,11 +255,12 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
             id: node.store,
             directory: { [unowned self] in self.cdaccess.updateName(of: $0, to: name) },
             document: { [unowned self] in self.cdaccess.updateName(of: $0, to: name) }
-        ).map {  node.name = name }
+        ).map {  node.name = name } // TODO: logs
         .eraseToAnyPublisher()
     }
 
     func update(doc: DocumentID, preview: UIImage) -> AnyPublisher<Void, Error> {
-        self.cdaccess.updatePreviewImage(of: doc, with: preview)
+        self.cdaccess
+            .updatePreviewImage(of: doc, with: preview)
     }
 }
