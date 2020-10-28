@@ -28,16 +28,17 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     var transitionManager: NoteTransitionDelegate!
 
     var viewModel: NoteEditorViewModel!
+    var logger: LoggerProtocol!
 
     private var drawerViewTopOffset: Constraint!
 
-    var subLevelViews: [UUID: NoteLevelPreview] = [:]
+    var subLevelViews: [NoteLevelPreview]!
 
     var interactionController: UIPercentDrivenInteractiveTransition? = nil
 
     private(set) var previewChangedSubject = PassthroughSubject<UIImage, Never>()
 
-    fileprivate var cancellables: Set<AnyCancellable> = []
+    var cancellables: Set<AnyCancellable> = []
 
     var statusBarHeight: CGFloat {
         self.view.window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
@@ -81,10 +82,16 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 let preview = self.sublevelPreview(frame: actualFrame, preview: image)
                 self.view.addSubview(preview)
 
+                self.logger.info("Created subimage via dropping")
+
                 self.create(id: .image(ID(UUID())), frame: actualFrame, with: image)
                     .sink(receiveDone: { /* TODO logging */ },
                           receiveError: { _ in /* TODO logging */ },
-                          receiveValue: { vm in preview.viewModel = vm })
+                          receiveValue: { [unowned self] vm in
+                            preview.viewModel = vm
+                            self.logger.info("Set view model of preview to vm (id: \(vm.id)")
+
+                    })
                     .store(in: &self.cancellables)
 
         })
@@ -105,6 +112,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                                                            preview: defaultPreviewImage)
                 self.view.addSubview(newLevelPreview)
 
+                self.logger.info("Beginning edge pan gesture")
                 return EdgePanGestureState(currentlyDraggedPreview: newLevelPreview)
         },
             step: { rec, state in
@@ -118,16 +126,20 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 return state
         },
             end: { rec, state in
+                self.logger.info("Ended edge pan gesture")
                 let velocity = rec.velocity(in: self.canvasView)
                 let magnitude: CGFloat = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
 
                 let catapult = Catapult(threshold: 4000, in: self.view) { }
 
-                if catapult.tryFling(velocity, magnitude, state.currentlyDraggedPreview) { return }
+                if catapult.tryFling(velocity, magnitude, state.currentlyDraggedPreview) {
+                    self.logger.info("Flung out child preview")
+                    return
+                }
 
                 self.create(id: .level(ID(UUID())),
-                                 frame: state.currentlyDraggedPreview.frame,
-                                 with: state.currentlyDraggedPreview.image!)
+                            frame: state.currentlyDraggedPreview.frame,
+                            with: state.currentlyDraggedPreview.image!)
                     .sink(receiveDone: { /* TODO */ },
                           receiveError: {  _ in /* TODO */ },
                           receiveValue: { vm in state.currentlyDraggedPreview.viewModel = vm })
@@ -153,6 +165,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     private func setup(_ canvasView: PKCanvasView) {
+        self.logger.info("Setting up canvas view")
         canvasView.delegate = self
         canvasView.drawing = viewModel.drawing
         canvasView.alwaysBounceVertical = true
@@ -167,6 +180,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     private func setup(_ toolPicker: PKToolPicker) {
+        self.logger.info("Setting up tool picker")
         toolPicker.setVisible(true, forFirstResponder: canvasView)
         toolPicker.addObserver(canvasView)
         toolPicker.addObserver(self)
@@ -186,6 +200,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         toolPicker = PKToolPicker.shared(for: window!)
         setup(toolPicker)
 
+        self.logger.info("Setting up drawer view")
         if self.drawerView != nil {
             self.drawerView!.removeFromSuperview()
         }
@@ -219,13 +234,24 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
 
+        // swiftlint:disable:next force_cast
+        let appdelegate = (UIApplication.shared.delegate as! AppDelegate)
+        self.logger = appdelegate.logger
+
+        self.logger.info("Setting drop interaction")
+
         let interaction = UIDropInteraction(delegate: dropManager)
         self.view.addInteraction(interaction)
 
+        self.logger.info("Setting up edge gesture swipe in interaction")
         let edges: [UIRectEdge] = [.left, .right]
 
         edges.forEach { self.view.addGestureRecognizer(edgeGestureRecognizer(edge: $0)) }
 
+
+        self.logger.info("Adding children to view")
+
+        self.subLevelViews = []
         for child in self.viewModel.nodes {
             let sublevel = self.sublevelPreview(frame: child.frame, preview: child.preview)
             sublevel.viewModel = child
@@ -241,8 +267,10 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
             self.canvasView.addSubview(sublevel)
         }
 
+        self.logger.info("Adding zoom up pinch gesture recognizer")
         self.view.addGestureRecognizer(ZNPinchGestureRecognizer { self.onPreviewZoomUp($0) })
 
+        self.logger.info("Adding observers")
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(updateDrawingMeta),
                                                name: UIApplication.willTerminateNotification,
@@ -273,12 +301,21 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
             prepare: { drawerView?.alpha = 0.0 },
             done: { drawerView?.alpha = 1.0 }
         )
-        self.previewChangedSubject.send(screen)
-        self.viewModel.refresh(image: screen)
+        self.viewModel
+            .refresh(image: screen)
+            .sink(
+                receiveDone: { },
+                receiveError: { [unowned self] error in
+                    self.logger.warning("Cannot refresh preview image, reason: \(error.localizedDescription)")
+                },
+                receiveValue: { [unowned self] in
+                    self.previewChangedSubject.send(screen)
+            }).store(in: &self.cancellables)
     }
 
     func onPreviewZoomUp(_ rec: ZNPinchGestureRecognizer) {
         if rec.state == .began {
+            self.logger.info("Began zoom up gesture")
             navigationController?.popViewController(animated: true)
         }
 
@@ -289,8 +326,10 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         if rec.state == .ended {
             if rec.scale < 0.5 && rec.state != .cancelled {
+                self.logger.info("Finished zoom up gesture")
                 transitionManager.finish()
             } else {
+                self.logger.info("Cancelled zoom up gesture")
                 transitionManager.cancel()
             }
         }
@@ -306,41 +345,58 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         let ratio = view.bounds.width / preview.frame.width
 
         if rec.state == .began {
+            self.logger.info("Began zoom down gesture")
             self.transitionManager = transitionManager.down(animator: ZoomDownTransitionAnimator(destinationRect: frameInView))
 
             switch vm.store {
             case .level(let id):
                 guard let sublevelVC = NoteViewController.from(self.storyboard) else { return }
                 sublevelVC.transitionManager =
-                        NoteTransitionDelegate()
-                            .up(animator: ZoomUpTransitionAnimator(with: vm.frame))
+                    NoteTransitionDelegate()
+                        .up(animator: ZoomUpTransitionAnimator(with: vm.frame))
 
-                    sublevelVC
-                        .previewChangedSubject
-                        .sink { preview in vm.preview = preview }
-                        .store(in: &cancellables)
+                sublevelVC
+                    .previewChangedSubject
+                    .sink { preview in vm.preview = preview }
+                    .store(in: &cancellables)
 
-                    self.viewModel.childViewModel(for: id)
-                        .receive(on: DispatchQueue.main)
-                        .sink(receiveCompletion: { _ in return }, // TODO: log
-                              receiveValue: { viewModel in
-                                sublevelVC.viewModel = viewModel
-                                self.navigationController?.pushViewController(sublevelVC, animated: true)
-                        }).store(in: &cancellables)
+                self.viewModel.childViewModel(for: id)
+                    .receive(on: DispatchQueue.main)
+                    .sink(receiveCompletion: { _ in return }, // TODO: log
+                        receiveValue: { viewModel in
+                            sublevelVC.viewModel = viewModel
+                            self.navigationController?.pushViewController(sublevelVC, animated: true)
+                    }).store(in: &cancellables)
             case .image(let id):
                 guard let imageVC = ImageDetailViewController.from(self.storyboard) else { return }
                 imageVC
                     .previewChanged
-                    .sink { [weak self] image in
-                        vm.preview = image
-                        self?.viewModel.update(id: id, preview: image)
-
-                }
-                    .store(in: &cancellables)
+                    .setFailureType(to: Error.self)
+                    .flatMap { [unowned self] image in
+                        self.viewModel
+                            .update(id: id, preview: image)
+                            .map { _ in image }
+                }.sink(receiveDone: { },
+                      receiveError: { [unowned self] error in
+                        self.logger.warning("Cannot update preview image of id: \(id), reason: \(error.localizedDescription)")
+                    },
+                      receiveValue: { [unowned self] image in
+                        preview.image = image
+                        self.logger.info("Updated preview image of id: \(id)")
+                })
+                .store(in: &cancellables)
 
                 imageVC
                     .drawingChanged
-                    .sink { self.viewModel.update(id: id, annotation: $0) }
+                    .setFailureType(to: Error.self)
+                    .flatMap { self.viewModel.update(id: id, annotation: $0) }
+                    .sink(receiveDone: { },
+                          receiveError: { [unowned self] error in
+                            self.logger.warning("Cannot update annotation of id: \(id), reason: \(error.localizedDescription)")
+                        },
+                          receiveValue: { [unowned self] in
+                            self.logger.info("Updated annotation of id: \(id)")
+                    })
                     .store(in: &cancellables)
 
                 imageVC.transitionManager =
@@ -350,8 +406,9 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 viewModel.imageDetailViewModel(for: id)
                     .receive(on: DispatchQueue.main)
                     .sink(receiveCompletion: { _ in return }, // TODO: signal error
-                          receiveValue: { viewModel in
+                        receiveValue: { viewModel in
                             imageVC.viewModel = viewModel
+                            self.logger.info("Began zoom down gesture")
                             self.navigationController?.pushViewController(imageVC, animated: true)
                     })
                     .store(in: &self.cancellables)
@@ -366,13 +423,19 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         if rec.state == .ended {
             guard rec.scale > 2 || rec.state == .cancelled else {
-                UIView.animate(withDuration: 0.1) {
-                    self.view.transform = .identity
-                }
-                transitionManager.cancel()
+                UIView.animate(
+                    withDuration: 0.1,
+                    animations: { self.view.transform = .identity },
+                    completion: { [unowned self] _ in
+                        self.transitionManager.cancel()
+                        self.logger.info("Cancelled zoom down gesture")
+                        return
+                })
                 return
             }
+
             transitionManager.finish()
+            self.logger.info("Finished zoom down gesture")
             self.view.transform = .identity
         }
     }
@@ -409,8 +472,10 @@ extension NoteViewController {
         let origin: MoveOrigin
         if preview.superview! == self.drawerView! {
             origin = .drawer
+            self.logger.info("Began child pan gesture from drawer")
         } else {
             origin = .canvas
+            self.logger.info("Began child pan gesture from canvas")
         }
 
         let loc = rec.location(in: self.view)
@@ -450,17 +515,13 @@ extension NoteViewController {
         let magnitude: CGFloat = sqrt((velocity.x * velocity.x) + (velocity.y * velocity.y))
 
         let catapult = Catapult(threshold: 4000, in: self.view) {
-            self.removeChild(vm, undo: { _ in fatalError("Not implemented") })
+            self.removeChild(vm)
         }
 
         if catapult.tryFling(velocity, magnitude, state.dragging) {
             state.dragging.removeFromSuperview()
-            self.removeChild(vm) { undidvm in
-                let preview = self.sublevelPreview(frame: undidvm.frame,
-                                                   preview: undidvm.preview)
-                preview.viewModel = undidvm
-                self.canvasView.addSubview(preview)
-            }
+            self.removeChild(vm)
+            self.logger.info("Pan gestur ended with child flung out")
             return
         }
 
@@ -475,15 +536,17 @@ extension NoteViewController {
             let originalFrame = state.originalFrame
             if state.origin == .canvas {
                 self.moveToDrawer(sublevel: vm,
-                                            from: originalFrame,
-                                            to: frameInDrawer)
+                                  from: originalFrame,
+                                  to: frameInDrawer)
                 state.dragging.removeFromSuperview()
                 self.drawerView?.addSubview(state.dragging)
                 state.dragging.frame = frameInDrawer
+                self.logger.info("Child (id: \(vm.id)) moved to drawer")
             } else {
                 self.moveChild(sublevel: vm,
-                                         from: originalFrame,
-                                         to: frameInDrawer)
+                               from: originalFrame,
+                               to: frameInDrawer)
+                self.logger.info("Child (id: \(vm.id)) moved")
             }
         } else {
             let canvasViewOffset = self.canvasView.contentOffset.y
@@ -496,12 +559,13 @@ extension NoteViewController {
 
             if state.origin == .drawer {
                 self.moveFromDrawer(sublevel: vm, from: originalFrame, to: newFrame)
-
                 state.dragging.removeFromSuperview()
                 self.canvasView.addSubview(state.dragging)
                 state.dragging.frame = newFrame
+                self.logger.info("Child (id: \(vm.id)) moved to canvas")
             } else {
                 self.moveChild(sublevel: vm, from: originalFrame, to: newFrame)
+                self.logger.info("Child (id: \(vm.id)) moved")
             }
         }
     }
@@ -581,6 +645,8 @@ extension NoteViewController {
             let location = rec.location(in: preview)
             preview.setEdited(in: preview.bounds.half(of: location))
         }.taps(2))
+
+        self.subLevelViews.append(preview)
 
         return preview
     }

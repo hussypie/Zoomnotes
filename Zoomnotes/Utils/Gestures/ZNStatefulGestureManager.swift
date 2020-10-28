@@ -40,7 +40,7 @@ final class ZNStatefulGestureManager<State, Recognizer: UIGestureRecognizer> {
             self.state = self.step(recognizer, self.state!)
         }
 
-        if recognizer.state == .ended {
+        if recognizer.state == .ended && recognizer.state != .cancelled {
             precondition(self.state != nil)
             self.end(recognizer, self.state!)
             self.state = nil
