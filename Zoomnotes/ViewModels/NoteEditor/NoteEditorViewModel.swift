@@ -113,7 +113,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         `switch`(
             id: child.store,
             level: { [unowned self] lid in self.move(id: lid, to: to) },
-            image: { [unowned self] iid in self.move(id: id, to: to) }
+            image: { [unowned self] iid in self.move(id: iid, to: to) }
         ).map { child.frame = to }
         .eraseToAnyPublisher()
     }
@@ -210,7 +210,10 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
     }
 
     func update(drawing: PKDrawing) -> AnyPublisher<Void, Error> {
-        access.update(drawing: drawing, for: self.id)
+        access
+            .update(drawing: drawing, for: self.id)
+            .map { [unowned self] in self.drawing = drawing }
+            .eraseToAnyPublisher()
     }
 
     func update(id: NoteImageID, annotation: PKDrawing) -> AnyPublisher<Void, Error> {

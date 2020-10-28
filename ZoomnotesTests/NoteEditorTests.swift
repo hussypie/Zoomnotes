@@ -110,17 +110,19 @@ class NoteEditorTests: XCTestCase {
                                      onUpdateName: { _ in })
 
         let numberOfLevelsInDBBeforeCommand = mockDB.levels.count
-        vm.remove(child: sublevels.first!)
+        _ = vm.remove(child: sublevels.first!)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: {
+                    XCTAssert(vm.nodes.isEmpty)
 
-        XCTAssert(vm.nodes.isEmpty)
+                    XCTAssertEqual(mockDB.levels.count, numberOfLevelsInDBBeforeCommand - 1)
 
-        XCTAssertEqual(mockDB.levels.count, numberOfLevelsInDBBeforeCommand - 1)
-
-        XCTAssert(mockDB.imageTrash.isEmpty)
-        XCTAssert(mockDB.imageDrawer.isEmpty)
-        XCTAssert(mockDB.levelDrawer.isEmpty)
-        XCTAssertEqual(mockDB.levelTrash.count, 1)
-
+                    XCTAssert(mockDB.imageTrash.isEmpty)
+                    XCTAssert(mockDB.imageDrawer.isEmpty)
+                    XCTAssert(mockDB.levelDrawer.isEmpty)
+                    XCTAssertEqual(mockDB.levelTrash.count, 1)
+            })
     }
 
     func testMove() {
@@ -150,20 +152,23 @@ class NoteEditorTests: XCTestCase {
 
         let newFrame = CGRect(x: 10, y: 10, width: 300, height: 300)
 
-        vm.move(child: sublevels.first!, to: newFrame)
+        _ = vm.move(child: sublevels.first!, to: newFrame)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: {
+                    XCTAssertEqual(vm.nodes.count, 1)
+                    XCTAssertNotNil(vm.nodes.first { $0.id == childId })
+                    XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, newFrame)
+                    XCTAssertEqual(vm.drawer.nodes.count, 0)
 
-        XCTAssertEqual(vm.nodes.count, 1)
-        XCTAssertNotNil(vm.nodes.first { $0.id == childId })
-        XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, newFrame)
-        XCTAssertEqual(vm.drawer.nodes.count, 0)
-
-        XCTAssertEqual(mockDB.levels.count, 1)
-        XCTAssertNotNil(mockDB.levels[note.id])
-        XCTAssertEqual(mockDB.levels[note.id]!.id, note.id)
-        XCTAssertEqual(mockDB.imageTrash.count, 0)
-        XCTAssertEqual(mockDB.levelTrash.count, 0)
-        XCTAssertEqual(mockDB.imageDrawer.count, 0)
-        XCTAssertEqual(mockDB.levelDrawer.count, 0)
+                    XCTAssertEqual(mockDB.levels.count, 1)
+                    XCTAssertNotNil(mockDB.levels[note.id])
+                    XCTAssertEqual(mockDB.levels[note.id]!.id, note.id)
+                    XCTAssertEqual(mockDB.imageTrash.count, 0)
+                    XCTAssertEqual(mockDB.levelTrash.count, 0)
+                    XCTAssertEqual(mockDB.imageDrawer.count, 0)
+                    XCTAssertEqual(mockDB.levelDrawer.count, 0)
+            })
     }
 
     func testResize() {
@@ -195,15 +200,18 @@ class NoteEditorTests: XCTestCase {
 
         let newFrame = CGRect(x: 10, y: 10, width: 300, height: 300)
 
-        vm.resize(child: sublevels.first!, to: newFrame)
+        _ = vm.resize(child: sublevels.first!, to: newFrame)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: {
+                    XCTAssertEqual(vm.nodes.count, 1)
+                    XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
+                    XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, newFrame)
+                    XCTAssertEqual(vm.drawer.nodes.count, 0)
 
-        XCTAssertEqual(vm.nodes.count, 1)
-        XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
-        XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, newFrame)
-        XCTAssertEqual(vm.drawer.nodes.count, 0)
-
-        XCTAssertEqual(mockDB.levels.count, 1)
-        XCTAssertNotNil(mockDB.levels[note.id])
+                    XCTAssertEqual(mockDB.levels.count, 1)
+                    XCTAssertNotNil(mockDB.levels[note.id])
+            })
     }
 
     func testUpdate() {
@@ -219,11 +227,14 @@ class NoteEditorTests: XCTestCase {
                                      onUpdateName: { _ in })
 
         let newDrawing = PKDrawing()
-        vm.update(drawing: newDrawing)
-
-        XCTAssert(vm.nodes.isEmpty)
-        XCTAssert(vm.drawer.nodes.isEmpty)
-        XCTAssertEqual(vm.drawing, newDrawing)
+        _ = vm.update(drawing: newDrawing)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: {
+                    XCTAssert(vm.nodes.isEmpty)
+                    XCTAssert(vm.drawer.nodes.isEmpty)
+                    XCTAssertEqual(vm.drawing, newDrawing)
+            })
     }
 
     func testAddSubImage() {
@@ -296,15 +307,18 @@ class NoteEditorTests: XCTestCase {
                                      onUpdateName: { _ in })
 
         let newFrame = CGRect(x: 100, y: 100, width: 100, height: 100)
-        vm.move(child: sublevels.first!, to: newFrame)
+        _ = vm.move(child: sublevels.first!, to: newFrame)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: {
+                    XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
+                    XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, newFrame)
 
-        XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
-        XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, newFrame)
+                    XCTAssertNotNil(mockDB.images[image.id])
+                    XCTAssertEqual(mockDB.images[image.id]!.frame, newFrame)
 
-        XCTAssertNotNil(mockDB.images[image.id])
-        XCTAssertEqual(mockDB.images[image.id]!.frame, newFrame)
-
-        self.assertDrawerTrashEmpty(db: mockDB)
+                    self.assertDrawerTrashEmpty(db: mockDB)
+            })
     }
 
     func testResizeSubImage() {
@@ -341,15 +355,18 @@ class NoteEditorTests: XCTestCase {
                                      onUpdateName: { _ in })
 
         let newFrame = CGRect(x: 100, y: 100, width: 100, height: 100)
-        vm.resize(child: sublevels.first!, to: newFrame)
+        _ = vm.resize(child: sublevels.first!, to: newFrame)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: {
+                    XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
+                    XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, newFrame)
 
-        XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
-        XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, newFrame)
+                    XCTAssertNotNil(mockDB.images[image.id])
+                    XCTAssertEqual(mockDB.images[image.id]!.frame, newFrame)
 
-        XCTAssertNotNil(mockDB.images[image.id])
-        XCTAssertEqual(mockDB.images[image.id]!.frame, newFrame)
-
-        self.assertDrawerTrashEmpty(db: mockDB)
+                    self.assertDrawerTrashEmpty(db: mockDB)
+            })
     }
 
     func testRemoveSubImage() {
@@ -384,18 +401,21 @@ class NoteEditorTests: XCTestCase {
                                      access: mockDB,
                                      onUpdateName: { _ in })
 
-        vm.remove(child: sublevels.first!)
+        _ = vm.remove(child: sublevels.first!)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: {
+                    XCTAssertNil(vm.nodes.first(where: { $0.id == childId }))
+                    XCTAssertNil(mockDB.images[image.id])
+                    XCTAssertEqual(mockDB.imageTrash.count, 1)
+                    XCTAssertNotNil(mockDB.imageTrash[image.id])
+                    XCTAssert(mockDB.levels[root.id]!.images.isEmpty)
 
-        XCTAssertNil(vm.nodes.first(where: { $0.id == childId }))
-        XCTAssertNil(mockDB.images[image.id])
-        XCTAssertEqual(mockDB.imageTrash.count, 1)
-        XCTAssertNotNil(mockDB.imageTrash[image.id])
-        XCTAssert(mockDB.levels[root.id]!.images.isEmpty)
-
-        XCTAssert(mockDB.levelTrash.isEmpty)
-        XCTAssert(mockDB.imageDrawer.isEmpty)
-        XCTAssert(mockDB.levelDrawer.isEmpty)
-        XCTAssertEqual(mockDB.imageTrash.count, 1)
+                    XCTAssert(mockDB.levelTrash.isEmpty)
+                    XCTAssert(mockDB.imageDrawer.isEmpty)
+                    XCTAssert(mockDB.levelDrawer.isEmpty)
+                    XCTAssertEqual(mockDB.imageTrash.count, 1)
+            })
     }
 
     func testMoveToDrawer() {
@@ -436,18 +456,21 @@ class NoteEditorTests: XCTestCase {
                                      onUpdateName: { _ in })
 
         let frameWithinDrawer = CGRect(x: 10, y: 10, width: 50, height: 50)
-        vm.moveToDrawer(child: sublevels.first!, frame: frameWithinDrawer)
+        _ = vm.moveToDrawer(child: sublevels.first!, frame: frameWithinDrawer)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: {
+                    XCTAssert(vm.nodes.isEmpty)
+                    XCTAssertEqual(vm.drawer.nodes.count, 1)
+                    XCTAssertNotNil(vm.drawer.nodes.first(where: { $0.id == childId }))
+                    XCTAssertEqual(vm.drawer.nodes.first(where: { $0.id == childId })!.frame, frameWithinDrawer)
 
-        XCTAssert(vm.nodes.isEmpty)
-        XCTAssertEqual(vm.drawer.nodes.count, 1)
-        XCTAssertNotNil(vm.drawer.nodes.first(where: { $0.id == childId }))
-        XCTAssertEqual(vm.drawer.nodes.first(where: { $0.id == childId })!.frame, frameWithinDrawer)
-
-        XCTAssertEqual(mockDB.levelDrawer.count, 1)
-        XCTAssertNotNil(mockDB.levelDrawer[note.id])
-        XCTAssert(mockDB.imageDrawer.isEmpty)
-        XCTAssert(mockDB.levelTrash.isEmpty)
-        XCTAssertEqual(mockDB.levels.count, 1)
+                    XCTAssertEqual(mockDB.levelDrawer.count, 1)
+                    XCTAssertNotNil(mockDB.levelDrawer[note.id])
+                    XCTAssert(mockDB.imageDrawer.isEmpty)
+                    XCTAssert(mockDB.levelTrash.isEmpty)
+                    XCTAssertEqual(mockDB.levels.count, 1)
+            })
     }
 
     func testMoveFromDrawer() {
@@ -489,15 +512,18 @@ class NoteEditorTests: XCTestCase {
                                      onUpdateName: { _ in })
 
         let frameWithinCanvas = CGRect(x: 10, y: 10, width: 50, height: 50)
-        vm.moveFromDrawer(child: drawer.first!, frame: frameWithinCanvas)
+        _ = vm.moveFromDrawer(child: drawer.first!, frame: frameWithinCanvas)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: {
+                    XCTAssert(vm.drawer.nodes.isEmpty)
+                    XCTAssertEqual(vm.nodes.count, 1)
+                    XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
+                    XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, frameWithinCanvas)
 
-        XCTAssert(vm.drawer.nodes.isEmpty)
-        XCTAssertEqual(vm.nodes.count, 1)
-        XCTAssertNotNil(vm.nodes.first(where: { $0.id == childId }))
-        XCTAssertEqual(vm.nodes.first(where: { $0.id == childId })!.frame, frameWithinCanvas)
+                    XCTAssertNotNil(mockDB.levels[note.id])
 
-        XCTAssertNotNil(mockDB.levels[note.id])
-
-        self.assertDrawerTrashEmpty(db: mockDB)
+                    self.assertDrawerTrashEmpty(db: mockDB)
+            })
     }
 }
