@@ -30,16 +30,9 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="wyM-vG-dgj"/>
                     </view>
-                    <navigationItem key="navigationItem" id="gTE-AX-b0V">
-                        <rightBarButtonItems>
-                            <barButtonItem title="Item" image="arrow.uturn.right" catalog="system" id="wEM-g3-O1N" userLabel="Redo"/>
-                            <barButtonItem image="arrow.uturn.left" catalog="system" id="p7f-df-8JM" userLabel="Undo"/>
-                        </rightBarButtonItems>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" id="gTE-AX-b0V"/>
                     <connections>
                         <outlet property="canvasView" destination="wwu-Pw-egK" id="ni2-DG-ovG"/>
-                        <outlet property="redoButton" destination="wEM-g3-O1N" id="1ly-YD-p6d"/>
-                        <outlet property="undoButton" destination="p7f-df-8JM" id="bZM-yA-6qM"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9Xx-ZR-1iV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -204,8 +197,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="arrow.uturn.left" catalog="system" width="128" height="112"/>
-        <image name="arrow.uturn.right" catalog="system" width="128" height="112"/>
         <image name="chevron.down" catalog="system" width="128" height="72"/>
         <image name="gear" catalog="system" width="128" height="119"/>
     </resources>

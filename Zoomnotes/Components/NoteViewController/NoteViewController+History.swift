@@ -17,7 +17,6 @@ extension NoteViewController {
             .create(id: id, frame: frame, preview: preview)
             .map { childVM in
                 self.undoManager?.registerUndo(withTarget: self) {
-                    print("remove aaaaaa")
                     $0.removeChild(childVM)
                 }
                 self.undoManager?.setActionName("Create")

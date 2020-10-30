@@ -21,8 +21,6 @@ struct DragState {
 // swiftlint:disable type_body_length
 class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var canvasView: PKCanvasView!
-    @IBOutlet weak var undoButton: UIBarButtonItem!
-    @IBOutlet weak var redoButton: UIBarButtonItem!
 
     var drawerView: DrawerView? = nil
 
@@ -81,6 +79,17 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         return button
     }()
 
+    lazy var undoButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "arrow.turn.up.left"), for: .normal)
+        button.layer.borderColor = UIColor.systemBlue.cgColor
+        button.layer.borderWidth = 2
+        button.layer.cornerRadius = 25
+        button.addTarget(self, action: #selector(plusButtonTapped), for: .touchUpInside)
+
+        return button
+    }()
+
     @objc func plusButtonTapped() {
         let id: NoteChildStore = .level(ID(UUID()))
         let frame = CGRect(x: 100,
@@ -95,10 +104,11 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 FloatingNotificationBanner(title: "Cannot create level", style: .warning).show()
             },
               receiveValue: { [unowned self] vm in
+                let contentOffset = self.canvasView.contentOffset
                 let startingFrame = CGRect(x: -1000,
                                            y: -1000,
-                                           width: frame.width,
-                                           height: frame.height)
+                                           width: frame.width + contentOffset.x,
+                                           height: frame.height + contentOffset.y)
                 let preview = self.sublevelPreview(frame: startingFrame, preview: preview)
                 preview.viewModel = vm
                 self.canvasView.addSubview(preview)
@@ -113,6 +123,11 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
     @objc func backButtonTapped() {
         self.navigationController?.popViewController(animated: true)
+    }
+
+    @objc func undoButtonTapped() {
+        guard let undoManager = self.undoManager else { return }
+        if undoManager.canUndo { undoManager.undo() }
     }
 
     lazy var dropManager: NoteEditorDropDelegate = {
@@ -239,6 +254,18 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         toolPicker.addObserver(self)
 
         updateLayout(for: toolPicker)
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        if traitCollection.horizontalSizeClass == .compact {
+            self.view.addSubview(self.undoButton)
+            self.undoButton.snp.makeConstraints { make in
+                make.width.equalTo(50)
+                make.height.equalTo(50)
+                make.trailing.equalTo(self.plusButton.snp.leading)
+                make.top.equalTo(10)
+            }
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -628,9 +655,9 @@ extension NoteViewController {
                 self.logger.info("Child (id: \(vm.id)) moved")
             }
         } else {
-            let canvasViewOffset = self.canvasView.contentOffset.y
-            let newFrame = CGRect(x: state.dragging.frame.minX,
-                                  y: state.dragging.frame.minY + canvasViewOffset - self.statusBarHeight,
+            let canvasViewOffset = self.canvasView.contentOffset
+            let newFrame = CGRect(x: state.dragging.frame.minX + canvasViewOffset.x,
+                                  y: state.dragging.frame.minY + canvasViewOffset.y - self.statusBarHeight,
                                   width: state.dragging.frame.width,
                                   height: state.dragging.frame.height)
 
