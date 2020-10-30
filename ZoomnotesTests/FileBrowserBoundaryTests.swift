@@ -13,6 +13,7 @@ import PencilKit
 
 @testable import Zoomnotes
 
+// swiftlint:disable type_body_length
 class FileBrowserDBIntegrationTests: XCTestCase {
     let moc = NSPersistentContainer.inMemory(name: "Zoomnotes").viewContext
 
@@ -24,7 +25,7 @@ class FileBrowserDBIntegrationTests: XCTestCase {
     func testCreateRootFoleBrowserVMIfNotExists() {
         let defaults = UserDefaults.mock(name: #file)
 
-        let access = DirectoryAccessImpl(access: DBAccess(moc: moc))
+        let access = DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger())
 
         _ = FolderBrowserViewModel.root(defaults: defaults, access: access)
             .flatMap { vm -> AnyPublisher<DirectoryStoreLookupResult?, Error> in
@@ -73,13 +74,13 @@ class FileBrowserDBIntegrationTests: XCTestCase {
         defaults.set(rootDirId, forKey: UserDefaultsKey.rootDirectoryId.rawValue)
 
         _ =
-            DirectoryAccessImpl(access: DBAccess(moc: moc))
+            DirectoryAccessImpl(access: DBAccess(moc: moc), logger: TestLogger())
                 .stubF(root: defaultRootDir)
                 .flatMap { access in
                     FolderBrowserViewModel.root(defaults: defaults, access: access)
-        }.sink(receiveDone: { XCTAssertTrue(true, "OK") },
-                  receiveError: { XCTFail($0.localizedDescription) },
-                  receiveValue: { vm in
+            }.sink(receiveDone: { XCTAssertTrue(true, "OK") },
+                   receiveError: { XCTFail($0.localizedDescription) },
+                   receiveValue: { vm in
                     XCTAssertEqual(vm.nodes.count, 2)
                     XCTAssertEqual(vm.title, defaultRootDir.name)
                     XCTAssertTrue(vm.nodes[0].storeEquals(defaultDirectoryChild.id))
@@ -101,19 +102,19 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                                 root: rootLevel)
 
         let rootId = UUID()
-        _ =  DirectoryAccessImpl(access: DBAccess(moc: self.moc))
+        _ =  DirectoryAccessImpl(access: DBAccess(moc: self.moc), logger: TestLogger())
             .stubF(root: DirectoryStoreDescription.stub(id: rootId,
-                                                       documents: [ document ],
-                                                       directories: []))
+                                                        documents: [ document ],
+                                                        directories: []))
             .flatMap { access in
                 access.noteModel(of: document.id)
         }.sink(receiveDone: { XCTAssertTrue(true, "OK") },
-                  receiveError: { XCTFail($0.localizedDescription) },
-                  receiveValue: { data in
-                    XCTAssertNotNil(data)
-                    XCTAssertEqual(data!.root.id, rootLevel.id)
-                    XCTAssertEqual(data!.root.drawing, rootLevel.drawing)
-            })
+               receiveError: { XCTFail($0.localizedDescription) },
+               receiveValue: { data in
+                XCTAssertNotNil(data)
+                XCTAssertEqual(data!.root.id, rootLevel.id)
+                XCTAssertEqual(data!.root.drawing, rootLevel.drawing)
+        })
     }
 
     func testCreateFile() {
@@ -131,11 +132,22 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                         nodes: [],
                                         access: access)
 
-        vm.process(command: .createFile(preview: .checkmark))
-
-        XCTAssertEqual(vm.nodes.count, 1)
-        XCTAssertEqual(access.documents.count, 1)
-        XCTAssertEqual(access.directories.count, 1)
+        let id: DocumentID = ID(UUID())
+        let name = "Untitled"
+        let preview: UIImage = .checkmark
+        let lastModified = Date()
+        _ = vm.createFile(id: id, name: name, preview: preview, lastModified: lastModified)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription)},
+                  receiveValue: { _ in
+                    XCTAssertEqual(vm.nodes.count, 1)
+                    XCTAssertEqual(vm.nodes.first!.store, .document(id))
+                    XCTAssertEqual(vm.nodes.first!.preview.image, preview)
+                    XCTAssertEqual(vm.nodes.first!.lastModified, lastModified)
+                    XCTAssertEqual(vm.nodes.first!.name, name)
+                    XCTAssertEqual(access.documents.count, 1)
+                    XCTAssertEqual(access.directories.count, 1)
+            })
     }
 
     func testCreateDirectory() {
@@ -153,11 +165,20 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                         nodes: [],
                                         access: access)
 
-        vm.process(command: .createDirectory)
-
-        XCTAssertEqual(vm.nodes.count, 1)
-        XCTAssertEqual(access.documents.count, 0)
-        XCTAssertEqual(access.directories.count, 2)
+        let id: DirectoryID = ID(UUID())
+        let name = "Untitled"
+        let lastModified = Date()
+        _ = vm.createFolder(id: id, created: lastModified, name: name)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription)},
+                  receiveValue: { _ in
+                    XCTAssertEqual(vm.nodes.count, 1)
+                    XCTAssertEqual(vm.nodes.first!.store, .directory(id))
+                    XCTAssertEqual(vm.nodes.first!.lastModified, lastModified)
+                    XCTAssertEqual(vm.nodes.first!.name, name)
+                    XCTAssertEqual(access.documents.count, 0)
+                    XCTAssertEqual(access.directories.count, 2)
+            })
     }
 
     func testUpdateFileName() {
@@ -192,17 +213,20 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                         access: access)
 
         let newName = "New Name"
-        vm.process(command: .rename(file, to: newName))
+        _ = vm.rename(node: file, to: newName)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription)},
+                  receiveValue: { _ in
+                    XCTAssertEqual(vm.nodes.count, 1)
+                    XCTAssertEqual(access.directories.count, 1)
+                    XCTAssertEqual(access.documents.count, 1)
 
-        XCTAssertEqual(vm.nodes.count, 1)
-        XCTAssertEqual(access.directories.count, 1)
-        XCTAssertEqual(access.documents.count, 1)
+                    XCTAssertNotNil(vm.nodes.first(where: { $0.id == file.id }))
+                    XCTAssertEqual(vm.nodes.first(where: { $0.id == file.id })!.name, newName)
 
-        XCTAssertNotNil(vm.nodes.first(where: { $0.id == file.id }))
-        XCTAssertEqual(vm.nodes.first(where: { $0.id == file.id })!.name, newName)
-
-        XCTAssertNotNil(access.documents[doc.id])
-        XCTAssertEqual(access.documents[doc.id]!.name, newName)
+                    XCTAssertNotNil(access.documents[doc.id])
+                    XCTAssertEqual(access.documents[doc.id]!.name, newName)
+            })
     }
 
     func testUpdateDirectoryName() {
@@ -235,13 +259,16 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                         access: access)
 
         let newName = "New Name"
-        vm.process(command: .rename(dirVM, to: newName))
-
-        XCTAssertEqual(vm.nodes.count, 1)
-        XCTAssertEqual(vm.nodes.first!.name, newName)
-        XCTAssertEqual(access.documents.count, 0)
-        XCTAssertEqual(access.directories.count, 2)
-        XCTAssertEqual(access.directories[dir.id]!.name, newName)
+        _ = vm.rename(node: dirVM, to: newName)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription)},
+                  receiveValue: { _ in
+                    XCTAssertEqual(vm.nodes.count, 1)
+                    XCTAssertEqual(vm.nodes.first!.name, newName)
+                    XCTAssertEqual(access.documents.count, 0)
+                    XCTAssertEqual(access.directories.count, 2)
+                    XCTAssertEqual(access.directories[dir.id]!.name, newName)
+            })
     }
 
     func testReparentDirectory() {
@@ -286,11 +313,14 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                         nodes: [ dir1VM, dir2VM ],
                                         access: access)
 
-        vm.process(command: .move(dir1VM, to: dir2.id))
-
-        XCTAssertEqual(vm.nodes.count, 1)
-        XCTAssert(access.documents.isEmpty)
-        XCTAssertEqual(access.directories.count, 3)
+        _ = vm.move(node: dir1VM, to: dir2.id)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription)},
+                  receiveValue: { _ in
+                    XCTAssertEqual(vm.nodes.count, 1)
+                    XCTAssert(access.documents.isEmpty)
+                    XCTAssertEqual(access.directories.count, 3)
+            })
     }
 
     func testReparentDocument() {
@@ -338,11 +368,14 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                         nodes: [ dir2VM, file ],
                                         access: access)
 
-        vm.process(command: .move(file, to: dir2.id))
-
-        XCTAssertEqual(vm.nodes.count, 1)
-        XCTAssertEqual(access.documents.count, 1)
-        XCTAssertEqual(access.directories.count, 2)
+        _ = vm.move(node: file, to: dir2.id)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: { _ in
+                    XCTAssertEqual(vm.nodes.count, 1)
+                    XCTAssertEqual(access.documents.count, 1)
+                    XCTAssertEqual(access.directories.count, 2)
+            })
     }
 
     func testDeleteFile() {
@@ -376,11 +409,14 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                         nodes: [ file ],
                                         access: access)
 
-        vm.process(command: .delete(file))
-
-        XCTAssert(vm.nodes.isEmpty)
-        XCTAssertEqual(access.documents.count, 0)
-        XCTAssertEqual(access.directories.count, 1)
+        _ = vm.delete(node: file)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: { _ in
+                    XCTAssert(vm.nodes.isEmpty)
+                    XCTAssertEqual(access.documents.count, 0)
+                    XCTAssertEqual(access.directories.count, 1)
+            })
     }
 
     func testDeleteDirectory() {
@@ -412,10 +448,13 @@ class FileBrowserDBIntegrationTests: XCTestCase {
                                         nodes: [ dirVM ],
                                         access: access)
 
-        vm.process(command: .delete(dirVM))
-
-        XCTAssert(vm.nodes.isEmpty)
-        XCTAssertEqual(access.directories.count, 1)
-        XCTAssertEqual(access.documents.count, 0)
+        _ = vm.delete(node: dirVM)
+            .sink(receiveDone: { },
+                  receiveError: { XCTFail($0.localizedDescription) },
+                  receiveValue: { _ in
+                    XCTAssert(vm.nodes.isEmpty)
+                    XCTAssertEqual(access.directories.count, 1)
+                    XCTAssertEqual(access.documents.count, 0)
+            })
     }
 }

@@ -62,6 +62,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return container
     }()
 
+    lazy var logger: LoggerProtocol = {
+        #if DEBUG
+        return DebugLogger()
+        #else
+        return ProductionLogger()
+        #endif
+    }()
+
     lazy var access: DBAccess = {
         let privateContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         privateContext.parent = self.persistentContainer.viewContext

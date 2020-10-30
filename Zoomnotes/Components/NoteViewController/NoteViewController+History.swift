@@ -16,70 +16,131 @@ extension NoteViewController {
         return self.viewModel
             .create(id: id, frame: frame, preview: preview)
             .map { childVM in
-                self.undoManager?.registerUndo(withTarget: self) { _ in
-                    self.viewModel.remove(child: childVM)
+                self.undoManager?.registerUndo(withTarget: self) {
+                    $0.removeChild(childVM)
                 }
-                switch id {
-                case .level:
-                    self.undoManager?.setActionName("Add Level")
-                case .image:
-                    self.undoManager?.setActionName("Add Image")
-                }
+                self.undoManager?.setActionName("Create")
                 return childVM
         }.eraseToAnyPublisher()
     }
 
+    func removeChild(_ sublevel: NoteChildVM) {
+        self.viewModel
+            .remove(child: sublevel)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveDone: { },
+                  receiveError: { [unowned self] error in
+                    self.logger.warning("Cannot remove child (id: \(sublevel.id)), reason: \(error.localizedDescription)")
+                },
+                  receiveValue: { [unowned self] in
+                    let preview = self.subLevelViews.first { preview in preview.viewModel?.id == sublevel.id }
+                    preview?.removeFromSuperview()
+                    self.subLevelViews.removeAll { preview in preview.viewModel?.id == sublevel.id }
 
-    func removeChild(_ sublevel: NoteChildVM, undo: @escaping (NoteChildVM) -> Void) {
-        self.viewModel.remove(child: sublevel)
-        self.undoManager?.registerUndo(withTarget: self) { _ in
-            self.viewModel.restore(child: sublevel)
-            undo(sublevel)
-        }
-        self.undoManager?.setActionName("Remove")
+                    self.undoManager?.registerUndo(withTarget: self) {
+                        $0.restore(sublevel)
+                    }
+                    self.undoManager?.setActionName("Remove")
+            }).store(in: &self.cancellables)
+    }
+
+    func restore(_ sublevel: NoteChildVM) {
+        self.viewModel
+            .restore(child: sublevel)
+            .sink(
+                receiveDone: { },
+                receiveError: { [unowned self] error in
+                    self.logger.warning("Cannot restore child (id: \(sublevel.id)), reason: \(error.localizedDescription)")
+            },
+                receiveValue: { [unowned self] in
+                    let preview = self.sublevelPreview(frame: sublevel.frame,
+                                                       preview: sublevel.preview)
+                    preview.viewModel = sublevel
+                    self.canvasView.addSubview(preview)
+
+                    self.undoManager?.registerUndo(withTarget: self) {
+                        $0.removeChild(sublevel)
+                    }
+                    self.undoManager?.setActionName("Restore")
+            }).store(in: &self.cancellables)
     }
 
     func update(from: PKDrawing, to drawing: PKDrawing) {
         self.viewModel.update(drawing: drawing)
-        self.undoManager?.registerUndo(withTarget: self) {
-            $0.update(from: drawing, to: from)
-        }
-        self.undoManager?.setActionName("Update Drawing")
+            .sink(receiveDone: { },
+                  receiveError: { [unowned self] error in
+                    self.logger.warning("Cannot update drawing, reason: \(error.localizedDescription)")
+                },
+                  receiveValue: {
+                    self.undoManager?.registerUndo(withTarget: self) {
+                        $0.update(from: drawing, to: from)
+                    }
+                    self.undoManager?.setActionName("Update Drawing")
+            })
+            .store(in: &self.cancellables)
     }
 
     func moveChild(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
-        UIView.animate(withDuration: 0.15, animations: {
-            sublevel.frame = to
-            self.viewModel.move(child: sublevel, to: to)
-        }, completion: { _ in
-            self.undoManager?.registerUndo(withTarget: self) {
-                $0.moveChild(sublevel: sublevel, from: to, to: from)
-            }
-            self.undoManager?.setActionName("Move Sublevel")
-        })
+        self.viewModel
+            .move(child: sublevel, to: to)
+            .sink(receiveDone: { },
+                  receiveError: { [unowned self] error in
+                    self.logger.warning("Cannot move child (id: \(sublevel.id)), reason: \(error.localizedDescription)")
+                },
+                  receiveValue: {
+                    self.undoManager?.registerUndo(withTarget: self) {
+                        $0.moveChild(sublevel: sublevel, from: to, to: from)
+                    }
+                    self.undoManager?.setActionName("Move")
+            })
+            .store(in: &self.cancellables)
     }
 
     func resizePreview(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
-        self.viewModel.resize(child: sublevel, to: to)
-        self.undoManager?.registerUndo(withTarget: self) {
-            $0.resizePreview(sublevel: sublevel, from: to, to: from)
-        }
-        self.undoManager?.setActionName("Resize")
+        self.viewModel
+            .resize(child: sublevel, to: to)
+            .sink(receiveDone: { },
+                  receiveError: { [unowned self] error in
+                    self.logger.warning("Cannot resize preview of child (id: \(sublevel.id)), reason: \(error.localizedDescription)")
+                },
+                  receiveValue: {
+                    self.undoManager?.registerUndo(withTarget: self) {
+                        $0.resizePreview(sublevel: sublevel, from: to, to: from)
+                    }
+                    self.undoManager?.setActionName("Resize")
+            })
+            .store(in: &self.cancellables)
     }
 
     func moveToDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
-        self.viewModel.moveToDrawer(child: sublevel, frame: to)
-        self.undoManager?.registerUndo(withTarget: self) { _ in
-            self.moveFromDrawer(sublevel: sublevel, from: to, to: from)
-        }
-        self.undoManager?.setActionName("Move To Drawer")
+        self.viewModel
+            .moveToDrawer(child: sublevel, frame: to)
+            .sink(receiveDone: { },
+                  receiveError: { [unowned self] error in
+                    self.logger.warning("Cannot move child (id: \(sublevel.id)) back to canvas, reason: \(error.localizedDescription)")
+                },
+                  receiveValue: {
+                    self.undoManager?.registerUndo(withTarget: self) {
+                        $0.moveFromDrawer(sublevel: sublevel, from: to, to: from)
+                    }
+                    self.undoManager?.setActionName("Move To Drawer")
+            })
+            .store(in: &self.cancellables)
     }
 
     func moveFromDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
-        self.viewModel.moveFromDrawer(child: sublevel, frame: to)
-        self.undoManager?.registerUndo(withTarget: self) { _ in
-            self.moveFromDrawer(sublevel: sublevel, from: to, to: from)
-        }
-        self.undoManager?.setActionName("Move To Canvas")
+        self.viewModel
+            .moveFromDrawer(child: sublevel, frame: to)
+            .sink(receiveDone: { },
+                  receiveError: { [unowned self] error in
+                    self.logger.warning("Cannot move child (id: \(sublevel.id)) back to canvas, reason: \(error.localizedDescription)")
+                },
+                  receiveValue: {
+                    self.undoManager?.registerUndo(withTarget: self) {
+                        $0.moveFromDrawer(sublevel: sublevel, from: to, to: from)
+                    }
+                    self.undoManager?.setActionName("Move To Canvas")
+            })
+            .store(in: &self.cancellables)
     }
 }

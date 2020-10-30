@@ -22,7 +22,7 @@ class NoteTransitionDelegate: NSObject, UINavigationControllerDelegate {
             return self.upAnimator
         case .push:
             self.interactionController.update(0)
-            return downAnimator
+            return self.downAnimator
         case .none:
             return nil
         @unknown default:

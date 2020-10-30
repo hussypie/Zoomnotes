@@ -84,8 +84,10 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
     func noteEditorVM(for note: DocumentID, with name: String) -> AnyPublisher<NoteEditorViewModel?, Error> {
         // swiftlint:disable:next force_cast
-        let dbaccess = (UIApplication.shared.delegate as! AppDelegate).access
-        let noteLevelAccess = NoteLevelAccessImpl(access: dbaccess, document: note)
+        let appdelegate = (UIApplication.shared.delegate as! AppDelegate)
+        let noteLevelAccess = NoteLevelAccessImpl(access: appdelegate.access,
+                                                  document: note,
+                                                  logger: appdelegate.logger)
 
         return self.cdaccess
             .noteModel(of: note)
@@ -157,53 +159,33 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                  lastModified: Date())
     }
 
-    private func delete(_ node: FolderBrowserNode) {
-        switch node.store {
-        case .directory(let id):
-            self.cdaccess
-                .delete(child: id, of: directoryId)
-                .sink(receiveCompletion: { _ in return }, // TODO
-                    receiveValue: {
-                        self.nodes = self.nodes.filter { $0.id != node.id }
-                })
-                .store(in: &cancellables)
-        case .document(let id):
-            self.cdaccess
-                .delete(child: id, of: directoryId)
-                .sink(receiveCompletion: { _ in return }, // TODO
-                    receiveValue: {
-                        self.nodes = self.nodes.filter { $0.id != node.id }
-                })
-                .store(in: &cancellables)
+    private func `switch`(
+        id: FolderBrowserNodeStoreID,
+        directory: (DirectoryID) -> AnyPublisher<Void, Error>,
+        document: (DocumentID) -> AnyPublisher<Void, Error>
+    ) -> AnyPublisher<Void, Error> {
+        switch id {
+        case .directory(let did):
+            return directory(did)
+        case .document(let docid):
+            return document(docid)
         }
     }
 
-    private func create(_ node: FolderBrowserNode) {
-        let createFactory: () -> AnyPublisher<Void, Error> = {
-            switch node.store {
-            case .directory(let id):
-                return self.createFolder(id: id, created: node.lastModified, name: node.name)
-            case .document(let id):
-                return self.createFile(id: id,
-                                       name: node.name,
-                                       preview: node.preview.image,
-                                       lastModified: node.lastModified)
-            }
-        }
-
-        createFactory()
-            .sink(receiveDone: { /* TODO: logging */ },
-                  receiveError: { _ in },
-                  receiveValue: {
-                    self.nodes.append(node)
-            })
-            .store(in: &self.cancellables)
+    func delete(node: FolderBrowserNode) -> AnyPublisher<Void, Error> {
+        return `switch`(
+            id: node.store,
+            directory: { [unowned self] id in self.cdaccess.delete(child: id, of: self.directoryId) },
+            document: {  [unowned self] id in self.cdaccess.delete(child: id, of: self.directoryId) }
+        ).map { [unowned self] _ in
+            self.nodes = self.nodes.filter { $0.id != node.id }
+        }.eraseToAnyPublisher()
     }
 
-    private func createFile(id: DocumentID,
-                            name: String,
-                            preview: UIImage,
-                            lastModified: Date
+    func createFile(id: DocumentID,
+                    name: String,
+                    preview: UIImage,
+                    lastModified: Date
     ) -> AnyPublisher<Void, Error> {
         let rootData = NoteLevelDescription(preview: preview,
                                             frame: CGRect(x: 0, y: 0, width: 1280, height: 900),
@@ -225,11 +207,19 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
         return self.cdaccess
             .append(document: description, to: directoryId)
+            .map { [unowned self] in
+                self.nodes.append(
+                    FolderBrowserNode(id: UUID(),
+                                      store: .document(description.id),
+                                      preview: CodableImage(wrapping: preview),
+                                      name: name,
+                                      lastModified: lastModified)
+            )}.eraseToAnyPublisher()
     }
 
-    private func createFolder(id: DirectoryID,
-                              created: Date,
-                              name: String
+    func createFolder(id: DirectoryID,
+                      created: Date,
+                      name: String
     ) -> AnyPublisher<Void, Error> {
         let description = DirectoryStoreDescription(id: id,
                                                     created: created,
@@ -237,76 +227,40 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                                     documents: [],
                                                     directories: [])
 
-        return self.cdaccess.append(directory: description, to: directoryId)
+        return self.cdaccess
+            .append(directory: description, to: directoryId)
+            .map { [unowned self] in
+                self.nodes.append(
+                    FolderBrowserNode(id: UUID(),
+                                      store: .directory(description.id),
+                                      preview: CodableImage(wrapping: UIImage.folder()),
+                                      name: name,
+                                      lastModified: created)
+            )}.eraseToAnyPublisher()
     }
 
-    private func move(_ node: FolderBrowserNode, to dest: DirectoryID) {
-        switch node.store {
-        case .directory(let id):
-            self.cdaccess.reparent(from: directoryId,
-                                   node: id,
-                                   to: dest)
-                .sink(receiveCompletion: { _ in return }, // TODO
-                    receiveValue: {
-                        self.nodes = self.nodes.filter { $0.id != node.id }
-                })
-                .store(in: &cancellables)
-        case .document(let id):
-            self.cdaccess.reparent(from: directoryId,
-                                   node: id,
-                                   to: dest)
-                .sink(receiveCompletion: { _ in return }, // TODO
-                    receiveValue: {
-                        self.nodes = self.nodes.filter { $0.id != node.id }
-                })
-                .store(in: &cancellables)
+    func move(node: FolderBrowserNode, to dest: DirectoryID) -> AnyPublisher<Void, Error> {
+        return `switch`(
+            id: node.store,
+            directory: { [unowned self] in self.cdaccess.reparent(from: directoryId, node: $0, to: dest) },
+            document: { [unowned self] in self.cdaccess.reparent(from: directoryId, node: $0, to: dest) }
+        ).map { [unowned self] in
+            self.nodes = self.nodes.filter { $0.id != node.id }
 
-        }
+        }.eraseToAnyPublisher()
     }
 
-    private func rename(_ node: FolderBrowserNode, to name: String) {
-        switch node.store {
-        case .directory(let dir):
-            self.cdaccess
-                .updateName(of: dir, to: name)
-                .sink(receiveCompletion: { _ in return }, // TODO
-                    receiveValue: { node.name = name })
-                .store(in: &cancellables)
-        case .document(let file):
-            self.cdaccess
-                .updateName(of: file, to: name)
-                .sink(receiveCompletion: { _ in return }, // TODO
-                    receiveValue: { node.name = name })
-                .store(in: &cancellables)
-        }
-
+    func rename(node: FolderBrowserNode, to name: String) -> AnyPublisher<Void, Error> {
+        `switch`(
+            id: node.store,
+            directory: { [unowned self] in self.cdaccess.updateName(of: $0, to: name) },
+            document: { [unowned self] in self.cdaccess.updateName(of: $0, to: name) }
+        ).map {  node.name = name } // TODO: logs
+        .eraseToAnyPublisher()
     }
 
-    func process(command: FileBrowserCommand) {
-        switch command {
-        case .delete(let node):
-            self.delete(node)
-
-        case .createFile(let preview):
-            let node = self.newFile()
-            node.preview = CodableImage(wrapping: preview)
-            self.create(node)
-
-        case .createDirectory:
-            self.create(self.newDirectory())
-
-        case .move(let node, to: let dest):
-            self.move(node, to: dest)
-
-        case .rename(let node, to: let name):
-            self.rename(node, to: name)
-
-        case .update(let file, preview: let image):
-            self.cdaccess
-                .updatePreviewImage(of: file, with: image)
-                .sink(receiveCompletion: { _ in return }, // TODO
-                    receiveValue: { })
-                .store(in: &cancellables)
-        }
+    func update(doc: DocumentID, preview: UIImage) -> AnyPublisher<Void, Error> {
+        self.cdaccess
+            .updatePreviewImage(of: doc, with: preview)
     }
 }

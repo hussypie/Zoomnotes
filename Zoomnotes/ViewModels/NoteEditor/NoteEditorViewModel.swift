@@ -96,69 +96,79 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         }
     }
 
-    func move(child: NoteChildVM, to: CGRect) {
-        switch child.store {
+    private func `switch`(
+        id: NoteChildStore,
+        level: (NoteLevelID) -> AnyPublisher<Void, Error>,
+        image: (NoteImageID) -> AnyPublisher<Void, Error>
+    ) -> AnyPublisher<Void, Error> {
+        switch id {
         case .level(let lid):
-            self.move(id: lid, to: to)
+            return level(lid)
         case .image(let iid):
-            self.move(id: iid, to: to)
-
+            return image(iid)
         }
-        child.frame = to
     }
 
-    func resize(child: NoteChildVM, to: CGRect) {
-        switch child.store {
-        case .level(let id):
-            self.resize(id: id, to: to)
-        case .image(let id):
-            self.resize(id: id, to: to)
-        }
-        child.frame = to
+    func move(child: NoteChildVM, to: CGRect) -> AnyPublisher<Void, Error> {
+        `switch`(
+            id: child.store,
+            level: { [unowned self] lid in self.move(id: lid, to: to) },
+            image: { [unowned self] iid in self.move(id: iid, to: to) }
+        ).map { child.frame = to }
+        .eraseToAnyPublisher()
     }
 
-    func remove(child: NoteChildVM) {
-        switch child.store {
-        case .level(let id):
-            self.remove(id: id)
-        case .image(let id):
-            self.remove(id: id)
-        }
-        self.nodes = self.nodes.filter { $0.id != child.id }
+    func resize(child: NoteChildVM, to: CGRect) -> AnyPublisher<Void, Error> {
+        `switch`(
+            id: child.store,
+            level: { [unowned self] id in self.resize(id: id, to: to) },
+            image: { [unowned self] id in self.resize(id: id, to: to) }
+        ).map { child.frame = to }
+        .eraseToAnyPublisher()
     }
 
-    func restore(child: NoteChildVM) {
-        switch child.store {
-        case .level(let id):
-            self.restore(id: id)
-        case .image(let id):
-            self.restore(id: id)
-        }
-        self.nodes.append(child)
+    func remove(child: NoteChildVM) -> AnyPublisher<Void, Error> {
+        `switch`(
+            id: child.store,
+            level: { [unowned self] id in self.remove(id: id) },
+            image: { [unowned self] id in self.remove(id: id) }
+        ).map { [unowned self] in self.nodes = self.nodes.filter { $0.id != child.id } }
+        .eraseToAnyPublisher()
     }
 
-    func moveToDrawer(child: NoteChildVM, frame: CGRect) {
-        switch child.store {
-        case .level(let id):
-            self.moveToDrawer(id: id, frame: frame)
-        case .image(let id):
-            self.moveToDrawer(id: id, frame: frame)
-        }
-        self.nodes = self.nodes.filter { $0.id != child.id }
-        self.drawer.nodes.append(child)
-        child.frame = frame
+    func restore(child: NoteChildVM) -> AnyPublisher<Void, Error> {
+        `switch`(
+            id: child.store,
+            level: { [unowned self] id in self.restore(id: id) },
+            image: { [unowned self] id in self.restore(id: id) }
+        ).map { [unowned self] in self.nodes.append(child) }
+        .eraseToAnyPublisher()
     }
 
-    func moveFromDrawer(child: NoteChildVM, frame: CGRect) {
-        switch child.store {
-        case .level(let id):
-            self.moveFromDrawer(id: id, frame: frame)
-        case .image(let id):
-            self.moveFromDrawer(id: id, frame: frame)
+    func moveToDrawer(child: NoteChildVM, frame: CGRect) -> AnyPublisher<Void, Error> {
+        `switch`(
+            id: child.store,
+            level: { [unowned self] id in self.moveToDrawer(id: id, frame: frame) },
+            image: { [unowned self] id in self.moveToDrawer(id: id, frame: frame) }
+        ).map { [unowned self] in
+            self.nodes.append(child)
+            self.nodes = self.nodes.filter { $0.id != child.id }
+            self.drawer.nodes.append(child)
+            child.frame = frame
         }
-        self.drawer.nodes = self.drawer.nodes.filter { $0.id != child.id }
-        self.nodes.append(child)
-        child.frame = frame
+        .eraseToAnyPublisher()
+    }
+
+    func moveFromDrawer(child: NoteChildVM, frame: CGRect) -> AnyPublisher<Void, Error> {
+        `switch`(
+            id: child.store,
+            level: { [unowned self] id in self.moveFromDrawer(id: id, frame: frame) },
+            image: { [unowned self] id in self.moveFromDrawer(id: id, frame: frame) }
+        ).map { [unowned self] _ in
+            self.drawer.nodes = self.drawer.nodes.filter { $0.id != child.id }
+            self.nodes.append(child)
+            child.frame = frame
+        }.eraseToAnyPublisher()
     }
 
     private func create(id: NoteLevelID, frame: CGRect, preview: UIImage) -> AnyPublisher<NoteChildVM, Error> {
@@ -199,142 +209,94 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         }.eraseToAnyPublisher()
     }
 
-    func update(drawing: PKDrawing) {
-        access.update(drawing: drawing, for: self.id)
-            .sink(receiveCompletion: { _ in /* TODO logging */  },
-                  receiveValue: { self.drawing = drawing })
-            .store(in: &cancellables)
+    func update(drawing: PKDrawing) -> AnyPublisher<Void, Error> {
+        access
+            .update(drawing: drawing, for: self.id)
+            .map { [unowned self] in self.drawing = drawing }
+            .eraseToAnyPublisher()
     }
 
-    func update(id: NoteImageID, annotation: PKDrawing) {
+    func update(id: NoteImageID, annotation: PKDrawing) -> AnyPublisher<Void, Error> {
         access.update(annotation: annotation, image: id)
-            .sink(receiveCompletion: { _ in /* TODO logging */ },
-                  receiveValue: { /* TODO logging */ })
-            .store(in: &cancellables)
     }
 
-    func update(id: NoteImageID, preview: UIImage) {
+    func update(id: NoteImageID, preview: UIImage) -> AnyPublisher<Void, Error> {
         access.update(preview: preview, image: id)
-            .sink(receiveCompletion: { _ in /* TODO logging */ },
-                  receiveValue: { /* TODO logging */ })
-            .store(in: &cancellables)
-
     }
 
-    func refresh(image: UIImage) {
+    func refresh(image: UIImage) -> AnyPublisher<Void, Error> {
         access.update(preview: image, for: self.id)
-            .sink(receiveCompletion: { _ in /* TODO logging */ },
-                  receiveValue: { /* TODO logging */ })
-            .store(in: &cancellables)
     }
 
-    private func move(id: NoteLevelID, to: CGRect) {
+    private func move(id: NoteLevelID, to: CGRect) -> AnyPublisher<Void, Error> {
         access.update(frame: to, for: id)
-            .sink(receiveCompletion: { _ in /* TODO logging */ },
-                  receiveValue: { /* TODO logging */ })
-            .store(in: &cancellables)
-
     }
 
-    private func move(id: NoteImageID, to: CGRect) {
+    private func move(id: NoteImageID, to: CGRect) -> AnyPublisher<Void, Error> {
         access.update(frame: to, image: id)
-            .sink(receiveCompletion: { _ in /* TODO logging */ },
-                  receiveValue: { /* TODO logging */ })
-            .store(in: &cancellables)
     }
 
-    private func resize(id: NoteLevelID, to frame: CGRect) {
+    private func resize(id: NoteLevelID, to frame: CGRect) -> AnyPublisher<Void, Error> {
         access.update(frame: frame, for: id)
-            .sink(receiveCompletion: { _ in /* TODO logging */ },
-                  receiveValue: { /* TODO logging */ })
-            .store(in: &cancellables)
-
     }
 
-    private func remove(id: NoteLevelID) {
+    private func remove(id: NoteLevelID) -> AnyPublisher<Void, Error> {
         self.access.remove(level: id, from: self.id)
-            .sink(receiveCompletion: { _ in /* TODO logging */ },
-                  receiveValue: { /* TODO logging */ })
-            .store(in: &cancellables)
     }
 
-    private func remove(id: NoteImageID) {
+    private func remove(id: NoteImageID) -> AnyPublisher<Void, Error> {
         access.remove(image: id, from: self.id)
-            .sink(receiveCompletion: { _ in /* TODO logging */ },
-                  receiveValue: { /* TODO logging */ })
-            .store(in: &cancellables)
     }
 
-    private func restore(id: NoteImageID) {
+    private func restore(id: NoteImageID) -> AnyPublisher<Void, Error> {
         let iid = id
-        access.restore(image: iid, to: self.id)
-            .sink(receiveDone: { /* TODO logging */ },
-               receiveError: { _ in /* TODO logging */ },
-               receiveValue: { _ in /* TODO logging */ })
-            .store(in: &cancellables)
+        return access
+            .restore(image: iid, to: self.id)
+            .map { _ in return }
+            .eraseToAnyPublisher()
     }
 
-    private func restore(id: NoteLevelID) {
+    private func restore(id: NoteLevelID) -> AnyPublisher<Void, Error> {
         let iid = id
-        access.restore(level: iid, to: self.id)
-            .sink(receiveDone: { /* TODO logging */ },
-               receiveError: { _ in /* TODO logging */ },
-               receiveValue: { _ in /* TODO logging */ })
-            .store(in: &cancellables)
+        return access
+            .restore(level: iid, to: self.id)
+            .map { _ in return }
+            .eraseToAnyPublisher()
     }
 
-    private func resize(id: NoteImageID, to: CGRect) {
+    private func resize(id: NoteImageID, to: CGRect) -> AnyPublisher<Void, Error> {
         access.update(frame: to, image: id)
-            .sink(receiveCompletion: { _ in /* TODO logging */ },
-                  receiveValue: { /* TODO logging */ })
-            .store(in: &cancellables)
     }
 
-    private func moveToDrawer(id: NoteImageID, frame: CGRect) {
+    private func moveToDrawer(id: NoteImageID, frame: CGRect) -> AnyPublisher<Void, Error> {
         let iid = id
-        access
+        return access
             .moveToDrawer(image: iid, from: self.id)
-            .flatMap { _ in
-                self.access.update(frame: frame, image: iid)
-        }.sink(receiveDone: { /* TODO logging */ },
-               receiveError: { _ in /* TODO logging */ },
-               receiveValue: { _ in /* TODO logging */ })
-        .store(in: &cancellables)
+            .flatMap { [unowned self] _ in self.access.update(frame: frame, image: iid) }
+            .eraseToAnyPublisher()
     }
 
-    private func moveFromDrawer(id: NoteImageID, frame: CGRect) {
+    private func moveFromDrawer(id: NoteImageID, frame: CGRect) -> AnyPublisher<Void, Error> {
         let iid = id
-        access
+        return access
             .moveFromDrawer(image: iid, to: self.id)
-            .flatMap { _ in
-                self.access.update(frame: frame, image: iid)
-        }.sink(receiveDone: { /* TODO logging */ },
-               receiveError: { _ in /* TODO logging */ },
-               receiveValue: { _ in  /* TODO logging */ })
-        .store(in: &cancellables)
+            .flatMap { [unowned self] _ in self.access.update(frame: frame, image: iid) }
+            .eraseToAnyPublisher()
     }
 
-    private func moveToDrawer(id: NoteLevelID, frame: CGRect) {
+    private func moveToDrawer(id: NoteLevelID, frame: CGRect) -> AnyPublisher<Void, Error> {
         let iid = id
-        access
+        return access
             .moveToDrawer(level: iid, from: self.id)
-            .flatMap { _ in
-                self.access.update(frame: frame, for: iid)
-        }.sink(receiveDone: { /* TODO logging */ },
-               receiveError: { _ in /* TODO logging */ },
-               receiveValue: { _ in  /* TODO logging */ })
-        .store(in: &cancellables)
+            .flatMap { [unowned self] _ in self.access.update(frame: frame, for: iid) }
+            .eraseToAnyPublisher()
     }
 
-    private func moveFromDrawer(id: NoteLevelID, frame: CGRect) {
+    private func moveFromDrawer(id: NoteLevelID, frame: CGRect) -> AnyPublisher<Void, Error> {
         let iid = id
-        access
+        return access
             .moveFromDrawer(level: iid, to: self.id)
-            .flatMap { _ in
-                self.access.update(frame: frame, for: iid)
-        }.sink(receiveDone: { /* TODO logging */ },
-               receiveError: { _ in /* TODO logging */ },
-               receiveValue: { _ in  /* TODO logging */ })
-        .store(in: &cancellables)
+            .flatMap { [unowned self] _ in self.access.update(frame: frame, for: iid) }
+            .eraseToAnyPublisher()
     }
 }

@@ -8,16 +8,13 @@
 
 import Foundation
 import UIKit
-
-enum FileBrowserCommand {
-    case createFile(preview: UIImage)
-    case createDirectory
-    case delete(FolderBrowserNode)
-    case move(FolderBrowserNode, to: DirectoryID)
-    case rename(FolderBrowserNode, to: String)
-    case update(DocumentID, preview: UIImage)
-}
+import Combine
 
 protocol FileBrowserCommandable {
-    func process(command: FileBrowserCommand)
+    func createFile(id: DocumentID, name: String, preview: UIImage, lastModified: Date) -> AnyPublisher<Void, Error>
+    func createFolder(id: DirectoryID, created: Date, name: String) -> AnyPublisher<Void, Error>
+    func delete(node: FolderBrowserNode) -> AnyPublisher<Void, Error>
+    func move(node: FolderBrowserNode, to dest: DirectoryID) -> AnyPublisher<Void, Error>
+    func rename(node: FolderBrowserNode, to name: String) -> AnyPublisher<Void, Error>
+    func update(doc: DocumentID, preview: UIImage) -> AnyPublisher<Void, Error>
 }

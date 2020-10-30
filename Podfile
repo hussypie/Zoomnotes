@@ -11,6 +11,7 @@ target 'Zoomnotes' do
   pod 'PrediKit'
   pod 'Introspect'
   pod 'SnapKit', '~> 5.0.0'
+  pod 'Willow', '~> 5.0'
 
   target 'ZoomnotesTests' do
     inherit! :search_paths
