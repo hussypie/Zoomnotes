@@ -62,17 +62,8 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         return NoteEditorDropDelegate(
             locationProvider: { session in session.location(in: self.view)},
             onDrop: { location, image in
-                let aspect = image.size.height / image.size.width
-                let reference: CGFloat
-
-                if image.size.width > image.size.height {
-                    reference = self.view.frame.width / 4
-                } else {
-                    reference = self.view.frame.height / 4
-                }
-
-                let width = image.size.width > image.size.height ? reference : reference / aspect
-                let height = image.size.height >= image.size.width ? reference : reference * aspect
+                let width = self.view.frame.width / 4
+                let height = self.view.frame.height / 4
 
                 let actualFrame = CGRect(x: location.x - width / 2,
                                          y: location.y - height / 2,
@@ -248,7 +239,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         edges.forEach { self.view.addGestureRecognizer(edgeGestureRecognizer(edge: $0)) }
 
-
         self.logger.info("Adding children to view")
 
         self.subLevelViews = []
@@ -261,7 +251,9 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 .store(in: &cancellables)
 
             child.$preview
-                .sink { sublevel.image = $0 }
+                .sink {
+                    sublevel.image = $0
+            }
                 .store(in: &cancellables)
 
             self.canvasView.addSubview(sublevel)
@@ -280,6 +272,11 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                                                selector: #selector(updateDrawingMeta),
                                                name: UIApplication.willResignActiveNotification,
                                                object: nil)
+
+        self.canvasView.snp.makeConstraints { [unowned self] make in
+            make.width.equalTo(self.view.snp.width)
+            make.height.equalTo(self.view.snp.height)
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -367,6 +364,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                             sublevelVC.viewModel = viewModel
                             self.navigationController?.pushViewController(sublevelVC, animated: true)
                     }).store(in: &cancellables)
+
             case .image(let id):
                 guard let imageVC = ImageDetailViewController.from(self.storyboard) else { return }
                 imageVC
@@ -381,7 +379,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                         self.logger.warning("Cannot update preview image of id: \(id), reason: \(error.localizedDescription)")
                     },
                       receiveValue: { [unowned self] image in
-                        preview.image = image
+                        vm.preview = image
                         self.logger.info("Updated preview image of id: \(id)")
                 })
                 .store(in: &cancellables)
@@ -498,7 +496,6 @@ extension NoteViewController {
                            y: max(0, state.dragging.frame.minY + tran.y),
                            width: state.dragging.frame.width,
                            height: state.dragging.frame.height)
-
         state.dragging.frame = frame
 
         rec.setTranslation(CGPoint.zero, in: self.view)
@@ -557,16 +554,20 @@ extension NoteViewController {
 
             let originalFrame = state.originalFrame
 
+            state.dragging.removeFromSuperview()
+
             if state.origin == .drawer {
                 self.moveFromDrawer(sublevel: vm, from: originalFrame, to: newFrame)
-                state.dragging.removeFromSuperview()
-                self.canvasView.addSubview(state.dragging)
                 state.dragging.frame = newFrame
                 self.logger.info("Child (id: \(vm.id)) moved to canvas")
             } else {
                 self.moveChild(sublevel: vm, from: originalFrame, to: newFrame)
                 self.logger.info("Child (id: \(vm.id)) moved")
             }
+
+            self.canvasView.addSubview(state.dragging)
+
+            updateContentSizeForDrawing()
         }
     }
 

@@ -20,13 +20,16 @@ class NoteLevelPreview: UIImageView {
     private var onResizeEnded: OnResizeEndedCallback
 
     private func indicator(systemName: String, yOffset: CGFloat) -> UIImageView {
-        let imageView = UIImageView(image: UIImage(systemName: systemName))
-        imageView.isUserInteractionEnabled = true
+        let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
-        imageView.layer.cornerRadius = 50
+        imageView.image =
+            UIImage(systemName: systemName)!
+                .resizableImage(withCapInsets: UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10))
+        imageView.isUserInteractionEnabled = true
+        imageView.layer.cornerRadius = 5
         imageView.layer.borderColor = UIColor.systemBlue.cgColor
-        imageView.layer.borderWidth = 1
-        imageView.backgroundColor = UIColor.white
+        imageView.layer.borderWidth = 2
+        imageView.layer.backgroundColor = UIColor.white.cgColor
         return imageView
     }
 

@@ -53,6 +53,8 @@ class ImageDetailViewController: UIViewController {
         canva.isOpaque = false
         canva.backgroundColor = UIColor(white: 0, alpha: 0)
 
+        canva.allowsFingerDrawing = true
+
         self.canva.drawing = viewModel.drawing
         self.image.image = viewModel.image
 
@@ -70,6 +72,12 @@ class ImageDetailViewController: UIViewController {
         toolPicker.addObserver(self)
 
         navigationController?.delegate = transitionManager
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        let screen = self.capture(self.view, prepare: {}, done: {})
+        self.previewChanged.send(screen)
     }
 }
 

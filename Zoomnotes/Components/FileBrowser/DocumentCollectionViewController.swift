@@ -143,9 +143,19 @@ class DocumentCollectionViewController: UICollectionViewController {
         using cell: DocumentNodeCell,
         with node: FolderBrowserNode
     ) -> DocumentNodeCell {
-        cell.nameLabel.text = node.name
-        cell.dateLabel.text = dateLabelFormatter.string(from: node.lastModified)
-        cell.image.image = node.preview.image
+        node.$name
+            .sink { cell.nameLabel.text = $0 }
+            .store(in: &cancellables)
+
+        node.$lastModified
+            .sink { [unowned self] in
+                cell.dateLabel.text = self.dateLabelFormatter.string(from: $0)
+        }
+            .store(in: &cancellables)
+
+        node.$preview
+            .sink { cell.image.image = $0.image }
+            .store(in: &cancellables)
 
         cell.detailsIndicator.addGestureRecognizer(ZNTapGestureRecognizer { _ in
             let editor = NodeDetailEditor(

@@ -88,6 +88,7 @@
 		31D6648F24ED1D470062AF8D /* NoteLevelPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D6648E24ED1D470062AF8D /* NoteLevelPreview.swift */; };
 		31F2FB992548D83000735258 /* Logevents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31F2FB982548D83000735258 /* Logevents.swift */; };
 		31F9957A254C63D4000E3293 /* ImageDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31F99579254C63D4000E3293 /* ImageDetailViewController.swift */; };
+		31F9957C254C72FD000E3293 /* Iffn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31F9957B254C72FD000E3293 /* Iffn.swift */; };
 		F7F6F47D55BB5C37777B55B9 /* Pods_Zoomnotes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41CA6B1C7B18B29005E678AC /* Pods_Zoomnotes.framework */; };
 		F885CBA636E12959C8D6828F /* Pods_ZoomnotesTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE82804B11FC6B424862CD52 /* Pods_ZoomnotesTests.framework */; };
 /* End PBXBuildFile section */
@@ -196,6 +197,7 @@
 		31D6648E24ED1D470062AF8D /* NoteLevelPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteLevelPreview.swift; sourceTree = "<group>"; };
 		31F2FB982548D83000735258 /* Logevents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logevents.swift; sourceTree = "<group>"; };
 		31F99579254C63D4000E3293 /* ImageDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailViewController.swift; sourceTree = "<group>"; };
+		31F9957B254C72FD000E3293 /* Iffn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Iffn.swift; sourceTree = "<group>"; };
 		41CA6B1C7B18B29005E678AC /* Pods_Zoomnotes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Zoomnotes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		485C114CAEE2DCFC02846656 /* Pods-ZoomnotesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZoomnotesTests.release.xcconfig"; path = "Target Support Files/Pods-ZoomnotesTests/Pods-ZoomnotesTests.release.xcconfig"; sourceTree = "<group>"; };
 		4E0ECA886B165C66AEA4C374 /* Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig"; path = "Target Support Files/Pods-Zoomnotes-ZoomnotesUITests/Pods-Zoomnotes-ZoomnotesUITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -501,6 +503,7 @@
 				3121A8302516007D00D8AD37 /* String+empty.swift */,
 				31048077252E241500EC8EAC /* UIViewController+ext.swift */,
 				311B81892539A82D00C60ACE /* Publisher+sink3.swift */,
+				31F9957B254C72FD000E3293 /* Iffn.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -836,6 +839,7 @@
 				31AD9BCF2507937300C193CF /* ZNStatefulGestureManager.swift in Sources */,
 				31AD9BE12509499100C193CF /* DirectoryAccessImpl.swift in Sources */,
 				3101756524E52FED007D3589 /* ZoomNotesNavigationController.swift in Sources */,
+				31F9957C254C72FD000E3293 /* Iffn.swift in Sources */,
 				312820CB24F6926B00338E28 /* ZNPinchGestureRecognizer.swift in Sources */,
 				313BFDE6251E601500EBF70F /* NoteLevelAccessMock.swift in Sources */,
 				314CA955252BB86800FE9B73 /* ZoomDownTransitionAnimator.swift in Sources */,

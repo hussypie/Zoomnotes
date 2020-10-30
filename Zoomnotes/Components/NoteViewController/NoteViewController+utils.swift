@@ -12,15 +12,21 @@ import PencilKit
 
 extension NoteViewController {
     func updateContentSizeForDrawing() {
-        let drawing = canvasView.drawing
-        let contentHeight: CGFloat
+        let offset = canvasView.contentOffset
+        let confortableDrawingHeight =
+            `if`(canvasView.drawing.bounds.isNull, then: {
+                return canvasView.drawing.bounds.maxY * 1.5 * canvasView.zoomScale
+            }, else: {
+                return canvasView.bounds.height
+            })
 
-        if !drawing.bounds.isNull {
-            contentHeight = max(canvasView.bounds.height, (drawing.bounds.maxY * 1.5) * canvasView.zoomScale)
-        } else {
-            contentHeight = canvasView.bounds.height
+        let maxSubviewHeight = self.viewModel.nodes.reduce(0) { res, child in
+            return max(res, child.frame.maxY * 1.5)
         }
-        canvasView.contentSize = CGSize(width: view.frame.width * canvasView.zoomScale, height: contentHeight)
+
+        canvasView.contentSize = CGSize(width: view.frame.width * canvasView.zoomScale,
+                                        height: max(confortableDrawingHeight, maxSubviewHeight))
+        canvasView.setContentOffset(offset, animated: false)
     }
 
     func updateLayout(for toolPicker: PKToolPicker) {

@@ -255,7 +255,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
             id: node.store,
             directory: { [unowned self] in self.cdaccess.updateName(of: $0, to: name) },
             document: { [unowned self] in self.cdaccess.updateName(of: $0, to: name) }
-        ).map {  node.name = name } // TODO: logs
+        ).map {  node.name = name }
         .eraseToAnyPublisher()
     }
 
