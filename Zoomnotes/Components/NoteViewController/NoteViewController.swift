@@ -11,6 +11,7 @@ import PencilKit
 import Combine
 import SwiftUI
 import SnapKit
+import NotificationBannerSwift
 
 struct DragState {
     let currentlyDraggedLevel: NoteChildVM
@@ -91,6 +92,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         .sink(receiveDone: { },
               receiveError: { [unowned self] in
                 self.logger.warning("Cannot create child level view model, reason: \($0.localizedDescription)")
+                FloatingNotificationBanner(title: "Cannot create level", style: .warning).show()
             },
               receiveValue: { [unowned self] vm in
                 let startingFrame = CGRect(x: -1000,

@@ -12,6 +12,7 @@ target 'Zoomnotes' do
   pod 'Introspect'
   pod 'SnapKit', '~> 5.0.0'
   pod 'Willow', '~> 5.0'
+  pod 'NotificationBannerSwift', '~> 3.0.0'
 
   target 'ZoomnotesTests' do
     inherit! :search_paths
