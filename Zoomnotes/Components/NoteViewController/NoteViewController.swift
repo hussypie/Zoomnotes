@@ -298,6 +298,10 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         }
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -360,15 +364,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     override func viewWillDisappear(_ animated: Bool) {
         self.updateDrawingMeta()
     }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-
-        updateContentSizeForDrawing()
-        canvasView.contentOffset = CGPoint(x: 0, y: -canvasView.adjustedContentInset.top)
-    }
-
-    @objc func onPinch(_ rec: UIPinchGestureRecognizer) { }
 
     @objc private func updateDrawingMeta() {
         let screen = capture(
