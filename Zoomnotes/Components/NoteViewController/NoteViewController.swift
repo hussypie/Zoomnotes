@@ -17,6 +17,7 @@ struct DragState {
     let originalFrame: CGRect
 }
 
+// swiftlint:disable type_body_length
 class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var canvasView: PKCanvasView!
     @IBOutlet weak var undoButton: UIBarButtonItem!
@@ -57,6 +58,60 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
             end: { _, _ in }
         )
     }()
+
+    lazy var backButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "arrow.left"), for: .normal)
+        button.layer.borderColor = UIColor.systemBlue.cgColor
+        button.layer.borderWidth = 2
+        button.layer.cornerRadius = 25
+        button.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        return button
+    }()
+
+    lazy var plusButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "plus"), for: .normal)
+        button.layer.borderColor = UIColor.systemBlue.cgColor
+        button.layer.borderWidth = 2
+        button.layer.cornerRadius = 25
+        button.addTarget(self, action: #selector(plusButtonTapped), for: .touchUpInside)
+
+        return button
+    }()
+
+    @objc func plusButtonTapped() {
+        let id: NoteChildStore = .level(ID(UUID()))
+        let frame = CGRect(x: 100,
+                           y: 100,
+                           width: self.view.frame.width / 4,
+                           height: self.view.frame.height / 4)
+        let preview = UIImage.from(size: self.view.frame.size).withBackground(color: UIColor.white)
+        self.create(id: id, frame: frame, with: preview)
+        .sink(receiveDone: { },
+              receiveError: { [unowned self] in
+                self.logger.warning("Cannot create child level view model, reason: \($0.localizedDescription)")
+            },
+              receiveValue: { [unowned self] vm in
+                let startingFrame = CGRect(x: -1000,
+                                           y: -1000,
+                                           width: frame.width,
+                                           height: frame.height)
+                let preview = self.sublevelPreview(frame: startingFrame, preview: preview)
+                preview.viewModel = vm
+                self.canvasView.addSubview(preview)
+
+                UIView.animate(withDuration: 0.1) {
+                    preview.frame = frame
+                }
+
+                self.logger.info("Created sublevel via plus button")
+        }).store(in: &self.cancellables)
+    }
+
+    @objc func backButtonTapped() {
+        self.navigationController?.popViewController(animated: true)
+    }
 
     lazy var dropManager: NoteEditorDropDelegate = {
         return NoteEditorDropDelegate(
@@ -162,7 +217,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         canvasView.alwaysBounceVertical = true
 
         #if targetEnvironment(simulator)
-        canvasView.allowsFingerDrawing = true
+        canvasView.allowsFingerDrawing = false
         #else
         canvasView.allowsFingerDrawing = false
         #endif
@@ -217,6 +272,22 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
             make.width.equalTo(self.view.snp.width)
             make.height.equalTo(self.view.frame.height / 3)
             self.drawerViewTopOffset = make.top.equalTo(self.view.snp.bottom).offset(-50).constraint
+        }
+
+        self.view.addSubview(self.backButton)
+        self.backButton.snp.makeConstraints { make in
+            make.leading.equalTo(10)
+            make.top.equalTo(10)
+            make.width.equalTo(50)
+            make.height.equalTo(50)
+        }
+
+        self.view.addSubview(self.plusButton)
+        self.plusButton.snp.makeConstraints { make in
+            make.trailing.equalTo(-10)
+            make.top.equalTo(10)
+            make.width.equalTo(50)
+            make.height.equalTo(50)
         }
     }
 
@@ -295,9 +366,18 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     @objc private func updateDrawingMeta() {
         let screen = capture(
             self.view,
-            prepare: { drawerView?.alpha = 0.0 },
-            done: { drawerView?.alpha = 1.0 }
-        )
+            prepare: {
+                drawerView?.alpha = 0.0
+                self.backButton.alpha = 0.0
+                self.plusButton.alpha = 0.0
+
+        },
+            done: {
+                drawerView?.alpha = 1.0
+                self.backButton.alpha = 1.0
+                self.plusButton.alpha = 1.0
+        })
+
         self.viewModel
             .refresh(image: screen)
             .sink(
