@@ -188,9 +188,14 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 self.create(id: .level(ID(UUID())),
                             frame: state.currentlyDraggedPreview.frame,
                             with: state.currentlyDraggedPreview.image!)
-                    .sink(receiveDone: { /* TODO */ },
-                          receiveError: {  _ in /* TODO */ },
-                          receiveValue: { vm in state.currentlyDraggedPreview.viewModel = vm })
+                    .sink(receiveDone: { },
+                          receiveError: { [unowned self] in
+                            self.logger.warning("Cannot create sublevel via edge gesture, reason: \($0.localizedDescription)")
+                        },
+                          receiveValue: { vm in
+                            state.currentlyDraggedPreview.viewModel = vm
+                            self.logger.info("Creates sublevel via edge gesture")
+                    })
                     .store(in: &self.cancellables)
         })
 
