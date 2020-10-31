@@ -635,7 +635,7 @@ extension NoteViewController {
         if catapult.tryFling(velocity, magnitude, state.dragging) {
             state.dragging.removeFromSuperview()
             self.removeChild(vm)
-            self.logger.info("Pan gestur ended with child flung out")
+            self.logger.info("Pan gesture ended with child flung out")
             return
         }
 
@@ -649,12 +649,10 @@ extension NoteViewController {
 
             let originalFrame = state.originalFrame
             if state.origin == .canvas {
-                self.moveToDrawer(sublevel: vm,
+                self.moveToDrawer(state.dragging,
+                                  sublevel: vm,
                                   from: originalFrame,
                                   to: frameInDrawer)
-                state.dragging.removeFromSuperview()
-                self.drawerView?.addSubview(state.dragging)
-                state.dragging.frame = frameInDrawer
                 self.logger.info("Child (id: \(vm.id)) moved to drawer")
             } else {
                 self.moveChild(sublevel: vm,
@@ -674,8 +672,7 @@ extension NoteViewController {
             state.dragging.removeFromSuperview()
 
             if state.origin == .drawer {
-                self.moveFromDrawer(sublevel: vm, from: originalFrame, to: newFrame)
-                state.dragging.frame = newFrame
+                self.moveFromDrawer(state.dragging, sublevel: vm, from: originalFrame, to: newFrame)
                 self.logger.info("Child (id: \(vm.id)) moved to canvas")
             } else {
                 self.moveChild(sublevel: vm, from: originalFrame, to: newFrame)

@@ -124,7 +124,7 @@ extension NoteViewController {
             .store(in: &self.cancellables)
     }
 
-    func moveToDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
+    func moveToDrawer(_ preview: NoteLevelPreview, sublevel: NoteChildVM, from: CGRect, to: CGRect) {
         self.viewModel
             .moveToDrawer(child: sublevel, frame: to)
             .sink(receiveDone: { },
@@ -132,15 +132,18 @@ extension NoteViewController {
                     self.logger.warning("Cannot move child (id: \(sublevel.id)) back to canvas, reason: \(error.localizedDescription)")
                 },
                   receiveValue: {
+                    preview.removeFromSuperview()
+                    self.drawerView?.addSubview(preview)
+                    sublevel.frame = to
                     self.undoManager?.registerUndo(withTarget: self) {
-                        $0.moveFromDrawer(sublevel: sublevel, from: to, to: from)
+                        $0.moveFromDrawer(preview, sublevel: sublevel, from: to, to: from)
                     }
                     self.undoManager?.setActionName("Move To Drawer")
             })
             .store(in: &self.cancellables)
     }
 
-    func moveFromDrawer(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
+    func moveFromDrawer(_ preview: NoteLevelPreview, sublevel: NoteChildVM, from: CGRect, to: CGRect) {
         self.viewModel
             .moveFromDrawer(child: sublevel, frame: to)
             .sink(receiveDone: { },
@@ -148,8 +151,11 @@ extension NoteViewController {
                     self.logger.warning("Cannot move child (id: \(sublevel.id)) back to canvas, reason: \(error.localizedDescription)")
                 },
                   receiveValue: {
+                    preview.removeFromSuperview()
+                    self.canvasView.addSubview(preview)
+                    sublevel.frame = to
                     self.undoManager?.registerUndo(withTarget: self) {
-                        $0.moveFromDrawer(sublevel: sublevel, from: to, to: from)
+                        $0.moveToDrawer(preview, sublevel: sublevel, from: to, to: from)
                     }
                     self.undoManager?.setActionName("Move To Canvas")
             })
