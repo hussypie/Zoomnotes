@@ -228,6 +228,14 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         access.update(preview: image, for: self.id)
     }
 
+    func emptyTrash() {
+        self.access
+            .emptyTrash()
+            .sink(receiveDone: { },
+                  receiveError: { _ in },
+                  receiveValue: { }).store(in: &self.cancellables)
+    }
+
     private func move(id: NoteLevelID, to: CGRect) -> AnyPublisher<Void, Error> {
         access.update(frame: to, for: id)
     }

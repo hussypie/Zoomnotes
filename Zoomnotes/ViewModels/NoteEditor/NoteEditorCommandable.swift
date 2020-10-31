@@ -23,4 +23,5 @@ protocol NoteEditorProtocol {
     func restore(child: NoteChildVM) -> AnyPublisher<Void, Error>
     func moveToDrawer(child: NoteChildVM, frame: CGRect) -> AnyPublisher<Void, Error>
     func moveFromDrawer(child: NoteChildVM, frame: CGRect) -> AnyPublisher<Void, Error>
+    func emptyTrash()
 }

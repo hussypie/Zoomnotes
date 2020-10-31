@@ -20,6 +20,7 @@ extension NoteViewController {
                     $0.removeChild(childVM)
                 }
                 self.undoManager?.setActionName("Create")
+                self.logger.info("Undo step for create added")
                 return childVM
         }.eraseToAnyPublisher()
     }
@@ -27,16 +28,20 @@ extension NoteViewController {
     func removeChild(_ sublevel: NoteChildVM) {
         self.viewModel
             .remove(child: sublevel)
+            .map {
+                self.undoManager?.registerUndo(withTarget: self) {
+                    $0.restore(sublevel)
+                }
+                self.undoManager?.setActionName("Remove")
+                self.logger.info("Undo step for remove added")
+        }
             .receive(on: DispatchQueue.main)
             .sink(receiveDone: { [unowned self] in
                 let preview = self.subLevelViews.first { preview in preview.viewModel?.id == sublevel.id }
                 preview?.removeFromSuperview()
                 self.subLevelViews.removeAll { preview in preview.viewModel?.id == sublevel.id }
-
-                self.undoManager?.registerUndo(withTarget: self) {
-                    $0.restore(sublevel)
-                }
-                self.undoManager?.setActionName("Remove") },
+                self.logger.info("Removed child")
+                },
                   receiveError: { [unowned self] error in
                     self.logger.warning("Cannot remove child (id: \(sublevel.id)), reason: \(error.localizedDescription)")
                 },
@@ -46,17 +51,22 @@ extension NoteViewController {
     func restore(_ sublevel: NoteChildVM) {
         self.viewModel
             .restore(child: sublevel)
+            .map {
+                self.undoManager?.registerUndo(withTarget: self) {
+                    $0.removeChild(sublevel)
+                }
+                self.undoManager?.setActionName("Restore")
+                self.logger.info("Undo step for restore added")
+        }
+            .receive(on: DispatchQueue.main)
             .sink(
                 receiveDone: { [unowned self] in
                     let preview = self.sublevelPreview(frame: sublevel.frame,
                                                        preview: sublevel.preview)
                     preview.viewModel = sublevel
                     self.canvasView.addSubview(preview)
-
-                    self.undoManager?.registerUndo(withTarget: self) {
-                        $0.removeChild(sublevel)
-                    }
-                    self.undoManager?.setActionName("Restore") },
+                    self.logger.info("Restored child")
+                },
                 receiveError: { [unowned self] error in
                     self.logger.warning("Cannot restore child (id: \(sublevel.id)), reason: \(error.localizedDescription)")
                 },
@@ -82,16 +92,19 @@ extension NoteViewController {
     func moveChild(sublevel: NoteChildVM, from: CGRect, to: CGRect) {
         self.viewModel
             .move(child: sublevel, to: to)
+            .map { [unowned self] in
+                self.undoManager?.registerUndo(withTarget: self) {
+                    sublevel.frame = from
+                    $0.moveChild(sublevel: sublevel, from: to, to: from)
+                }
+                self.undoManager?.setActionName("Move")
+                self.logger.info("Created undo step for move")
+        }
             .sink(receiveDone: { },
                   receiveError: { [unowned self] error in
                     self.logger.warning("Cannot move child (id: \(sublevel.id)), reason: \(error.localizedDescription)")
                 },
-                  receiveValue: {
-                    self.undoManager?.registerUndo(withTarget: self) {
-                        $0.moveChild(sublevel: sublevel, from: to, to: from)
-                    }
-                    self.undoManager?.setActionName("Move")
-            })
+                  receiveValue: { })
             .store(in: &self.cancellables)
     }
 

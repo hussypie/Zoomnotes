@@ -252,10 +252,11 @@ class DocumentCollectionViewController: UICollectionViewController {
                 receiveError: { [unowned self] error in
                     self.logger.warning("Cannot create note view controller, reason: \(error.localizedDescription)")
                 },
-                receiveValue: {
-                    destinationViewController.viewModel = $0
-                    self.logger.warning("Navigating to note editor (id: \(note))")
+                receiveValue: { vm in
+                    destinationViewController.viewModel = vm
+                    destinationViewController.onUnload = { vm?.emptyTrash() }
                     self.navigationController?.pushViewController(destinationViewController, animated: true)
+                    self.logger.info("Navigating to note editor (id: \(note))")
             })
             .store(in: &cancellables)
     }

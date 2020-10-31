@@ -42,7 +42,7 @@ class DrawerView: UIView {
         self.title = title
         super.init(frame: CGRect.zero)
 
-        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .prominent))
+        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         self.addSubview(blurView)
 
         blurView.snp.makeConstraints { make in
@@ -51,15 +51,16 @@ class DrawerView: UIView {
             make.center.equalTo(self)
         }
 
-        self.addSubview(titleTextField)
-        self.bringSubviewToFront(titleTextField)
+        // FIXME
+        // self.addSubview(titleTextField)
+        // self.bringSubviewToFront(titleTextField)
 
-        titleTextField.snp.makeConstraints { make in
-            make.top.equalTo(self).offset(10)
-            make.left.equalTo(self).offset(20)
-            make.width.equalTo(200)
-            make.height.equalTo(30)
-        }
+        // titleTextField.snp.makeConstraints { make in
+        //     make.top.equalTo(self).offset(10)
+        //     make.left.equalTo(self).offset(20)
+        //     make.width.equalTo(200)
+        //     make.height.equalTo(30)
+        // }
 
         let nc = NotificationCenter.default
         nc.addObserver(self,

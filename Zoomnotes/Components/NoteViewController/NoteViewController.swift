@@ -26,13 +26,11 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
     fileprivate var toolPicker: PKToolPicker!
     var transitionManager: NoteTransitionDelegate!
-
     var viewModel: NoteEditorViewModel!
     var logger: LoggerProtocol!
-
     private var drawerViewTopOffset: Constraint!
-
     var subLevelViews: [NoteLevelPreview]!
+    var onUnload: (() -> Void)? = nil
 
     var interactionController: UIPercentDrivenInteractiveTransition? = nil
 
@@ -92,10 +90,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
     @objc func plusButtonTapped() {
         let id: NoteChildStore = .level(ID(UUID()))
-        let frame = CGRect(x: 100,
-                           y: 100,
-                           width: self.view.frame.width / 4,
-                           height: self.view.frame.height / 4)
+        let frame = self.defaultPreviewFrame(from: CGPoint(x: 200, y: 200))
         let preview = UIImage.from(size: self.view.frame.size).withBackground(color: UIColor.white)
         self.create(id: id, frame: frame, with: preview)
         .sink(receiveDone: { },
@@ -223,8 +218,12 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     private func defaultPreviewFrame(from loc: CGPoint) -> CGRect {
-        let width = self.view.frame.width / 4
-        let height = self.view.frame.height / 4
+        let maxDim = max(self.view.frame.width, self.view.frame.height)
+        let aspect = self.view.frame.width / self.view.frame.height
+
+        let width = maxDim / 4
+        let height = aspect > 1 ? width / aspect : width * aspect
+
         let frame = CGRect(x: loc.x - width / 2,
                            y: loc.y - height / 2,
                            width: width,
@@ -325,10 +324,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         }
     }
 
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -381,15 +376,11 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                                                selector: #selector(updateDrawingMeta),
                                                name: UIApplication.willResignActiveNotification,
                                                object: nil)
-
-        self.canvasView.snp.makeConstraints { [unowned self] make in
-            make.width.equalTo(self.view.snp.width)
-            make.height.equalTo(self.view.snp.height)
-        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         self.updateDrawingMeta()
+        self.onUnload?()
     }
 
     @objc private func updateDrawingMeta() {
@@ -671,6 +662,7 @@ extension NoteViewController {
                 self.logger.info("Child (id: \(vm.id)) moved to canvas")
             } else {
                 self.moveChild(sublevel: vm, from: originalFrame, to: newFrame)
+                state.dragging.frame = newFrame
                 self.logger.info("Child (id: \(vm.id)) moved")
             }
 
@@ -727,8 +719,10 @@ extension NoteViewController {
                 self.create(id: id,
                             frame: state.dragging.frame,
                             with: state.dragging.image!)
-                    .sink(receiveDone: { /* TODO */ },
-                          receiveError: {  _ in /* TODO */ },
+                    .sink(receiveDone: { },
+                          receiveError: { [unowned self] in
+                            self.logger.warning("Cannot create vm for cloned child, reason: \($0.localizedDescription)")
+                        },
                           receiveValue: { vm in state.dragging.viewModel = vm })
                     .store(in: &self.cancellables)
         })
@@ -751,10 +745,11 @@ extension NoteViewController {
 
         preview.addGestureRecognizer(ZNPinchGestureRecognizer { self.onPreviewZoomDown($0, preview) })
 
-        preview.addGestureRecognizer(ZNTapGestureRecognizer { rec in
-            let location = rec.location(in: preview)
-            preview.setEdited(in: preview.bounds.half(of: location))
-        }.taps(2))
+        // FIXME: literally
+        // preview.addGestureRecognizer(ZNTapGestureRecognizer { rec in
+        //    let location = rec.location(in: preview)
+        //    preview.setEdited(in: preview.bounds.half(of: location))
+        // }.taps(2))
 
         self.subLevelViews.append(preview)
 
