@@ -443,14 +443,30 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         if rec.state == .began {
             self.logger.info("Began zoom down gesture")
-            self.transitionManager = transitionManager.down(animator: ZoomDownTransitionAnimator(destinationRect: frameInView))
+
+            let from = CGPoint(x: self.view.frame.midX + self.canvasView.contentOffset.x,
+                               y: self.view.frame.midY)
+
+            let to = CGPoint(x: frameInView.midX, y: frameInView.midY)
+
+            let dist = CGPoint(x: CGFloat(from.x - to.x),
+                               y: CGFloat(from.y - to.y))
+
+            let start = zoomDownTransform(at: 1, for: dist)
+            let end   = zoomDownTransform(at: ratio, for: dist)
+
+            self.transitionManager =
+                transitionManager.down(
+                    animator: ZoomDownTransitionAnimator(transformStart: start,
+                                                         transformEnd: end))
 
             switch vm.store {
             case .level(let id):
                 guard let sublevelVC = NoteViewController.from(self.storyboard) else { return }
                 sublevelVC.transitionManager =
                     NoteTransitionDelegate()
-                        .up(animator: ZoomUpTransitionAnimator(with: vm.frame))
+                        .up(animator: ZoomUpTransitionAnimator(transformStart: start,
+                                                               transformEnd: end))
 
                 sublevelVC
                     .previewChangedSubject
@@ -499,7 +515,8 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
                 imageVC.transitionManager =
                     NoteTransitionDelegate()
-                        .up(animator: ZoomUpTransitionAnimator(with: vm.frame))
+                        .up(animator: ZoomUpTransitionAnimator(transformStart: start,
+                                                               transformEnd: end))
 
                 viewModel.imageDetailViewModel(for: id)
                     .receive(on: DispatchQueue.main)

@@ -10,11 +10,14 @@ import Foundation
 import UIKit
 
 class ZoomDownTransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning {
-    let destinationRect: CGRect
+    let transformStart: CGAffineTransform
+    let transformEnd: CGAffineTransform
+
     private let duration: TimeInterval = 0.2
 
-    init(destinationRect: CGRect) {
-        self.destinationRect = destinationRect
+    init(transformStart: CGAffineTransform, transformEnd: CGAffineTransform) {
+        self.transformStart = transformStart
+        self.transformEnd = transformEnd
         super.init()
     }
 
@@ -31,21 +34,21 @@ class ZoomDownTransitionAnimator: NSObject, UIViewControllerAnimatedTransitionin
             return
         }
 
-        let dist = distance(from: fromVC.view.bounds, to: destinationRect)
-
         let container = transitionContext.containerView
 
         container.addSubview(fromVC.view)
         fromVC.view.layoutIfNeeded()
-        container.transform = zoomDownTransform(at: 1, for: dist)
+        container.transform = self.transformStart
 
         UIView.animate(withDuration: self.duration, animations: {
-            container.transform = zoomDownTransform(at: 4, for: dist)
+            container.transform = self.transformEnd
         }, completion: { _ in
-            container.transform = .identity
-            container.addSubview(toVC.view)
-            toVC.view.layoutIfNeeded()
             let success = !transitionContext.transitionWasCancelled
+            if success {
+                container.transform = .identity
+                container.addSubview(toVC.view)
+                toVC.view.layoutIfNeeded()
+            }
             transitionContext.completeTransition(success)
         })
     }

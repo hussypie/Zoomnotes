@@ -10,11 +10,14 @@ import Foundation
 import UIKit
 
 class ZoomUpTransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning {
-    let targetFrame: CGRect
+    let transformStart: CGAffineTransform
+    let transformEnd: CGAffineTransform
+
     private let duration: TimeInterval = 0.2
 
-    init(with target: CGRect) {
-        self.targetFrame = target
+    init(transformStart: CGAffineTransform, transformEnd: CGAffineTransform) {
+        self.transformStart = transformStart
+        self.transformEnd = transformEnd
         super.init()
     }
 
@@ -27,13 +30,14 @@ class ZoomUpTransitionAnimator: NSObject, UIViewControllerAnimatedTransitioning 
 
         let container = transitionContext.containerView
         container.addSubview(toVC.view)
+        toVC.view.layoutIfNeeded()
 
         toVC.view.frame = transitionContext.finalFrame(for: toVC)
-        toVC.view.layoutIfNeeded()
-        toVC.view.transform = zoomDownTransform(at: 4, for: distance(from: toVC.view.bounds, to: targetFrame))
+
+        container.transform = transformEnd
 
         UIView.animate(withDuration: self.duration, animations: {
-            toVC.view.transform = .identity
+            container.transform = self.transformStart
         }, completion: { _ in
             let success = !transitionContext.transitionWasCancelled
             transitionContext.completeTransition(success)
