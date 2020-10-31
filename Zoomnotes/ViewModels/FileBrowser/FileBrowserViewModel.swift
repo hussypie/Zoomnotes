@@ -129,15 +129,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                     drawer: DrawerVM(nodes: drawerSubLevels + drawerImages),
                     drawing: lookupResult.root.drawing,
                     access: noteLevelAccess,
-                    onUpdateName: {
-                        self.cdaccess
-                            .updateName(of: note, to: $0)
-                            .sink(receiveDone: { /* TODO logging */ },
-                                  receiveError: { _ in /* TODO logging */ },
-                                  receiveValue: { _ in /* TODO logging */ })
-                            .store(in: &self.cancellables)
-
-                })
+                    onUpdateName: nil)
         }
         .eraseToAnyPublisher()
     }

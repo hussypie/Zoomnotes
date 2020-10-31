@@ -60,7 +60,7 @@ class StoreBuilder<T: NSManagedObject> {
     }
 
     func build(using moc: NSManagedObjectContext) throws -> T? {
-        try self.buildI(using: moc) { result in }
+        try self.buildI(using: moc) { _ in }
     }
 }
 

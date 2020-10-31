@@ -21,7 +21,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
 
     private let id: NoteLevelID
     private let access: NoteLevelAccess
-    private let onUpdateName: (String) -> Void
+    private let onUpdateName: ((String) -> Void)?
 
     private var cancellables: Set<AnyCancellable> = []
 
@@ -31,7 +31,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
          drawer: DrawerVM,
          drawing: PKDrawing,
          access: NoteLevelAccess,
-         onUpdateName: @escaping (String) -> Void
+         onUpdateName: ((String) -> Void)?
     ) {
         self.id = id
         self.title = title
@@ -45,7 +45,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         self.drawer = drawer
 
         self.$title
-            .sink { self.onUpdateName($0) }
+            .sink { [unowned self] in self.onUpdateName?($0) }
             .store(in: &cancellables)
     }
 

@@ -71,7 +71,6 @@ extension FolderBrowserNode.DirectoryWrapper: NSItemProviderReading {
     }
 }
 
-
 fileprivate func loadDataI<Codee: Encodable>(
     codee: Codee,
     forItemProviderCompletionHandler completionHandler: @escaping (Data?, Error?) -> Void

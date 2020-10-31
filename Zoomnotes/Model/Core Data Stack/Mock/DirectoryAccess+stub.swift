@@ -11,7 +11,6 @@ import Combine
 
 extension DirectoryAccessImpl {
     func stub(root: DirectoryStoreDescription) -> DirectoryAccessImpl {
-        // swiftlint:disable:next force_try
         _ = self.root(from: root)
         return self
     }

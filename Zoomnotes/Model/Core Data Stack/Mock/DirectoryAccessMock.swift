@@ -49,7 +49,6 @@ class DirectoryAccessMock: DirectoryAccess {
                                           levelTrash: doc.levelDrawer.map { SublevelDescription(id: $0.id, preview: $0.preview, frame: $0.frame) },
                                           root: rootDesc)
 
-
         return Future { $0(.success(result)) }.eraseToAnyPublisher()
     }
 

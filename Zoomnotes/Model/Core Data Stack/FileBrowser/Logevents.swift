@@ -13,13 +13,11 @@ enum LogEvent {
     case cannotFindDocument(id: DocumentID)
 
     var message: String {
-        get {
-            switch self {
-            case .cannotFindDirectory(id: let id):
-                return "Cannot find directory (id: \(id)) in DB"
-            case .cannotFindDocument(id: let id):
-                return "Cannot find document (id: \(id)) in DB"
-            }
+        switch self {
+        case .cannotFindDirectory(id: let id):
+            return "Cannot find directory (id: \(id)) in DB"
+        case .cannotFindDocument(id: let id):
+            return "Cannot find document (id: \(id)) in DB"
         }
     }
 }

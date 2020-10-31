@@ -114,7 +114,7 @@ extension NoteLevelAccessImpl {
     }
 
     func stub(with description: NoteLevelDescription) -> NoteLevelAccessImpl {
-        let cancellable = access.build(prepare: { (store: RectStore) -> RectStore in
+        _ = access.build(prepare: { (store: RectStore) -> RectStore in
             store.x = Float(description.frame.minX)
             store.y = Float(description.frame.minY)
             store.width = Float(description.frame.width)

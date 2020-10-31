@@ -98,7 +98,7 @@ extension FolderBrowserNode {
                                  name: description.name,
                                  lastModified: description.created)
     }
-    
+
     static func from(_ description: DocumentStoreDescription) -> FolderBrowserNode {
         return FolderBrowserNode(id: UUID(),
                                  store: .document(description.id),
