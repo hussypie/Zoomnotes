@@ -58,7 +58,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
     lazy var backButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(systemName: "arrow.left"), for: .normal)
+        button.setImage(UIImage(sfSymbol: .arrowLeft), for: .normal)
         button.layer.borderColor = UIColor.systemBlue.cgColor
         button.layer.borderWidth = 2
         button.layer.cornerRadius = 25
@@ -68,7 +68,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
     lazy var plusButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(systemName: "plus"), for: .normal)
+        button.setImage(UIImage(sfSymbol: .plus), for: .normal)
         button.layer.borderColor = UIColor.systemBlue.cgColor
         button.layer.borderWidth = 2
         button.layer.cornerRadius = 25
@@ -79,7 +79,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
     lazy var undoButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(systemName: "arrow.turn.up.left"), for: .normal)
+        button.setImage(UIImage(sfSymbol: .arrowTurnUpLeft), for: .normal)
         button.layer.borderColor = UIColor.systemBlue.cgColor
         button.layer.borderWidth = 2
         button.layer.cornerRadius = 25

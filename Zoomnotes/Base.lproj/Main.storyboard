@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="4OE-jC-paE">
-    <device id="ipad10_2" orientation="landscape" layout="fullscreen" appearance="light"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="4OE-jC-paE">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="collection view cell content view" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -13,22 +13,22 @@
             <objects>
                 <viewController storyboardIdentifier="NoteViewController" id="I8X-cy-noA" customClass="NoteViewController" customModule="Zoomnotes" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cZa-2w-RY4">
-                        <rect key="frame" x="0.0" y="0.0" width="1080" height="810"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wwu-Pw-egK" customClass="PKCanvasView">
-                                <rect key="frame" x="0.0" y="50" width="1080" height="760"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <rect key="frame" x="0.0" y="44" width="600" height="556"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </view>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="wyM-vG-dgj"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="wwu-Pw-egK" firstAttribute="top" secondItem="wyM-vG-dgj" secondAttribute="top" id="4KY-V0-glH"/>
                             <constraint firstItem="wyM-vG-dgj" firstAttribute="trailing" secondItem="wwu-Pw-egK" secondAttribute="trailing" id="AvP-ni-0LB"/>
                             <constraint firstItem="wwu-Pw-egK" firstAttribute="leading" secondItem="wyM-vG-dgj" secondAttribute="leading" id="k8n-KU-neh"/>
                             <constraint firstItem="wyM-vG-dgj" firstAttribute="bottom" secondItem="wwu-Pw-egK" secondAttribute="bottom" id="omJ-Qu-uDY"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="wyM-vG-dgj"/>
                     </view>
                     <navigationItem key="navigationItem" id="gTE-AX-b0V"/>
                     <connections>
@@ -44,9 +44,9 @@
             <objects>
                 <collectionViewController storyboardIdentifier="DocumentCollectionViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="eNg-Yp-3wA" customClass="DocumentCollectionViewController" customModule="Zoomnotes" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="w2a-lV-fYX">
-                        <rect key="frame" x="0.0" y="0.0" width="1080" height="810"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="pkt-IU-WRT">
                             <size key="itemSize" width="168" height="192"/>
                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -81,7 +81,7 @@
                                                                 </label>
                                                                 <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron.down" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="5iO-IE-Jbu">
                                                                     <rect key="frame" x="129.5" y="5" width="18.5" height="10.5"/>
-                                                                    <color key="tintColor" systemColor="opaqueSeparatorColor" red="0.77647058820000003" green="0.77647058820000003" blue="0.7843137255" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                    <color key="tintColor" systemColor="opaqueSeparatorColor"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" constant="18.5" id="6NM-Bs-Utj"/>
                                                                     </constraints>
@@ -109,7 +109,7 @@
                                 <connections>
                                     <outlet property="dateLabel" destination="Ogz-by-6dy" id="Jfe-6n-pLJ"/>
                                     <outlet property="detailsIndicator" destination="5iO-IE-Jbu" id="XW4-h2-uED"/>
-                                    <outlet property="image" destination="0Ta-Tx-HHq" id="S5V-fV-dBl"/>
+                                    <outlet property="imageView" destination="0Ta-Tx-HHq" id="S5V-fV-dBl"/>
                                     <outlet property="nameLabel" destination="0fE-a6-vNd" id="8eS-Nz-fGG"/>
                                 </connections>
                             </collectionViewCell>
@@ -162,18 +162,19 @@
             <objects>
                 <viewController restorationIdentifier="ImageDetailViewController" storyboardIdentifier="ImageDetailViewController" id="NWu-Sx-owd" customClass="ImageDetailViewController" customModule="Zoomnotes" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="ryx-3c-wmD">
-                        <rect key="frame" x="0.0" y="0.0" width="1080" height="810"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="x4z-NI-Nx3">
-                                <rect key="frame" x="0.0" y="0.0" width="1080" height="810"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uRy-CX-xNh" customClass="PKCanvasView">
-                                <rect key="frame" x="0.0" y="0.0" width="1080" height="810"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </view>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="mjW-d7-7lg"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="mjW-d7-7lg" firstAttribute="bottom" secondItem="uRy-CX-xNh" secondAttribute="bottom" id="2vh-ZT-Byx"/>
                             <constraint firstItem="mjW-d7-7lg" firstAttribute="bottom" secondItem="x4z-NI-Nx3" secondAttribute="bottom" id="Bu6-IM-3VI"/>
@@ -184,7 +185,6 @@
                             <constraint firstItem="uRy-CX-xNh" firstAttribute="leading" secondItem="mjW-d7-7lg" secondAttribute="leading" id="ixP-oG-xJG"/>
                             <constraint firstAttribute="trailing" secondItem="uRy-CX-xNh" secondAttribute="trailing" id="qhh-uC-MWM"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="mjW-d7-7lg"/>
                     </view>
                     <connections>
                         <outlet property="canva" destination="uRy-CX-xNh" id="S9r-r9-LFH"/>
@@ -199,5 +199,11 @@
     <resources>
         <image name="chevron.down" catalog="system" width="128" height="72"/>
         <image name="gear" catalog="system" width="128" height="119"/>
+        <systemColor name="opaqueSeparatorColor">
+            <color red="0.77647058823529413" green="0.77647058823529413" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
     </resources>
 </document>

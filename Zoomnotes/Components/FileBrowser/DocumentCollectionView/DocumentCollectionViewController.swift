@@ -12,17 +12,10 @@ import SwiftUI
 import CoreData
 
 class DocumentCollectionViewController: UICollectionViewController {
-    private var folderVM: FolderBrowserViewModel!
-    private var cancellables: Set<AnyCancellable> = []
-    private var logger: LoggerProtocol!
+    var folderVM: FolderBrowserViewModel!
+    var logger: LoggerProtocol!
 
-    lazy var dateLabelFormatter: DateFormatter = {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .short
-        dateFormatter.timeStyle = .short
-        dateFormatter.doesRelativeDateFormatting = true
-        return dateFormatter
-    }()
+    var cancellables: Set<AnyCancellable> = []
 
     func deleteAlertController(for node: FolderBrowserNode) -> UIAlertController {
         let alert = UIAlertController(
@@ -143,21 +136,9 @@ class DocumentCollectionViewController: UICollectionViewController {
         using cell: DocumentNodeCell,
         with node: FolderBrowserNode
     ) -> DocumentNodeCell {
-        node.$name
-            .sink { cell.nameLabel.text = $0 }
-            .store(in: &cancellables)
+        cell.setup(vm: node)
 
-        node.$lastModified
-            .sink { [unowned self] in
-                cell.dateLabel.text = self.dateLabelFormatter.string(from: $0)
-        }
-            .store(in: &cancellables)
-
-        node.$preview
-            .sink { cell.image.image = $0.image }
-            .store(in: &cancellables)
-
-        cell.detailsIndicator.addGestureRecognizer(ZNTapGestureRecognizer { _ in
+        cell.detailsIndicator?.addGestureRecognizer(ZNTapGestureRecognizer { _ in
             let editor = NodeDetailEditor(
                 name: node.name,
                 onTextfieldEditingChanged: { [unowned self] name in
@@ -210,7 +191,7 @@ class DocumentCollectionViewController: UICollectionViewController {
 
     private func navigateTo(folder: DirectoryID, with name: String) {
         guard let destinationViewController =
-            DocumentCollectionViewController.from(storyboard: self.storyboard) else { return }
+            DocumentCollectionViewController.from(self.storyboard) else { return }
         self.folderVM.subFolderBrowserVM(for: folder, with: name)
             .receive(on: DispatchQueue.main)
             .sink(receiveDone: { },
@@ -262,69 +243,6 @@ class DocumentCollectionViewController: UICollectionViewController {
     }
 }
 
-extension DocumentCollectionViewController: UICollectionViewDragDelegate {
-    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
-        guard let index = indexPath.last else { return [] }
-        let node = folderVM.nodes[index]
-
-        let itemProvider: NSItemProvider
-        switch node.store {
-        case .document:
-            itemProvider = NSItemProvider(object: FolderBrowserNode.DocumentWrapper(node: node))
-        case .directory:
-            itemProvider = NSItemProvider(object: FolderBrowserNode.DirectoryWrapper(node: node))
-        }
-
-        let dragItem = UIDragItem(itemProvider: itemProvider)
-        dragItem.localObject = node
-
-        self.logger.info("Beginning drag session with node (id: \(node.id))")
-
-        return [ dragItem ]
-    }
-}
-
-extension DocumentCollectionViewController: UICollectionViewDropDelegate {
-    func collectionView(_ collectionView: UICollectionView,
-                        dropSessionDidUpdate session: UIDropSession,
-                        withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
-        if collectionView.hasActiveDrag {
-            return UICollectionViewDropProposal(operation: .move, intent: .insertIntoDestinationIndexPath)
-        }
-        return UICollectionViewDropProposal(operation: .forbidden)
-    }
-
-    func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
-        guard let index = coordinator.destinationIndexPath?.last else { return }
-
-        guard let node =
-            coordinator.items.first?.dragItem.localObject as? FolderBrowserNode else {
-                return
-        }
-
-        let destination = folderVM.nodes[index]
-        switch destination.store {
-        case .directory(let id):
-            self.logger.info("Dropping dragged node on directory node")
-            folderVM
-                .move(node: node, to: id)
-                .sink(
-                    receiveDone: { },
-                    receiveError: { [unowned self] error in
-                        self.logger.warning("Could not move nodes to new parent, reason: \(error.localizedDescription)")
-                    },
-                    receiveValue: { [unowned self] _ in
-                        self.logger.info("Dropped node (id: \(node.id)) into new parent (id: \(destination.id))")
-                    }
-            ).store(in: &self.cancellables)
-
-        default:
-            self.logger.info("Tried to drop dragged node on non-directory node")
-            return
-        }
-    }
-}
-
 extension DocumentCollectionViewController {
     @IBAction func onSettingsButtonClick(_ sender: Any) {
         let settingsController = UIHostingController(rootView: SettingsView())
@@ -372,11 +290,5 @@ extension DocumentCollectionViewController {
 
         self.logger.info("Presenting node adding sheet")
         self.present(adderSheet, animated: true, completion: nil)
-    }
-}
-
-extension DocumentCollectionViewController {
-    static func from(storyboard: UIStoryboard?) -> DocumentCollectionViewController? {
-        return storyboard?.instantiateViewController(identifier: String(describing: DocumentCollectionViewController.self)) as? DocumentCollectionViewController
     }
 }
