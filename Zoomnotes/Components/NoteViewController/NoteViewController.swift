@@ -238,7 +238,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         canvasView.alwaysBounceVertical = true
 
         #if targetEnvironment(simulator)
-        canvasView.allowsFingerDrawing = false
+        canvasView.allowsFingerDrawing = true
         #else
         canvasView.allowsFingerDrawing = false
         #endif

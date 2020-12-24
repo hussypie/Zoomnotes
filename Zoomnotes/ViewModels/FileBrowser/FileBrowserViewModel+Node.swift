@@ -107,3 +107,15 @@ extension FolderBrowserNode {
                                  lastModified: description.lastModified)
     }
 }
+
+extension FolderBrowserNode: Equatable {
+    static func == (lhs: FolderBrowserNode, rhs: FolderBrowserNode) -> Bool {
+        ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+    }
+}
+
+extension FolderBrowserNode: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
+    }
+}

@@ -11,9 +11,16 @@ import Combine
 import SwiftUI
 import CoreData
 
-class DocumentCollectionViewController: UICollectionViewController {
+class DocumentCollectionViewController: UIViewController {
+    enum Section {
+        case files
+    }
+
     var folderVM: FolderBrowserViewModel!
     var logger: LoggerProtocol!
+
+    lazy var dataSource = makeDataSource()
+    lazy var collectionView = makeCollectionView()
 
     var cancellables: Set<AnyCancellable> = []
 
@@ -54,11 +61,41 @@ class DocumentCollectionViewController: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        self.collectionView.register(DocumentNodeCell.self,
+                                     forCellWithReuseIdentifier: DocumentNodeCell.identifier)
+
+        self.collectionView.dataSource = dataSource
+
+        self.collectionView.backgroundColor = .systemBackground
+
+        _ = self.view.add(collectionView) { [unowned self] make in
+            make.top.equalTo(self.view)
+            make.leading.equalTo(self.view)
+            make.trailing.equalTo(self.view)
+            make.bottom.equalTo(self.view)
+        }
+
         collectionView.dragDelegate = self
         collectionView.dropDelegate = self
 
         self.navigationItem.leftItemsSupplementBackButton = true
 
+        self.setupVM()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
+    }
+
+    private func nodesDidLoad(_ conversions: [FolderBrowserNode]) {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, FolderBrowserNode>()
+        snapshot.appendSections([.files])
+        snapshot.appendItems(conversions, toSection: .files)
+        dataSource.apply(snapshot, animatingDifferences: true)
+    }
+
+    private func setupVM() {
         // swiftlint:disable:next force_cast
         let appdelegate = (UIApplication.shared.delegate as! AppDelegate)
         self.logger = appdelegate.logger
@@ -101,95 +138,30 @@ class DocumentCollectionViewController: UICollectionViewController {
                     .sink { [unowned self] _ in self.collectionView.reloadData() }
                     .store(in: &self.cancellables)
 
+                folderVM
+                    .$nodes
+                    .sink(receiveValue: { [unowned self] nodes in
+                        if nodes.isEmpty {
+                            self.collectionView.setEmptyMessage("Tap + to add file")
+                        } else {
+                            self.collectionView.unsetEmptyMessage()
+                        }
+                        self.nodesDidLoad(nodes)
+                    })
+                    .store(in: &self.cancellables)
+
         })
             .store(in: &cancellables)
     }
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        self.navigationController?.setNavigationBarHidden(false, animated: true)
-    }
-
-    // MARK: UICollectionViewDataSource
-
-    override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard let folderVM = self.folderVM else { return 0 }
-        return folderVM.nodes.count
-    }
-
-    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let index = indexPath.last else { fatalError("Indexpath has no `last` component") }
-
-        let node = folderVM.nodes[index]
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: DocumentNodeCell.self),
-                                                            for: indexPath) as? DocumentNodeCell else {
-                                                                fatalError("Unknown cell type dequeued")
-        }
-        return nodeCell(using: cell, with: node)
-    }
-
-    private func nodeCell(
-        using cell: DocumentNodeCell,
-        with node: FolderBrowserNode
-    ) -> DocumentNodeCell {
-        cell.setup(vm: node)
-
-        cell.detailsIndicator?.addGestureRecognizer(ZNTapGestureRecognizer { _ in
-            let editor = NodeDetailEditor(
-                name: node.name,
-                onTextfieldEditingChanged: { [unowned self] name in
-                    self.folderVM
-                        .rename(node: node, to: name)
-                        .sink(
-                            receiveDone: { [unowned self] in
-                                self.logger.info("Renamed node (id: \(node.id)) to \(name)")
-                            },
-                            receiveError: { [unowned self] in
-                                self.logger.warning("Renamed node (id: \(node.id)), reason: \($0.localizedDescription)")
-                            },
-                            receiveValue: { node.name = name })
-                        .store(in: &self.cancellables)
-                    self.dismiss(animated: true, completion: nil)
-                },
-                onDelete: { [unowned self] in
-                    self.logger.info("Delete node button tapped")
-                    self.delete(node: node) }
-            )
-
-            let optionsVC = UIHostingController(rootView: editor)
-
-            optionsVC.modalPresentationStyle = .popover
-            optionsVC.popoverPresentationController?.sourceView = cell.detailsIndicator
-            optionsVC.preferredContentSize = CGSize(width: 200,
-                                                    height: optionsVC.view.intrinsicContentSize.height)
-
-            self.present(optionsVC, animated: true, completion: nil)
-        })
-
-        cell.addGestureRecognizer(ZNTapGestureRecognizer { _ in
-            switch node.store {
-            case .document(let id):
-                self.openNoteEditor(node: node, for: id, with: node.name)
-            case .directory(let id):
-                self.navigateTo(folder: id, with: node.name)
-            }
-        })
-
-        return cell
-    }
-
-    private func delete(node: FolderBrowserNode) {
+    func delete(node: FolderBrowserNode) {
         self.logger.info("Presenting delete dialog")
         let controller = deleteAlertController(for: node)
         self.dismiss(animated: true, completion: nil)
         self.present(controller, animated: true, completion: nil)
     }
 
-    private func navigateTo(folder: DirectoryID, with name: String) {
+    func navigateTo(folder: DirectoryID, with name: String) {
         guard let destinationViewController =
             DocumentCollectionViewController.from(self.storyboard) else { return }
         self.folderVM.subFolderBrowserVM(for: folder, with: name)
@@ -206,7 +178,7 @@ class DocumentCollectionViewController: UICollectionViewController {
             .store(in: &cancellables)
     }
 
-    private func openNoteEditor(node: FolderBrowserNode, for note: DocumentID, with name: String) {
+    func openNoteEditor(node: FolderBrowserNode, for note: DocumentID, with name: String) {
         guard let destinationViewController = NoteViewController.from(self.storyboard) else { return }
         destinationViewController.transitionManager = NoteTransitionDelegate()
         destinationViewController
