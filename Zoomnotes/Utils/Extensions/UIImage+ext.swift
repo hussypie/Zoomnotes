@@ -29,15 +29,28 @@ extension UIImage {
 
 extension UIImage {
     static func from(size: CGSize) -> UIImage {
-        UIGraphicsBeginImageContext(size)
-        let image = UIGraphicsGetImageFromCurrentImageContext()!
-        UIGraphicsEndImageContext()
-        return image
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { _ in }
     }
 }
 
 extension UIImage {
     static func folder() -> UIImage {
         UIImage(named: "folder")!
+    }
+}
+
+enum SFSymbol: String {
+    case plus
+    case trash
+    case xmark
+    case arrowLeft = "arrow.left"
+    case arrowTurnUpLeft = "arrow.turn.up.left"
+    case chevronDownCircle = "chevron.down.circle"
+}
+
+extension UIImage {
+    convenience init(sfSymbol: SFSymbol) {
+        self.init(systemName: sfSymbol.rawValue)!
     }
 }

@@ -23,7 +23,7 @@
 		31074D72251E293F00F8A11D /* FileBrowserViewModel+stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31074D71251E293F00F8A11D /* FileBrowserViewModel+stub.swift */; };
 		31074D7A251E2BA400F8A11D /* DirectoryAccessMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31074D79251E2BA400F8A11D /* DirectoryAccessMock.swift */; };
 		310A5C6D24F40A44006394A0 /* ZNPanGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310A5C6C24F40A44006394A0 /* ZNPanGestureRecognizer.swift */; };
-		310A5C6F24F411F1006394A0 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310A5C6E24F411F1006394A0 /* UIImage.swift */; };
+		310A5C6F24F411F1006394A0 /* UIImage+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310A5C6E24F411F1006394A0 /* UIImage+ext.swift */; };
 		310F03B72510095B000CF0F0 /* FileBrowserDBReadingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310F03B62510095B000CF0F0 /* FileBrowserDBReadingTests.swift */; };
 		310F03B9251009A6000CF0F0 /* FileBrowserDBAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310F03B8251009A6000CF0F0 /* FileBrowserDBAccessTests.swift */; };
 		310F03D32510DF1D000CF0F0 /* ManagedContext+inMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310F03D22510DF1D000CF0F0 /* ManagedContext+inMemory.swift */; };
@@ -58,6 +58,8 @@
 		3166F0D3252F9F7E006FE84A /* DBAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3166F0D2252F9F7E006FE84A /* DBAccess.swift */; };
 		3169CE0F24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */; };
 		318EEA6525247BCE00CDB95C /* NoteImageDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 318EEA6425247BCE00CDB95C /* NoteImageDescription.swift */; };
+		31966A8C2594D234001D6D52 /* UIView+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31966A8B2594D234001D6D52 /* UIView+ext.swift */; };
+		31966A912594D447001D6D52 /* UIStackView+ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31966A902594D447001D6D52 /* UIStackView+ext.swift */; };
 		319C008025460690004CB3CF /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319C007F25460690004CB3CF /* Logger.swift */; };
 		319C00822546CC80004CB3CF /* DrawerVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319C00812546CC80004CB3CF /* DrawerVM.swift */; };
 		319F7501253C418F00AF6113 /* TestUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319F7500253C418F00AF6113 /* TestUtils.swift */; };
@@ -132,7 +134,7 @@
 		31074D71251E293F00F8A11D /* FileBrowserViewModel+stub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileBrowserViewModel+stub.swift"; sourceTree = "<group>"; };
 		31074D79251E2BA400F8A11D /* DirectoryAccessMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryAccessMock.swift; sourceTree = "<group>"; };
 		310A5C6C24F40A44006394A0 /* ZNPanGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNPanGestureRecognizer.swift; sourceTree = "<group>"; };
-		310A5C6E24F411F1006394A0 /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
+		310A5C6E24F411F1006394A0 /* UIImage+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+ext.swift"; sourceTree = "<group>"; };
 		310F03B62510095B000CF0F0 /* FileBrowserDBReadingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserDBReadingTests.swift; sourceTree = "<group>"; };
 		310F03B8251009A6000CF0F0 /* FileBrowserDBAccessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileBrowserDBAccessTests.swift; sourceTree = "<group>"; };
 		310F03D22510DF1D000CF0F0 /* ManagedContext+inMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ManagedContext+inMemory.swift"; sourceTree = "<group>"; };
@@ -167,6 +169,8 @@
 		3166F0D2252F9F7E006FE84A /* DBAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBAccess.swift; sourceTree = "<group>"; };
 		3169CE0E24F58A4300CF15C7 /* ZNTapGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZNTapGestureRecognizer.swift; sourceTree = "<group>"; };
 		318EEA6425247BCE00CDB95C /* NoteImageDescription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteImageDescription.swift; sourceTree = "<group>"; };
+		31966A8B2594D234001D6D52 /* UIView+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+ext.swift"; sourceTree = "<group>"; };
+		31966A902594D447001D6D52 /* UIStackView+ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIStackView+ext.swift"; sourceTree = "<group>"; };
 		319C007F25460690004CB3CF /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		319C00812546CC80004CB3CF /* DrawerVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawerVM.swift; sourceTree = "<group>"; };
 		319F7500253C418F00AF6113 /* TestUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
@@ -495,7 +499,7 @@
 		31B1B1D2251E5F4700DEEE68 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				310A5C6E24F411F1006394A0 /* UIImage.swift */,
+				310A5C6E24F411F1006394A0 /* UIImage+ext.swift */,
 				312820CC24F6963B00338E28 /* CGRect+ext.swift */,
 				31B1AA3724FD5DC7007DAF4D /* UserDefaults+ext.swift */,
 				31AD9BE425094D9C00C193CF /* AlertController+closure.swift */,
@@ -504,6 +508,8 @@
 				31048077252E241500EC8EAC /* UIViewController+ext.swift */,
 				311B81892539A82D00C60ACE /* Publisher+sink3.swift */,
 				31F9957B254C72FD000E3293 /* Iffn.swift */,
+				31966A8B2594D234001D6D52 /* UIView+ext.swift */,
+				31966A902594D447001D6D52 /* UIStackView+ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -821,7 +827,8 @@
 				31B68FFD2534EAFF004619EC /* Types.swift in Sources */,
 				3101756A24E531D1007D3589 /* NoteViewController.swift in Sources */,
 				313B6CEC25155B0300789595 /* NodeDetailEditor.swift in Sources */,
-				310A5C6F24F411F1006394A0 /* UIImage.swift in Sources */,
+				31966A8C2594D234001D6D52 /* UIView+ext.swift in Sources */,
+				310A5C6F24F411F1006394A0 /* UIImage+ext.swift in Sources */,
 				31AD9BE325094CB900C193CF /* FileBrowserVM+dragdrop.swift in Sources */,
 				313BFDE8251E638100EBF70F /* NoteLevelDescription.swift in Sources */,
 				31048078252E241500EC8EAC /* UIViewController+ext.swift in Sources */,
@@ -881,6 +888,7 @@
 				313BFDEC251E6CD200EBF70F /* NoteLevelDescription+stub.swift in Sources */,
 				3166F0D3252F9F7E006FE84A /* DBAccess.swift in Sources */,
 				31CD5211251CF8D400561D27 /* DirectoryStoreDescription.swift in Sources */,
+				31966A912594D447001D6D52 /* UIStackView+ext.swift in Sources */,
 				31AD9BBF25052EB200C193CF /* NoteEditorViewModel.swift in Sources */,
 				313BFDF62520E4F100EBF70F /* DirectoryAccess+stub.swift in Sources */,
 				3121A8312516007D00D8AD37 /* String+empty.swift in Sources */,
