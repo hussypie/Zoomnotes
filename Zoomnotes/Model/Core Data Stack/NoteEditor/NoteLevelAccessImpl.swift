@@ -12,6 +12,8 @@ import PencilKit
 import Combine
 import UIKit
 
+// 🤷‍♂️
+// swiftlint:disable:next type_body_length
 struct NoteLevelAccessImpl: NoteLevelAccess {
     let access: DBAccess
     let document: DocumentID

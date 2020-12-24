@@ -11,6 +11,7 @@ import PencilKit
 import Combine
 import UIKit
 
+// swiftlint:disable:next type_body_length
 class NoteLevelAccessMock: NoteLevelAccess {
     typealias LevelTable = [NoteLevelID: NoteLevelDescription]
     typealias ImageTable = [NoteImageID: NoteImageDescription]
@@ -113,7 +114,6 @@ class NoteLevelAccessMock: NoteLevelAccess {
     func delete(level id: NoteLevelID) -> AnyPublisher<Void, Error> {
         guard let desc = levels[id] else { return Future { $0(.success(())) }.eraseToAnyPublisher() }
         for sublevel in desc.sublevels {
-            // swiftlint:disable:next force_try
             _ = self.delete(level: sublevel.id)
         }
         levels.removeValue(forKey: id)

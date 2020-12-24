@@ -12,6 +12,8 @@ import Combine
 import PrediKit
 import PencilKit
 
+// 🤷‍♂️ this is a long class
+// swiftlint:disable:next type_body_length
 struct DirectoryAccessImpl: DirectoryAccess {
     let access: DBAccess
     let logger: LoggerProtocol

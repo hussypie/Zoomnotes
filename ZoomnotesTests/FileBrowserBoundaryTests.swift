@@ -271,6 +271,7 @@ class FileBrowserDBIntegrationTests: XCTestCase {
             })
     }
 
+    // swiftlint:disable:next function_body_length
     func testReparentDirectory() {
         let dir1 = DirectoryStoreDescription(id: ID(UUID()),
                                              created: Date(),
@@ -323,6 +324,7 @@ class FileBrowserDBIntegrationTests: XCTestCase {
             })
     }
 
+    // swiftlint:disable:next function_body_length
     func testReparentDocument() {
         let doc = DocumentStoreDescription(id: ID(UUID()),
                                            lastModified: Date(),

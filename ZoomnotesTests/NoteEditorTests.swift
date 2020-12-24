@@ -418,6 +418,7 @@ class NoteEditorTests: XCTestCase {
             })
     }
 
+    // swiftlint:disable:next function_body_length
     func testMoveToDrawer() {
         let note = NoteLevelDescription(preview: .checkmark,
                                         frame: CGRect(x: 0, y: 0, width: 200, height: 200),
@@ -473,6 +474,7 @@ class NoteEditorTests: XCTestCase {
             })
     }
 
+    // swiftlint:disable:next function_body_length
     func testMoveFromDrawer() {
         let note = NoteLevelDescription(preview: .checkmark,
                                         frame: CGRect(x: 0, y: 0, width: 200, height: 200),

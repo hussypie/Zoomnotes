@@ -12,6 +12,7 @@ import Combine
 
 @testable import Zoomnotes
 
+// swiftlint:disable:next type_body_length
 class FileBrowserDBAccessTests: XCTestCase {
     let moc = NSPersistentContainer.inMemory(name: "Zoomnotes").viewContext
 

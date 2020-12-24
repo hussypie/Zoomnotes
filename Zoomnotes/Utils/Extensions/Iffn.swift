@@ -13,7 +13,7 @@ func `if`<T>(
     then: () -> T,
     else: () -> T
 ) -> T {
-    if (test()) {
+    if test() {
         return then()
     } else {
         return `else`()

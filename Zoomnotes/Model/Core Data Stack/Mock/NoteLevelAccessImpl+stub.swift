@@ -35,6 +35,7 @@ extension NoteLevelAccessImpl {
 }
 
 extension NoteLevelAccessImpl {
+    // swiftlint:disable:next function_body_length
     static func stubP(
         using access: DBAccess,
         with document: DocumentStoreDescription,

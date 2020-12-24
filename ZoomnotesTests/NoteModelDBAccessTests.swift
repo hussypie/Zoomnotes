@@ -117,6 +117,7 @@ class NoteModelDBAccessTests: XCTestCase {
         })
     }
 
+    // swiftlint:disable:next function_body_length
     func testRemoveSubImage() {
         let image = NoteImageDescription(id: ID(UUID()),
                                          preview: .checkmark,
@@ -250,6 +251,7 @@ class NoteModelDBAccessTests: XCTestCase {
 
     }
 
+    // swiftlint:disable:next function_body_length
     func testNoteLevelDeletion() {
         let description = NoteLevelDescription(preview: .checkmark,
                                                frame: CGRect(x: 0, y: 0, width: 100, height: 200),
@@ -373,6 +375,7 @@ class NoteModelDBAccessTests: XCTestCase {
         })
     }
 
+    // swiftlint:disable:next function_body_length
     func testRestoreSubLevelAfterDelete() {
         let description = NoteLevelDescription(preview: .checkmark,
                                                frame: CGRect(x: 0, y: 0, width: 100, height: 200),
@@ -433,6 +436,7 @@ class NoteModelDBAccessTests: XCTestCase {
         })
     }
 
+    // swiftlint:disable:next function_body_length
     func testRestoreSubImageAfterDelete() {
         let image = NoteImageDescription(id: ID(UUID()),
                                          preview: .checkmark,
@@ -492,6 +496,7 @@ class NoteModelDBAccessTests: XCTestCase {
         })
     }
 
+    // swiftlint:disable:next function_body_length
     func testEmptyTrash() {
         let image = NoteImageDescription(id: ID(UUID()),
                                          preview: .checkmark,
@@ -543,6 +548,7 @@ class NoteModelDBAccessTests: XCTestCase {
         })
     }
 
+    // swiftlint:disable:next function_body_length
     func testMoveSublevelToDrawer() {
         let description = NoteLevelDescription(preview: .checkmark,
                                                frame: CGRect(x: 0, y: 0, width: 100, height: 200),
@@ -599,6 +605,7 @@ class NoteModelDBAccessTests: XCTestCase {
         })
     }
 
+    // swiftlint:disable:next function_body_length
     func testMoveSublevelFromDrawer() {
         let description = NoteLevelDescription(preview: .checkmark,
                                                frame: CGRect(x: 0, y: 0, width: 100, height: 200),
@@ -655,6 +662,7 @@ class NoteModelDBAccessTests: XCTestCase {
         })
     }
 
+    // swiftlint:disable:next function_body_length
     func testMoveSubimageToDrawer() {
         let image = NoteImageDescription(id: ID(UUID()),
                                          preview: .checkmark,
@@ -711,6 +719,7 @@ class NoteModelDBAccessTests: XCTestCase {
         })
     }
 
+    // swiftlint:disable:next function_body_length
     func testMoveSubimageFromDrawer() {
         let image = NoteImageDescription(id: ID(UUID()),
                                          preview: .checkmark,
