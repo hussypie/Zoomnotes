@@ -482,7 +482,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                     }).store(in: &cancellables)
 
             case .image(let id):
-                guard let imageVC = ImageDetailViewController.from(self.storyboard) else { return }
+                let imageVC = ImageDetailViewController()
 
                 imageVC.transitionManager =
                     NoteTransitionDelegate()

@@ -11,8 +11,8 @@ import PencilKit
 import Combine
 
 class ImageDetailViewController: UIViewController {
-    @IBOutlet weak var image: UIImageView!
-    @IBOutlet weak var canva: PKCanvasView!
+    var imageView: UIImageView!
+    var canva: PKCanvasView!
 
     var viewModel: ImageDetailViewModel!
     var transitionManager: NoteTransitionDelegate!
@@ -45,6 +45,32 @@ class ImageDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        self.view.backgroundColor = .systemBackground
+
+        self.imageView = self.view.add(UIImageView(image: viewModel.image)) { [unowned self] make in
+            let img = self.viewModel.image
+            let aspectRatio = img.size.width / img.size.height
+            if img.size.width > img.size.height {
+                make.leading.equalTo(self.view.snp.leading)
+                make.trailing.equalTo(self.view.snp.trailing)
+                make.centerY.equalTo(self.view.snp.centerY)
+                make.height.equalTo(self.view.bounds.width / aspectRatio)
+            } else {
+                make.top.equalTo(self.view.snp.top)
+                make.bottom.equalTo(self.view.snp.bottom)
+                make.centerX.equalTo(self.view.snp.centerX)
+                make.width.equalTo(self.view.bounds.height * aspectRatio)
+            }
+        }
+        self.imageView.contentMode = .scaleAspectFit
+
+        self.canva = self.view.add(PKCanvasView()) { [unowned self] make in
+            make.leading.equalTo(self.imageView.snp.leading)
+            make.top.equalTo(self.imageView.snp.top)
+            make.width.equalTo(self.imageView.snp.width)
+            make.height.equalTo(self.imageView.snp.height)
+        }
+
         canva.delegate = self
         canva.becomeFirstResponder()
 
@@ -54,13 +80,9 @@ class ImageDetailViewController: UIViewController {
         canva.allowsFingerDrawing = true
 
         self.canva.drawing = viewModel.drawing
-        self.image.image = viewModel.image
+        self.imageView.image = viewModel.image
 
         self.view.addGestureRecognizer(zoomDownGesture)
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
 
         let window = parent?.view.window
         toolPicker = PKToolPicker.shared(for: window!)
