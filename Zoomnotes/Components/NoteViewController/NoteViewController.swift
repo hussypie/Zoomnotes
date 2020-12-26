@@ -93,27 +93,27 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         let frame = self.defaultPreviewFrame(from: CGPoint(x: 200, y: 200))
         let preview = UIImage.from(size: self.view.frame.size).withBackground(color: UIColor.white)
         self.create(id: id, frame: frame, with: preview)
-        .sink(receiveDone: { },
-              receiveError: { [unowned self] in
-                self.logger.warning("Cannot create child level view model, reason: \($0.localizedDescription)")
-                FloatingNotificationBanner(title: "Cannot create level", style: .warning).show()
-            },
-              receiveValue: { [unowned self] vm in
-                let contentOffset = self.canvasView.contentOffset
-                let startingFrame = CGRect(x: -1000,
-                                           y: -1000,
-                                           width: frame.width + contentOffset.x,
-                                           height: frame.height + contentOffset.y)
-                let preview = self.sublevelPreview(frame: startingFrame, preview: preview)
-                preview.viewModel = vm
-                self.canvasView.addSubview(preview)
+            .sink(receiveDone: { },
+                  receiveError: { [unowned self] in
+                    self.logger.warning("Cannot create child level view model, reason: \($0.localizedDescription)")
+                    FloatingNotificationBanner(title: "Cannot create level", style: .warning).show()
+                  },
+                  receiveValue: { [unowned self] vm in
+                    let contentOffset = self.canvasView.contentOffset
+                    let startingFrame = CGRect(x: -1000,
+                                               y: -1000,
+                                               width: frame.width + contentOffset.x,
+                                               height: frame.height + contentOffset.y)
+                    let preview = self.sublevelPreview(frame: startingFrame, preview: preview)
+                    preview.viewModel = vm
+                    self.canvasView.addSubview(preview)
 
-                UIView.animate(withDuration: 0.1) {
-                    preview.frame = frame
-                }
+                    UIView.animate(withDuration: 0.1) {
+                        preview.frame = frame
+                    }
 
-                self.logger.info("Created sublevel via plus button")
-        }).store(in: &self.cancellables)
+                    self.logger.info("Created sublevel via plus button")
+                  }).store(in: &self.cancellables)
     }
 
     @objc func backButtonTapped() {
@@ -143,16 +143,20 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 self.logger.info("Created subimage via dropping")
 
                 self.create(id: .image(ID(UUID())), frame: actualFrame, with: image)
-                    .sink(receiveDone: { /* TODO logging */ },
-                          receiveError: { _ in /* TODO logging */ },
-                          receiveValue: { [unowned self] vm in
-                            preview.viewModel = vm
-                            self.logger.info("Set view model of preview to vm (id: \(vm.id)")
+                    .sink(receiveDone: { [unowned self] in
+                        self.logger.info("Successfully dropped image")
+                    },
+                    receiveError: { [unowned self] error in
+                        self.logger.error("Cannot drop image: \(error.localizedDescription)")
+                    },
+                    receiveValue: { [unowned self] vm in
+                        preview.viewModel = vm
+                        self.logger.info("Set view model of preview to vm (id: \(vm.id)")
 
                     })
                     .store(in: &self.cancellables)
 
-        })
+            })
     }()
 
     private struct EdgePanGestureState {
@@ -172,7 +176,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
                 self.logger.info("Beginning edge pan gesture")
                 return EdgePanGestureState(currentlyDraggedPreview: newLevelPreview)
-        },
+            },
             step: { rec, state in
                 let translation = rec.translation(in: self.view)
                 let oldFrame = state.currentlyDraggedPreview.frame
@@ -182,7 +186,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                                                              height: oldFrame.height)
                 rec.setTranslation(CGPoint.zero, in: self.view)
                 return state
-        },
+            },
             end: { rec, state in
                 self.logger.info("Ended edge pan gesture")
                 let velocity = rec.velocity(in: self.canvasView)
@@ -201,13 +205,13 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                     .sink(receiveDone: { },
                           receiveError: { [unowned self] in
                             self.logger.warning("Cannot create sublevel via edge gesture, reason: \($0.localizedDescription)")
-                        },
+                          },
                           receiveValue: { vm in
                             state.currentlyDraggedPreview.viewModel = vm
                             self.logger.info("Creates sublevel via edge gesture")
-                    })
+                          })
                     .store(in: &self.cancellables)
-        })
+            })
 
         edgeGestureRecognizer.edges = edge
         #if targetEnvironment(simulator)
@@ -357,7 +361,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
             child.$preview
                 .sink {
                     sublevel.image = $0
-            }
+                }
                 .store(in: &cancellables)
 
             self.canvasView.addSubview(sublevel)
@@ -391,12 +395,12 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 self.backButton.alpha = 0.0
                 self.plusButton.alpha = 0.0
 
-        },
+            },
             done: {
                 drawerView?.alpha = 1.0
                 self.backButton.alpha = 1.0
                 self.plusButton.alpha = 1.0
-        })
+            })
 
         self.viewModel
             .refresh(image: screen)
@@ -407,7 +411,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 },
                 receiveValue: { [unowned self] in
                     self.previewChangedSubject.send(screen)
-            }).store(in: &self.cancellables)
+                }).store(in: &self.cancellables)
     }
 
     func onPreviewZoomUp(_ rec: ZNPinchGestureRecognizer) {
@@ -465,8 +469,8 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 guard let sublevelVC = NoteViewController.from(self.storyboard) else { return }
                 sublevelVC.transitionManager =
                     NoteTransitionDelegate()
-                        .up(animator: ZoomUpTransitionAnimator(transformStart: start,
-                                                               transformEnd: end))
+                    .up(animator: ZoomUpTransitionAnimator(transformStart: start,
+                                                           transformEnd: end))
 
                 sublevelVC
                     .previewChangedSubject
@@ -475,19 +479,22 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
                 self.viewModel.childViewModel(for: id)
                     .receive(on: DispatchQueue.main)
-                    .sink(receiveCompletion: { _ in return }, // TODO: log
-                        receiveValue: { viewModel in
+                    .sink(receiveDone: { /* not logged */ },
+                          receiveError: { [unowned self] error in
+                            self.logger.error("Cannot create child level vm (store id: \(vm.store)), error: \(error.localizedDescription)")
+                          },
+                          receiveValue: { [unowned self] viewModel in
                             sublevelVC.viewModel = viewModel
                             self.navigationController?.pushViewController(sublevelVC, animated: true)
-                    }).store(in: &cancellables)
+                          }).store(in: &cancellables)
 
             case .image(let id):
                 let imageVC = ImageDetailViewController()
 
                 imageVC.transitionManager =
                     NoteTransitionDelegate()
-                        .up(animator: ZoomUpTransitionAnimator(transformStart: start,
-                                                               transformEnd: end))
+                    .up(animator: ZoomUpTransitionAnimator(transformStart: start,
+                                                           transformEnd: end))
 
                 viewModel.imageDetailViewModel(for: id)
                     .receive(on: DispatchQueue.main)
@@ -507,10 +514,10 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                                 .sink(receiveDone: { },
                                       receiveError: { [unowned self] error in
                                         self.logger.warning("Cannot update annotation of id: \(id), reason: \(error.localizedDescription)")
-                                    },
+                                      },
                                       receiveValue: { [unowned self] in
                                         self.logger.info("Updated annotation of id: \(id)")
-                                })
+                                      })
                                 .store(in: &self.cancellables)
 
                             // subscribe to preview changes
@@ -521,21 +528,21 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                                     self.viewModel
                                         .update(id: id, preview: image)
                                         .map { _ in image }
-                            }
+                                }
                                 .sink(receiveDone: { },
-                                  receiveError: { [unowned self] error in
-                                    self.logger.warning("Cannot update preview image of id: \(id), reason: \(error.localizedDescription)")
-                                },
-                                  receiveValue: { [unowned self] image in
-                                    vm.preview = image
-                                    self.logger.info("Updated preview image of id: \(id)")
-                            })
-                            .store(in: &cancellables)
+                                      receiveError: { [unowned self] error in
+                                        self.logger.warning("Cannot update preview image of id: \(id), reason: \(error.localizedDescription)")
+                                      },
+                                      receiveValue: { [unowned self] image in
+                                        vm.preview = image
+                                        self.logger.info("Updated preview image of id: \(id)")
+                                      })
+                                .store(in: &cancellables)
 
                             // start zoom down anim
                             self.logger.info("Began zoom down gesture")
                             self.navigationController?.pushViewController(imageVC, animated: true)
-                    })
+                          })
                     .store(in: &self.cancellables)
             }
         }
@@ -555,7 +562,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                         self.transitionManager.cancel()
                         self.logger.info("Cancelled zoom down gesture")
                         return
-                })
+                    })
                 return
             }
 
@@ -716,7 +723,7 @@ extension NoteViewController {
                 self.canvasView.addSubview(newPreview)
                 return CloneGestureState(originalFrame: preview.frame,
                                          dragging: newPreview)
-        },
+            },
             step: { rec, state in
                 let tran = rec.translation(in: self.canvasView)
                 let frame = CGRect(x: max(0, state.dragging.frame.minX + tran.x),
@@ -728,7 +735,7 @@ extension NoteViewController {
 
                 rec.setTranslation(CGPoint.zero, in: self.canvasView)
                 return state
-        },
+            },
             end: { _, state in
                 guard let childVM = state.dragging.viewModel else { return }
                 let id: NoteChildStore
@@ -746,10 +753,10 @@ extension NoteViewController {
                     .sink(receiveDone: { },
                           receiveError: { [unowned self] in
                             self.logger.warning("Cannot create vm for cloned child, reason: \($0.localizedDescription)")
-                        },
+                          },
                           receiveValue: { vm in state.dragging.viewModel = vm })
                     .store(in: &self.cancellables)
-        })
+            })
     }
 
     func sublevelPreview(frame: CGRect, preview: UIImage) -> NoteLevelPreview {
@@ -759,7 +766,7 @@ extension NoteViewController {
             resizeEnded: { vm, oframe, frame in
                 guard let vm = vm else { return }
                 self.resizePreview(sublevel: vm, from: oframe, to: frame)
-        })
+            })
 
         preview.copyIndicator.addGestureRecognizer(cloneGesture(for: preview))
 
