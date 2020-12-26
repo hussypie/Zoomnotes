@@ -31,8 +31,9 @@ struct SettingsView: View {
                 Toggle(isOn: self.statusBarPreference) {
                     Text("Hide status bar")
                 }
-                Toggle(isOn: self.zoomAnimatonDisabled,
-                       label: { Text("Disable zooming")})
+                Toggle(isOn: self.zoomAnimatonDisabled) {
+                    Text("Disable zooming")
+                }
             }
         }
     }
