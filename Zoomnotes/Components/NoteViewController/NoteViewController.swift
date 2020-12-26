@@ -483,35 +483,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
             case .image(let id):
                 guard let imageVC = ImageDetailViewController.from(self.storyboard) else { return }
-                imageVC
-                    .previewChanged
-                    .setFailureType(to: Error.self)
-                    .flatMap { [unowned self] image in
-                        self.viewModel
-                            .update(id: id, preview: image)
-                            .map { _ in image }
-                }.sink(receiveDone: { },
-                      receiveError: { [unowned self] error in
-                        self.logger.warning("Cannot update preview image of id: \(id), reason: \(error.localizedDescription)")
-                    },
-                      receiveValue: { [unowned self] image in
-                        vm.preview = image
-                        self.logger.info("Updated preview image of id: \(id)")
-                })
-                .store(in: &cancellables)
-
-                imageVC
-                    .drawingChanged
-                    .setFailureType(to: Error.self)
-                    .flatMap { self.viewModel.update(id: id, annotation: $0) }
-                    .sink(receiveDone: { },
-                          receiveError: { [unowned self] error in
-                            self.logger.warning("Cannot update annotation of id: \(id), reason: \(error.localizedDescription)")
-                        },
-                          receiveValue: { [unowned self] in
-                            self.logger.info("Updated annotation of id: \(id)")
-                    })
-                    .store(in: &cancellables)
 
                 imageVC.transitionManager =
                     NoteTransitionDelegate()
@@ -520,9 +491,48 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
                 viewModel.imageDetailViewModel(for: id)
                     .receive(on: DispatchQueue.main)
-                    .sink(receiveCompletion: { _ in return }, // TODO: signal error
-                        receiveValue: { viewModel in
+                    .sink(receiveDone: { /* not logged */ },
+                          receiveError: { [unowned self] error in
+                            self.logger.error("Cannot create image detail view vm: \(error.localizedDescription)")
+                          },
+                          receiveValue: { [unowned self] viewModel in
+                            // set vm on vc
                             imageVC.viewModel = viewModel
+
+                            // subscribe to drawing changes
+                            imageVC.viewModel
+                                .$drawing
+                                .setFailureType(to: Error.self)
+                                .flatMap { self.viewModel.update(id: id, annotation: $0) }
+                                .sink(receiveDone: { },
+                                      receiveError: { [unowned self] error in
+                                        self.logger.warning("Cannot update annotation of id: \(id), reason: \(error.localizedDescription)")
+                                    },
+                                      receiveValue: { [unowned self] in
+                                        self.logger.info("Updated annotation of id: \(id)")
+                                })
+                                .store(in: &self.cancellables)
+
+                            // subscribe to preview changes
+                            imageVC.viewModel
+                                .previewChanged
+                                .setFailureType(to: Error.self)
+                                .flatMap { [unowned self] image in
+                                    self.viewModel
+                                        .update(id: id, preview: image)
+                                        .map { _ in image }
+                            }
+                                .sink(receiveDone: { },
+                                  receiveError: { [unowned self] error in
+                                    self.logger.warning("Cannot update preview image of id: \(id), reason: \(error.localizedDescription)")
+                                },
+                                  receiveValue: { [unowned self] image in
+                                    vm.preview = image
+                                    self.logger.info("Updated preview image of id: \(id)")
+                            })
+                            .store(in: &cancellables)
+
+                            // start zoom down anim
                             self.logger.info("Began zoom down gesture")
                             self.navigationController?.pushViewController(imageVC, animated: true)
                     })

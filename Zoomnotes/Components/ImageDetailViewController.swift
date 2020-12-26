@@ -16,8 +16,6 @@ class ImageDetailViewController: UIViewController {
 
     var viewModel: ImageDetailViewModel!
     var transitionManager: NoteTransitionDelegate!
-    fileprivate(set) var previewChanged = PassthroughSubject<UIImage, Never>()
-    fileprivate(set) var drawingChanged = PassthroughSubject<PKDrawing, Never>()
 
     var toolPicker: PKToolPicker!
 
@@ -77,15 +75,15 @@ class ImageDetailViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         let screen = self.capture(self.view, prepare: {}, done: {})
-        self.previewChanged.send(screen)
+        self.viewModel.previewChanged.send(screen)
     }
 }
 
 extension ImageDetailViewController: PKCanvasViewDelegate {
     func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
-        self.drawingChanged.send(canvasView.drawing)
+        self.viewModel.setDrawing(drawing: canvasView.drawing)
         let screen = self.capture(self.view, prepare: {}, done: {})
-        self.previewChanged.send(screen)
+        self.viewModel.previewChanged.send(screen)
     }
 }
 
