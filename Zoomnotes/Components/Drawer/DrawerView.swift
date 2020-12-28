@@ -37,6 +37,27 @@ class DrawerView: UIView {
         return textField
     }()
 
+    private lazy var drawerViewPanGesture: ZNPanGestureRecognizer<Void> = {
+        return ZNPanGestureRecognizer(
+            begin: { _ in },
+            step: { [unowned self] rec, _ in
+                let touchHeight = rec.location(in: self.superView).y
+                let offset = clamp(self.superView.frame.height - touchHeight,
+                                   lower: 50,
+                                   upper: self.superView.frame.height / 3)
+                self.topOffset.update(offset: -offset)
+            },
+            end: { _, _ in }
+        )
+    }()
+
+    private var superView: UIView {
+        guard let superview = superview else {
+            fatalError("Drawer has to be added as a child view")
+        }
+        return superview
+    }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
     }
@@ -62,19 +83,18 @@ class DrawerView: UIView {
             make.height.equalTo(30)
         }
 
-        guard let superview = self.superview else {
-            fatalError("Drawer has to be added as a child view")
-        }
-
         self.snp.makeConstraints { [unowned self] make in
-            make.leading.equalTo(superview)
-            make.trailing.equalTo(superview)
-            make.width.equalTo(superview.snp.width)
-            make.height.equalTo(superview.frame.height / 3)
-            self.topOffset = make.top.equalTo(superview.snp.bottom).offset(-50).constraint
+            make.leading.equalTo(superView)
+            make.trailing.equalTo(superView)
+            make.width.equalTo(superView.snp.width)
+            make.height.equalTo(superView.frame.height / 3)
+            self.topOffset = make.top.equalTo(superView.snp.bottom).offset(-50).constraint
         }
 
         self.addGestureRecognizer(drawerViewPanGesture)
+        self.addGestureRecognizer(ZNTapGestureRecognizer { _ in
+            self.endEditing(true)
+        })
 
         let nc = NotificationCenter.default
         nc.addObserver(self,
@@ -87,23 +107,6 @@ class DrawerView: UIView {
                        object: nil)
     }
 
-    private lazy var drawerViewPanGesture: ZNPanGestureRecognizer<Void> = {
-        return ZNPanGestureRecognizer(
-            begin: { _ in },
-            step: { [unowned self] rec, _ in
-                guard let superview = self.superview else {
-                    fatalError("Drawer has to be added as a child view")
-                }
-                let touchHeight = rec.location(in: superview).y
-                let offset = clamp(superview.frame.height - touchHeight,
-                                   lower: 50,
-                                   upper: superview.frame.height / 3)
-                self.topOffset.update(offset: -offset)
-            },
-            end: { _, _ in }
-        )
-    }()
-
     @objc func onTextField(_ sender: UITextField) {
         // TODO
     }
@@ -113,19 +116,15 @@ class DrawerView: UIView {
         guard let view = self.superview else { return }
 
         UIView.animate(withDuration: 0.1) {
+            let offset: CGFloat
             if notification.name == UIResponder.keyboardWillHideNotification {
-                self.frame = CGRect(x: 0,
-                                    y: view.frame.height - 50,
-                                    width: view.frame.width,
-                                    height: view.frame.height / 2)
+                offset = -50
             } else {
                 let keyboardScreenEndFrame = keyboardValue.cgRectValue
                 let kbHeight = view.frame.height - keyboardScreenEndFrame.height
-                self.frame = CGRect(x: 0,
-                                    y: kbHeight - 50,
-                                    width: view.frame.width,
-                                    height: view.frame.height / 2)
+                offset = self.frame.height - kbHeight - 50
             }
+            self.topOffset.update(offset: offset)
         }
     }
 }

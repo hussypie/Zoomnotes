@@ -325,6 +325,10 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         edges.forEach { self.view.addGestureRecognizer(edgeGestureRecognizer(edge: $0)) }
 
+        self.view.addGestureRecognizer(ZNTapGestureRecognizer { _ in
+            self.view.endEditing(true)
+        })
+
         self.logger.info("Adding children to view")
 
         self.subLevelViews = []
