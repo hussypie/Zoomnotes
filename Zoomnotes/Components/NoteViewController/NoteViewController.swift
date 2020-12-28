@@ -28,7 +28,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     var transitionManager: NoteTransitionDelegate!
     var viewModel: NoteEditorViewModel!
     var logger: LoggerProtocol!
-    private var drawerViewTopOffset: Constraint!
     var subLevelViews: [NoteLevelPreview]!
     var onUnload: (() -> Void)? = nil
 
@@ -41,20 +40,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     var statusBarHeight: CGFloat {
         self.view.window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
     }
-
-    private lazy var drawerViewPanGesture: ZNPanGestureRecognizer<Void> = {
-        return ZNPanGestureRecognizer(
-            begin: { _ in },
-            step: { [unowned self] rec, _ in
-                let touchHeight = rec.location(in: self.view).y
-                let offset = clamp(self.view.frame.height - touchHeight,
-                                   lower: 50,
-                                   upper: self.view.frame.height / 3)
-                self.drawerViewTopOffset.update(offset: -offset)
-            },
-            end: { _, _ in }
-        )
-    }()
 
     lazy var backButton: UIButton = {
         let button = UIButton()
@@ -291,7 +276,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         let title: Binding<String> = .init(get: { self.viewModel.title },
                                            set: { self.viewModel.title = $0 })
 
-        self.drawerView = DrawerView(title: title)
+        self.drawerView = DrawerView()
 
         for child in viewModel.drawer.nodes {
             let sublevelView = sublevelPreview(frame: child.frame, preview: child.preview)
@@ -301,15 +286,8 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         self.view.addSubview(drawerView!)
         self.view.bringSubviewToFront(drawerView!)
-        drawerView!.addGestureRecognizer(drawerViewPanGesture)
 
-        drawerView!.snp.makeConstraints { make in
-            make.leading.equalTo(self.view)
-            make.trailing.equalTo(self.view)
-            make.width.equalTo(self.view.snp.width)
-            make.height.equalTo(self.view.frame.height / 3)
-            self.drawerViewTopOffset = make.top.equalTo(self.view.snp.bottom).offset(-50).constraint
-        }
+        drawerView?.setup(with: title)
 
         self.view.addSubview(self.backButton)
         self.backButton.snp.makeConstraints { make in

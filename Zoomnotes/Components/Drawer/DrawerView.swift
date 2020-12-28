@@ -12,11 +12,10 @@ import SwiftUI
 import SnapKit
 
 class DrawerView: UIView {
-    let title: Binding<String>
-
     var contents: [UUID: NoteLevelPreview] = [:]
+    private var topOffset: Constraint!
 
-    lazy var titleTextField: UITextField = {
+    private lazy var titleTextField: UITextField = {
         let textField = UITextField()
 
         textField.delegate = self
@@ -24,7 +23,7 @@ class DrawerView: UIView {
         textField.addTarget(self, action: #selector(onTextField(_:)), for: .valueChanged)
 
         textField.placeholder = "Note Title"
-        textField.text = title.wrappedValue
+        textField.text = "TODO title"
         textField.returnKeyType = .done
         textField.clearButtonMode = .whileEditing
         textField.backgroundColor = UIColor.systemGray5
@@ -38,10 +37,15 @@ class DrawerView: UIView {
         return textField
     }()
 
-    init(title: Binding<String>) {
-        self.title = title
-        super.init(frame: CGRect.zero)
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
 
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
+    func setup(with title: Binding<String>) {
         let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         self.addSubview(blurView)
 
@@ -51,16 +55,26 @@ class DrawerView: UIView {
             make.center.equalTo(self)
         }
 
-        // FIXME
-        // self.addSubview(titleTextField)
-        // self.bringSubviewToFront(titleTextField)
+        _ = self.add(titleTextField) { [unowned self] make in
+            make.top.equalTo(self).offset(10)
+            make.left.equalTo(self).offset(20)
+            make.width.equalTo(200)
+            make.height.equalTo(30)
+        }
 
-        // titleTextField.snp.makeConstraints { make in
-        //     make.top.equalTo(self).offset(10)
-        //     make.left.equalTo(self).offset(20)
-        //     make.width.equalTo(200)
-        //     make.height.equalTo(30)
-        // }
+        guard let superview = self.superview else {
+            fatalError("Drawer has to be added as a child view")
+        }
+
+        self.snp.makeConstraints { [unowned self] make in
+            make.leading.equalTo(superview)
+            make.trailing.equalTo(superview)
+            make.width.equalTo(superview.snp.width)
+            make.height.equalTo(superview.frame.height / 3)
+            self.topOffset = make.top.equalTo(superview.snp.bottom).offset(-50).constraint
+        }
+
+        self.addGestureRecognizer(drawerViewPanGesture)
 
         let nc = NotificationCenter.default
         nc.addObserver(self,
@@ -73,8 +87,25 @@ class DrawerView: UIView {
                        object: nil)
     }
 
+    private lazy var drawerViewPanGesture: ZNPanGestureRecognizer<Void> = {
+        return ZNPanGestureRecognizer(
+            begin: { _ in },
+            step: { [unowned self] rec, _ in
+                guard let superview = self.superview else {
+                    fatalError("Drawer has to be added as a child view")
+                }
+                let touchHeight = rec.location(in: superview).y
+                let offset = clamp(superview.frame.height - touchHeight,
+                                   lower: 50,
+                                   upper: superview.frame.height / 3)
+                self.topOffset.update(offset: -offset)
+            },
+            end: { _, _ in }
+        )
+    }()
+
     @objc func onTextField(_ sender: UITextField) {
-        self.title.wrappedValue = sender.text ?? "Untitled"
+        // TODO
     }
 
     @objc func keyboardWillChangeFrame(notification: Notification) {
@@ -96,10 +127,6 @@ class DrawerView: UIView {
                                     height: view.frame.height / 2)
             }
         }
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 }
 
