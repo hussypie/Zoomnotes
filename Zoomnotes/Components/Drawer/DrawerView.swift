@@ -77,6 +77,18 @@ class DrawerView: UIView {
         let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         self.addSubview(blurView)
 
+        self.clipsToBounds = true
+        self.layer.cornerRadius = 20
+
+        let handle = self.add(UIView()) { [unowned self] make in
+            make.top.equalTo(self.snp.top).offset(5)
+            make.centerX.equalTo(self)
+            make.width.equalTo(80)
+            make.height.equalTo(6)
+        }
+        handle.backgroundColor = .systemGray
+        handle.layer.cornerRadius = 3
+
         blurView.snp.makeConstraints { make in
             make.width.equalTo(self.snp.width)
             make.height.equalTo(self.snp.height)
