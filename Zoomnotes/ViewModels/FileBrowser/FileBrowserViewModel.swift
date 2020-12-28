@@ -128,19 +128,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                     sublevels: subLevels + images,
                     drawer: DrawerVM(nodes: drawerSubLevels + drawerImages),
                     drawing: lookupResult.root.drawing,
-                    access: noteLevelAccess,
-                    onUpdateName: { [unowned self] title in
-                        self.cdaccess
-                            .updateName(of: note, to: title)
-                            .sink(receiveDone: {
-                                appdelegate.logger.info("Updated title of \(note) to: \(title)")
-                            },
-                            receiveError: { error in
-                                appdelegate.logger.info("Cannot update title of \(note) due to error: \(error.localizedDescription)")
-                            },
-                            receiveValue: { /* not logged as nothing interesting happens*/})
-                            .store(in: &cancellables)
-                    })
+                    access: noteLevelAccess)
             }
             .eraseToAnyPublisher()
     }

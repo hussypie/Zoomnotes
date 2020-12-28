@@ -198,6 +198,22 @@ class DocumentCollectionViewController: UIViewController {
             })
             .store(in: &cancellables)
 
+        destinationViewController
+            .nameChangedSubject
+            .sink(receiveValue: { [unowned self] title in
+                self.folderVM
+                    .rename(node: node, to: title)
+                    .sink(receiveDone: { [unowned self] in
+                        self.logger.info("Updated title of \(note) to: \(title)")
+                    },
+                    receiveError: { [unowned self] error in
+                        self.logger.info("Cannot update title of \(note) due to error: \(error.localizedDescription)")
+                    },
+                    receiveValue: { /* not logged as nothing interesting happens*/})
+                    .store(in: &self.cancellables)
+            })
+            .store(in: &self.cancellables)
+
         self.folderVM.noteEditorVM(for: note, with: node.name)
             .receive(on: DispatchQueue.main)
             .sink(

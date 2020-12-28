@@ -19,7 +19,6 @@ extension NoteEditorViewModel {
                                    sublevels: sublevels,
                                    drawer: DrawerVM(nodes: []),
                                    drawing: PKDrawing(),
-                                   access: access,
-                                   onUpdateName: onUpdateName)
+                                   access: access)
     }
 }

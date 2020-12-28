@@ -21,7 +21,6 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
 
     private let id: NoteLevelID
     private let access: NoteLevelAccess
-    private let onUpdateName: ((String) -> Void)?
 
     private var cancellables: Set<AnyCancellable> = []
 
@@ -30,23 +29,17 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
          sublevels: [NoteChildVM],
          drawer: DrawerVM,
          drawing: PKDrawing,
-         access: NoteLevelAccess,
-         onUpdateName: ((String) -> Void)?
+         access: NoteLevelAccess
     ) {
         self.id = id
         self.title = title
         self.drawing = drawing
-        self.onUpdateName = onUpdateName
 
         self.access = access
 
         self.nodes = sublevels
 
         self.drawer = drawer
-    }
-
-    func updateName(to name: String) {
-        self.onUpdateName?(name)
     }
 
     func childViewModel(for id: NoteLevelID) -> AnyPublisher<NoteEditorViewModel?, Error> {
@@ -73,8 +66,7 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
                                            sublevels: subSubLevels + subSubImages,
                                            drawer: self.drawer,
                                            drawing: subLevel.drawing,
-                                           access: self.access,
-                                           onUpdateName: self.onUpdateName)
+                                           access: self.access)
         }.eraseToAnyPublisher()
     }
 

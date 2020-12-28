@@ -34,6 +34,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
     var interactionController: UIPercentDrivenInteractiveTransition? = nil
 
     private(set) var previewChangedSubject = PassthroughSubject<UIImage, Never>()
+    private(set) var nameChangedSubject = PassthroughSubject<String, Never>()
 
     var cancellables: Set<AnyCancellable> = []
 
@@ -286,7 +287,7 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
 
         drawerView?
             .setup(with: ObservedValue(publisher: self.viewModel.$title.eraseToAnyPublisher()) { [unowned self] title in
-                self.viewModel.updateName(to: title)
+                self.nameChangedSubject.send(title)
         })
 
         self.view.addSubview(self.backButton)
@@ -457,6 +458,11 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
                 sublevelVC
                     .previewChangedSubject
                     .sink { preview in vm.preview = preview }
+                    .store(in: &cancellables)
+
+                sublevelVC
+                    .nameChangedSubject
+                    .sink(receiveValue: { self.nameChangedSubject.send($0) })
                     .store(in: &cancellables)
 
                 self.viewModel.childViewModel(for: id)
