@@ -113,7 +113,6 @@ class DrawerView: UIView {
 
     @objc func keyboardWillChangeFrame(notification: Notification) {
         guard let keyboardValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
-        guard let view = self.superview else { return }
 
         UIView.animate(withDuration: 0.1) {
             let offset: CGFloat
@@ -121,8 +120,7 @@ class DrawerView: UIView {
                 offset = -50
             } else {
                 let keyboardScreenEndFrame = keyboardValue.cgRectValue
-                let kbHeight = view.frame.height - keyboardScreenEndFrame.height
-                offset = self.frame.height - kbHeight - 50
+                offset = -(keyboardScreenEndFrame.height + 50)
             }
             self.topOffset.update(offset: offset)
         }
