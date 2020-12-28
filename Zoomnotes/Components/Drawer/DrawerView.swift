@@ -8,22 +8,24 @@
 
 import Foundation
 import UIKit
+import Combine
 import SwiftUI
 import SnapKit
 
 class DrawerView: UIView {
+    var title: ObservedValue<String>!
     var contents: [UUID: NoteLevelPreview] = [:]
     private var topOffset: Constraint!
+    private var cancellables: Set<AnyCancellable> = []
 
     private lazy var titleTextField: UITextField = {
         let textField = UITextField()
 
         textField.delegate = self
 
-        textField.addTarget(self, action: #selector(onTextField(_:)), for: .valueChanged)
+        textField.addTarget(self, action: #selector(onTextField(_:)), for: .editingChanged)
 
         textField.placeholder = "Note Title"
-        textField.text = "TODO title"
         textField.returnKeyType = .done
         textField.clearButtonMode = .whileEditing
         textField.backgroundColor = UIColor.systemGray5
@@ -33,6 +35,10 @@ class DrawerView: UIView {
         /// https://stackoverflow.com/a/51403213
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField.frame.height))
         textField.leftViewMode = .always
+
+        title.publisher
+            .sink(receiveValue: { textField.text = $0 })
+            .store(in: &cancellables)
 
         return textField
     }()
@@ -66,7 +72,8 @@ class DrawerView: UIView {
         super.init(coder: coder)
     }
 
-    func setup(with title: Binding<String>) {
+    func setup(with title: ObservedValue<String>) {
+        self.title = title
         let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         self.addSubview(blurView)
 
@@ -108,7 +115,7 @@ class DrawerView: UIView {
     }
 
     @objc func onTextField(_ sender: UITextField) {
-        // TODO
+        self.title.update(sender.text ?? "Untitled")
     }
 
     @objc func keyboardWillChangeFrame(notification: Notification) {

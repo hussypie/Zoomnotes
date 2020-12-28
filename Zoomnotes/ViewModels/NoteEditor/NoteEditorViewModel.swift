@@ -43,10 +43,10 @@ class NoteEditorViewModel: ObservableObject, NoteEditorProtocol {
         self.nodes = sublevels
 
         self.drawer = drawer
+    }
 
-        self.$title
-            .sink { [unowned self] in self.onUpdateName?($0) }
-            .store(in: &cancellables)
+    func updateName(to name: String) {
+        self.onUpdateName?(name)
     }
 
     func childViewModel(for id: NoteLevelID) -> AnyPublisher<NoteEditorViewModel?, Error> {

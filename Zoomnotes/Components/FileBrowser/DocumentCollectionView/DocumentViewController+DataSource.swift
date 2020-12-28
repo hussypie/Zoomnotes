@@ -25,7 +25,7 @@ extension DocumentCollectionViewController {
                 cell.imageView?.addGestureRecognizer(ZNTapGestureRecognizer { _ in
                     switch node.store {
                     case .document(let id):
-                        self.openNoteEditor(node: node, for: id, with: node.name)
+                        self.openNoteEditor(node: node, for: id)
                     case .directory(let id):
                         self.navigateTo(folder: id, with: node.name)
                     }

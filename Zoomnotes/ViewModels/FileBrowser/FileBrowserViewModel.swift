@@ -35,8 +35,8 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                                           name: rootDir.name,
                                                           nodes: children,
                                                           access: access)
-                    }.eraseToAnyPublisher()
-            }.eraseToAnyPublisher()
+                        }.eraseToAnyPublisher()
+                }.eraseToAnyPublisher()
         }
 
         let defaultID = UUID()
@@ -53,7 +53,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                               name: defaultRootDir.name,
                                               nodes: [],
                                               access: access)
-        }.eraseToAnyPublisher()
+            }.eraseToAnyPublisher()
     }
 
     init(directoryId: DirectoryID,
@@ -79,7 +79,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                               nodes: children,
                                               access: self.cdaccess)
 
-        }.eraseToAnyPublisher()
+            }.eraseToAnyPublisher()
     }
 
     func noteEditorVM(for note: DocumentID, with name: String) -> AnyPublisher<NoteEditorViewModel?, Error> {
@@ -95,14 +95,14 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                 guard let lookupResult = lookupResult else { return nil }
 
                 let subLevels =
-                lookupResult.root.sublevels
+                    lookupResult.root.sublevels
                     .map { NoteChildVM(id: UUID(),
                                        preview: $0.preview,
                                        frame: $0.frame,
                                        store: .level($0.id)) }
 
                 let images =
-                lookupResult.root.images
+                    lookupResult.root.images
                     .map { NoteChildVM(id: UUID(),
                                        preview: $0.preview,
                                        frame: $0.frame,
@@ -110,17 +110,17 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
 
                 let drawerSubLevels =
                     lookupResult.levelDrawer
-                        .map { NoteChildVM(id: UUID(),
-                                           preview: $0.preview,
-                                           frame: $0.frame,
-                                           store: .level($0.id)) }
+                    .map { NoteChildVM(id: UUID(),
+                                       preview: $0.preview,
+                                       frame: $0.frame,
+                                       store: .level($0.id)) }
 
                 let drawerImages =
                     lookupResult.imageDrawer
-                        .map { NoteChildVM(id: UUID(),
-                                           preview: $0.preview,
-                                           frame: $0.frame,
-                                           store: .image($0.id)) }
+                    .map { NoteChildVM(id: UUID(),
+                                       preview: $0.preview,
+                                       frame: $0.frame,
+                                       store: .image($0.id)) }
 
                 return NoteEditorViewModel(
                     id: lookupResult.root.id,
@@ -129,9 +129,20 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                     drawer: DrawerVM(nodes: drawerSubLevels + drawerImages),
                     drawing: lookupResult.root.drawing,
                     access: noteLevelAccess,
-                    onUpdateName: nil)
-        }
-        .eraseToAnyPublisher()
+                    onUpdateName: { [unowned self] title in
+                        self.cdaccess
+                            .updateName(of: note, to: title)
+                            .sink(receiveDone: {
+                                appdelegate.logger.info("Updated title of \(note) to: \(title)")
+                            },
+                            receiveError: { error in
+                                appdelegate.logger.info("Cannot update title of \(note) due to error: \(error.localizedDescription)")
+                            },
+                            receiveValue: { /* not logged as nothing interesting happens*/})
+                            .store(in: &cancellables)
+                    })
+            }
+            .eraseToAnyPublisher()
     }
 
     private func newFile() -> FolderBrowserNode {
@@ -206,7 +217,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                       preview: CodableImage(wrapping: preview),
                                       name: name,
                                       lastModified: lastModified)
-            )}.eraseToAnyPublisher()
+                )}.eraseToAnyPublisher()
     }
 
     func createFolder(id: DirectoryID,
@@ -228,7 +239,7 @@ class FolderBrowserViewModel: ObservableObject, FileBrowserCommandable {
                                       preview: CodableImage(wrapping: UIImage.folder()),
                                       name: name,
                                       lastModified: created)
-            )}.eraseToAnyPublisher()
+                )}.eraseToAnyPublisher()
     }
 
     func move(node: FolderBrowserNode, to dest: DirectoryID) -> AnyPublisher<Void, Error> {

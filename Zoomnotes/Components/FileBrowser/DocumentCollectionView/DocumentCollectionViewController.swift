@@ -178,7 +178,7 @@ class DocumentCollectionViewController: UIViewController {
             .store(in: &cancellables)
     }
 
-    func openNoteEditor(node: FolderBrowserNode, for note: DocumentID, with name: String) {
+    func openNoteEditor(node: FolderBrowserNode, for note: DocumentID) {
         guard let destinationViewController = NoteViewController.from(self.storyboard) else { return }
         destinationViewController.transitionManager = NoteTransitionDelegate()
         destinationViewController
@@ -198,7 +198,7 @@ class DocumentCollectionViewController: UIViewController {
             })
             .store(in: &cancellables)
 
-        self.folderVM.noteEditorVM(for: note, with: name)
+        self.folderVM.noteEditorVM(for: note, with: node.name)
             .receive(on: DispatchQueue.main)
             .sink(
                 receiveDone: { },

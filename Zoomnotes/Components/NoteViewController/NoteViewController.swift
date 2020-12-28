@@ -273,9 +273,6 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
             self.drawerView!.removeFromSuperview()
         }
 
-        let title: Binding<String> = .init(get: { self.viewModel.title },
-                                           set: { self.viewModel.title = $0 })
-
         self.drawerView = DrawerView()
 
         for child in viewModel.drawer.nodes {
@@ -287,7 +284,10 @@ class NoteViewController: UIViewController, UIGestureRecognizerDelegate {
         self.view.addSubview(drawerView!)
         self.view.bringSubviewToFront(drawerView!)
 
-        drawerView?.setup(with: title)
+        drawerView?
+            .setup(with: ObservedValue(publisher: self.viewModel.$title.eraseToAnyPublisher()) { [unowned self] title in
+                self.viewModel.updateName(to: title)
+        })
 
         self.view.addSubview(self.backButton)
         self.backButton.snp.makeConstraints { make in
